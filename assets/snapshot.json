@@ -8,10 +8,23 @@
       "atualizado_cnes": "2026-09-15 11:02:32",
       "atualizado_cfm": "2026-09-15 07:13:04",
       "extras": [
-        { "label": "CRMs únicos ativos", "value": 773790, "accent": true },
-        { "label": "CPFs únicos ativos", "value": 678322 },
-        { "label": "Total médicos ativos", "value": 773790 },
-        { "label": "Total registros (todas situações)", "value": 1149824 }
+        {
+          "label": "Dadosfera · CRMs únicos ativos",
+          "value": 773790,
+          "accent": true
+        },
+        {
+          "label": "Dadosfera · CPFs únicos ativos",
+          "value": 678322
+        },
+        {
+          "label": "Dadosfera · Total médicos ativos",
+          "value": 773790
+        },
+        {
+          "label": "Dadosfera · Total registros",
+          "value": 1149824
+        }
       ]
     },
     "databricks": {
@@ -22,47 +35,131 @@
       "atualizado_cnes": "2025-05-13T15:53:04.000Z",
       "atualizado_cfm": "2026-08-20T00:44:05.000Z",
       "extras": [
-        { "label": "Databricks · CRMs únicos ativos", "value": 793646, "accent": true },
-        { "label": "Databricks · Silver CNES", "value": 519364 },
-        { "label": "Databricks · Bronze CNES", "value": 488718 }
+        {
+          "label": "Databricks · CRMs únicos ativos",
+          "value": 793646,
+          "accent": true
+        },
+        {
+          "label": "Databricks · CPFs únicos ativos",
+          "value": 690599
+        },
+        {
+          "label": "Databricks · Total médicos ativos",
+          "value": 804576
+        },
+        {
+          "label": "Databricks · Total registros",
+          "value": 1148754
+        }
       ]
     },
     "manual": {
       "gold": 0,
       "silver": 0,
-      "bronze": 762567,
-      "atualizado_em": "2026-07-02T15:10:39",
+      "bronze": 774001,
+      "atualizado_em": "2026-09-15T15:31:26",
       "extras": [
-        { "label": "CRMs únicos ativos (TXT)", "value": 762567, "accent": true },
-        { "label": "Total registros TXT", "value": 1136588 },
-        { "label": "Arquivos UF", "value": 27 }
+        {
+          "label": "CRMs únicos ativos (TXT)",
+          "value": 774001,
+          "accent": true
+        },
+        {
+          "label": "Total registros TXT",
+          "value": 1150444
+        },
+        {
+          "label": "Arquivos UF",
+          "value": 27
+        }
       ]
     }
   },
   "genero": [
-    { "label": "Feminino", "value": 381368 },
-    { "label": "Masculino", "value": 373965 },
-    { "label": "Não informado", "value": 18457 }
+    {
+      "label": "Feminino",
+      "value": 381368
+    },
+    {
+      "label": "Masculino",
+      "value": 373965
+    },
+    {
+      "label": "Não informado",
+      "value": 18457
+    }
   ],
   "tipoInscricao": [
-    { "label": "Principal", "value": 693731 },
-    { "label": "Secundária", "value": 78359 },
-    { "label": "Provisória", "value": 825 },
-    { "label": "Estud.Méd.Estrangeiro", "value": 820 },
-    { "label": "Não informado", "value": 55 }
+    {
+      "label": "Principal",
+      "value": 693731
+    },
+    {
+      "label": "Secundária",
+      "value": 78359
+    },
+    {
+      "label": "Provisória",
+      "value": 825
+    },
+    {
+      "label": "Estud.Méd.Estrangeiro",
+      "value": 820
+    },
+    {
+      "label": "Não informado",
+      "value": 55
+    }
   ],
   "ufs": [
-    { "uf": "SP", "value": 208810 },
-    { "uf": "MG", "value": 84372 },
-    { "uf": "RJ", "value": 83626 },
-    { "uf": "PR", "value": 45304 },
-    { "uf": "RS", "value": 44046 },
-    { "uf": "BA", "value": 37753 },
-    { "uf": "SC", "value": 31353 },
-    { "uf": "PE", "value": 28994 },
-    { "uf": "GO", "value": 26731 },
-    { "uf": "CE", "value": 23945 },
-    { "uf": "DF", "value": 21773 },
-    { "uf": "ES", "value": 16986 }
+    {
+      "uf": "SP",
+      "value": 208810
+    },
+    {
+      "uf": "MG",
+      "value": 84372
+    },
+    {
+      "uf": "RJ",
+      "value": 83626
+    },
+    {
+      "uf": "PR",
+      "value": 45304
+    },
+    {
+      "uf": "RS",
+      "value": 44046
+    },
+    {
+      "uf": "BA",
+      "value": 37753
+    },
+    {
+      "uf": "SC",
+      "value": 31353
+    },
+    {
+      "uf": "PE",
+      "value": 28994
+    },
+    {
+      "uf": "GO",
+      "value": 26731
+    },
+    {
+      "uf": "CE",
+      "value": 23945
+    },
+    {
+      "uf": "DF",
+      "value": 21773
+    },
+    {
+      "uf": "ES",
+      "value": 16986
+    }
   ]
 }

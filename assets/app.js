@@ -91,8 +91,24 @@ function nowIso() {
   return new Date().toISOString();
 }
 
+function kpiValue(fonte, testers, fallback) {
+  const extras = fonte.extras || [];
+  const hit = extras.find((item) => testers.some((test) => test.test(item.label || "")));
+  if (hit && Number(hit.value)) return Number(hit.value);
+  return Number(fallback) || 0;
+}
+
+function kpiRow(fonte, prefix) {
+  return [
+    { label: `${prefix} · CRMs únicos ativos`, value: kpiValue(fonte, [/crm/i], fonte.gold || fonte.bronze), accent: true },
+    { label: `${prefix} · CPFs únicos ativos`, value: kpiValue(fonte, [/cpf/i], 0) },
+    { label: `${prefix} · Total médicos ativos`, value: kpiValue(fonte, [/total médicos|total medicos/i], fonte.gold || 0) },
+    { label: `${prefix} · Total registros`, value: kpiValue(fonte, [/total registros/i], 0) },
+  ];
+}
+
 function render() {
-  const { fontes, extras, ufs, genero, tipoInscricao } = state;
+  const { fontes, ufs, genero, tipoInscricao } = state;
   const labels = {
     dadosfera: "CRMs únicos ativos · GOLD.TB_MEDICOS",
     databricks: "CRMs únicos ativos · gold.tb_medicos",
@@ -156,13 +172,10 @@ function render() {
     return `<li><i style="background:${g.color}"></i>${g.key} · ${formatMi(g.value)} (${pct}%)</li>`;
   }).join("");
 
-  const derived = [
-    ...(fontes.dadosfera.extras || []),
-    ...(fontes.databricks.extras || []),
-    ...(fontes.manual.extras || extras || []),
-  ].slice(0, 8);
-
-  $("kpis").innerHTML = derived.map((k) => `
+  $("kpis").innerHTML = [
+    ...kpiRow(fontes.dadosfera, "Dadosfera"),
+    ...kpiRow(fontes.databricks, "Databricks"),
+  ].map((k) => `
     <article class="kpi ${k.accent ? "accent" : ""}">
       <strong>${formatMi(k.value)}</strong>
       <span>${k.label}</span>

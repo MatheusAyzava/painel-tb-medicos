@@ -7,12 +7,14 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/style.css?v=20" />
+  <link rel="stylesheet" href="assets/style.css?v=21" />
 </head>
 <body>
   <div class="keys-backdrop" id="keys-backdrop" hidden></div>
   <div class="app">
     <aside class="keys" id="keys">
+      <span class="keys-tab" aria-hidden="true">☰</span>
+      <div class="keys-panel">
       <header class="keys-head">
         <p>Conexões</p>
         <h1>Chaves e arquivos</h1>
@@ -50,6 +52,7 @@
         </label>
         <p class="file-name" id="file-name"></p>
       </section>
+      </div>
     </aside>
 
     <main class="viz">
@@ -150,6 +153,6 @@
       el.textContent = event.message || "Erro no painel";
     });
   </script>
-  <script src="assets/app.js?v=20"></script>
+  <script src="assets/app.js?v=21"></script>
 </body>
 </html>
