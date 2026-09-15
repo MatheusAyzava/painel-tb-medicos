@@ -569,15 +569,13 @@ async function loadSnapshot() {
 
 async function loadStatus() {
   try {
-    const res = await fetch("/api/status", { signal: AbortSignal.timeout(2500) });
+    const res = await fetch("/api/status", { signal: AbortSignal.timeout(12000) });
     if (!res.ok) return false;
     const data = await res.json();
     if (data.snowflake) $("sf-ready").textContent = `${data.snowflake.warehouse} · ${data.snowflake.account}`;
     if (data.databricks) $("dbx-ready").textContent = data.databricks.tabela || data.databricks.host;
     if (data.cnes) {
-      $("cnes-ready").textContent = data.cnes.ok
-        ? (data.cnes.last?.arquivo ? `Último TXT: ${data.cnes.last.arquivo}` : "Pasta CNES encontrada")
-        : "Pasta CNES não encontrada";
+      $("cnes-ready").textContent = data.cnes.pasta || (data.cnes.last?.arquivo ? `Último TXT: ${data.cnes.last.arquivo}` : "TXT");
       if (data.cnes.last && data.cnes.last.valor) {
         applyFonte("manual", data.cnes.last, "bronze");
         setStatus("manual", true);
@@ -585,49 +583,56 @@ async function loadStatus() {
         render();
       }
     }
+    setStatus("dadosfera", Boolean(data.snowflake?.ok));
+    setStatus("databricks", Boolean(data.databricks?.ok));
     return true;
   } catch {
     return false;
   }
 }
 
+function bindUi() {
+  $("btn-snowflake").addEventListener("click", pullSnowflake);
+  $("btn-databricks").addEventListener("click", pullDatabricks);
+  $("btn-cnes").addEventListener("click", pullCnes);
+  const zone = $("dropzone");
+  const input = $("file-input");
+  if (!zone || !input) return;
+  ["dragenter", "dragover"].forEach((evt) => {
+    zone.addEventListener(evt, (e) => {
+      e.preventDefault();
+      zone.classList.add("drag");
+    });
+  });
+  ["dragleave", "drop"].forEach((evt) => {
+    zone.addEventListener(evt, (e) => {
+      e.preventDefault();
+      zone.classList.remove("drag");
+    });
+  });
+  zone.addEventListener("drop", (e) => {
+    const file = e.dataTransfer.files[0];
+    if (file) readFile(file).catch((err) => toast(err.message));
+  });
+  input.addEventListener("change", () => {
+    const file = input.files[0];
+    if (file) readFile(file).catch((err) => toast(err.message));
+  });
+}
+
 async function bind() {
   try {
-    render();
-    const live = await loadStatus();
-    if (!live) {
-      document.body.classList.add("published");
-      await loadSnapshot();
-      return;
+    if (/\.netlify\.app$/i.test(location.hostname) || /netlify/.test(location.hostname)) {
+      document.body.classList.add("hosted");
     }
+    render();
     await loadSnapshot();
-    $("btn-snowflake").addEventListener("click", pullSnowflake);
-    $("btn-databricks").addEventListener("click", pullDatabricks);
-    $("btn-cnes").addEventListener("click", pullCnes);
-    const zone = $("dropzone");
-    const input = $("file-input");
-    ["dragenter", "dragover"].forEach((evt) => {
-      zone.addEventListener(evt, (e) => {
-        e.preventDefault();
-        zone.classList.add("drag");
-      });
-    });
-    ["dragleave", "drop"].forEach((evt) => {
-      zone.addEventListener(evt, (e) => {
-        e.preventDefault();
-        zone.classList.remove("drag");
-      });
-    });
-    zone.addEventListener("drop", (e) => {
-      const file = e.dataTransfer.files[0];
-      if (file) readFile(file).catch((err) => toast(err.message));
-    });
-    input.addEventListener("change", () => {
-      const file = input.files[0];
-      if (file) readFile(file).catch((err) => toast(err.message));
-    });
-    pullDatabricks();
-    pullSnowflake();
+    bindUi();
+    const live = await loadStatus();
+    if (live) {
+      pullDatabricks();
+      pullSnowflake();
+    }
   } catch (err) {
     toast(err.message || String(err));
   }

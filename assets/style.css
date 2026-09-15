@@ -28,8 +28,8 @@ body {
     var(--bg);
 }
 
-body.published .keys { display: none; }
-body.published .app { grid-template-columns: 1fr; }
+body.hosted .drop { display: none; }
+body.hosted .app { grid-template-columns: 320px minmax(0, 1fr); }
 
 .app {
   display: grid;

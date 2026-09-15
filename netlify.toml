@@ -1,5 +1,28 @@
 [build]
   publish = "."
+  functions = "netlify/functions"
+
+[functions]
+  node_bundler = "esbuild"
+  included_files = ["assets/snapshot.json"]
+
+[functions.snowflake]
+  timeout = 26
+
+[functions.databricks]
+  timeout = 26
+
+[functions.status]
+  timeout = 10
+
+[functions.cnes]
+  timeout = 10
 
 [build.environment]
   SECRETS_SCAN_SMART_DETECTION_ENABLED = "false"
+
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+  force = true
