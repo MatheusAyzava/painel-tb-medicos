@@ -695,7 +695,7 @@ input, textarea {
 }
 
 .month-col {
-  flex: 1 0 18px;
+  flex: 1 0 22px;
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -704,6 +704,7 @@ input, textarea {
   gap: 4px;
   cursor: pointer;
   border-radius: 4px;
+  padding: 0 1px;
 }
 
 .month-col.on i { background: #f0c14a; }
@@ -717,7 +718,21 @@ input, textarea {
   border-radius: 3px 3px 0 0;
 }
 
-.month-col span { font-size: 9px; color: var(--muted); writing-mode: vertical-rl; transform: rotate(180deg); }
+.month-col span {
+  font-size: 10px;
+  color: var(--muted);
+  writing-mode: horizontal-tb;
+  transform: none;
+  text-transform: lowercase;
+}
+
+.month-col.on span { color: #f0c14a; font-weight: 600; }
+
+#mes-escolhido {
+  font: 600 13px "IBM Plex Sans", system-ui, sans-serif;
+  color: #f0c14a;
+  text-transform: lowercase;
+}
 
 .map-toolbar, .novos-toolbar {
   display: flex;
@@ -729,7 +744,7 @@ input, textarea {
 
 .map-toolbar h2, .novos-toolbar h2 { margin: 0; margin-right: auto; }
 
-.map-toolbar select, .novos-toolbar input[type="month"] {
+.map-toolbar select {
   width: auto;
   margin: 0;
 }
@@ -744,8 +759,6 @@ input, textarea {
 }
 
 .modo-toggle { display: flex; gap: 6px; flex-wrap: wrap; }
-
-#mes-wrap[hidden] { display: none !important; }
 
 #lista-local { margin: 0 0 10px; }
 

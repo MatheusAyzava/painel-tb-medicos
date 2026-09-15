@@ -8,24 +8,32 @@ const UF_CENTRO = {
   SE: [-10.57, -37.45], SP: [-22.19, -48.79], TO: [-9.46, -48.26],
 };
 
-const biState = { data: null, munis: [], map: null, layer: null, novos: [], modo: "novos", cidade: null };
+const biState = { data: null, munis: [], map: null, layer: null, novos: [], modo: "novos", cidade: null, mes: null };
 
 const MES_NOMES = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"];
+const MES_CURTO = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"];
 
-function mesAtual() {
+function mesIndex(mes) {
+  const mo = Number(String(mes || "").split("-")[1]);
+  return mo >= 1 && mo <= 12 ? mo - 1 : -1;
+}
+
+function mesValue() {
+  if (biState.mes) return biState.mes;
+  const lista = (biState.data && biState.data.mensal) || [];
+  if (lista.length) return lista[lista.length - 1].mes;
   const now = new Date();
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
 }
 
-function mesValue() {
-  return document.getElementById("novos-mes").value || mesAtual();
+function mesCurto(mes) {
+  const idx = mesIndex(mes);
+  return idx < 0 ? "" : MES_CURTO[idx];
 }
 
 function mesLabel(mes) {
-  const [ano, mo] = String(mes || "").split("-");
-  const idx = Number(mo) - 1;
-  if (!ano || idx < 0 || idx > 11) return mes || "";
-  return `${MES_NOMES[idx]} de ${ano}`;
+  const idx = mesIndex(mes);
+  return idx < 0 ? "" : MES_NOMES[idx];
 }
 
 function biFmt(n) {
@@ -99,14 +107,16 @@ function renderBi(data) {
     return `<li><i style="background:${g.color}"></i>${g.key} · ${biFmt(g.value)} (${pct}%)</li>`;
   }).join("");
 
+  if (!biState.mes && (data.mensal || []).length) biState.mes = data.mensal[data.mensal.length - 1].mes;
   const escolhido = mesValue();
   const maxM = Math.max(...(data.mensal || []).map((m) => m.value), 1);
   document.getElementById("bi-mensal").innerHTML = (data.mensal || []).map((m) => `
-    <div class="month-col${m.mes === escolhido ? " on" : ""}" data-mes="${m.mes}" title="${m.mes}: ${biFmt(m.value)}">
+    <div class="month-col${m.mes === escolhido ? " on" : ""}" data-mes="${m.mes}" title="${mesLabel(m.mes)} · ${biFmt(m.value)}">
       <i style="height:${Math.max(4, (m.value / maxM) * 100)}%"></i>
-      <span>${m.mes.slice(2)}</span>
+      <span>${mesCurto(m.mes)}</span>
     </div>
   `).join("");
+  atualizarTitulo();
 
   fillBars("bi-regiao", data.regioes || []);
   fillBars("bi-faixa", data.faixa || []);
@@ -214,16 +224,16 @@ function csvEscape(value) {
 }
 
 function atualizarTitulo() {
-  const mes = mesLabel(mesValue());
+  const mes = mesLabel(mesValue()) || "mês";
+  const elMes = document.getElementById("mes-escolhido");
+  if (elMes) elMes.textContent = mes;
   document.getElementById("lista-titulo").textContent = biState.modo === "novos"
     ? `Médicos novos · ${mes}`
     : `Todos os médicos · ${mes}`;
   const cidade = biState.cidade
     ? `${biState.cidade.municipio} · ${biState.cidade.uf}`
     : "Brasil";
-  document.getElementById("lista-local").textContent = biState.modo === "novos"
-    ? `${cidade} · inscritos em ${mes}`
-    : `${cidade} · todos os ativos (mês só vale para médicos novos)`;
+  document.getElementById("lista-local").textContent = `${cidade} · ${mes}`;
   document.querySelectorAll(".month-col").forEach((col) => {
     col.classList.toggle("on", col.dataset.mes === mesValue());
   });
@@ -246,10 +256,7 @@ function abrirCidade(cidade) {
 
 function escolherMes(mes) {
   if (!/^\d{4}-\d{2}$/.test(mes)) return;
-  document.getElementById("novos-mes").value = mes;
-  biState.modo = "novos";
-  document.getElementById("modo-todos").classList.toggle("on", false);
-  document.getElementById("modo-novos").classList.toggle("on", true);
+  biState.mes = mes;
   atualizarTitulo();
   document.getElementById("novos-body").scrollIntoView({ behavior: "smooth", block: "start" });
   buscarLista();
@@ -257,13 +264,13 @@ function escolherMes(mes) {
 
 function downloadNovosCsv() {
   if (!biState.novos.length) return;
-  const header = "UF_CRM;NOME;CIDADE;UF;TELEFONE;EMAIL;DATA_INSCRICAO";
-  const body = biState.novos.map((r) => [r.uf_crm, r.nome, r.cidade, r.uf, r.telefone, r.email, r.data].map(csvEscape).join(";")).join("\n");
+  const header = "UF_CRM;NOME;CIDADE;UF;TELEFONE;EMAIL";
+  const body = biState.novos.map((r) => [r.uf_crm, r.nome, r.cidade, r.uf, r.telefone, r.email].map(csvEscape).join(";")).join("\n");
   const blob = new Blob(["\ufeff" + header + "\n" + body], { type: "text/csv;charset=utf-8" });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
   const cidade = (biState.cidade && biState.cidade.municipio) || "lista";
-  a.download = `medicos-${biState.modo}-${cidade}-${document.getElementById("novos-mes").value || "mes"}.csv`;
+  a.download = `medicos-${biState.modo}-${cidade}-${mesCurto(mesValue())}.csv`;
   a.click();
   URL.revokeObjectURL(a.href);
 }
@@ -279,11 +286,11 @@ async function buscarLista() {
   }
   atualizarTitulo();
   if (biState.modo === "todos" && !biState.cidade) {
-    bodyEl.innerHTML = "<tr><td colspan='7'>Clique numa cidade no mapa para ver todos os médicos dali, ou escolha Médicos novos para filtrar o mês.</td></tr>";
+    bodyEl.innerHTML = "<tr><td colspan='6'>Clique numa cidade no mapa para ver todos os médicos dali naquele mês.</td></tr>";
     document.getElementById("novos-count").textContent = "0 registros";
     return;
   }
-  bodyEl.innerHTML = "<tr><td colspan='7'>Consultando Snowflake…</td></tr>";
+  bodyEl.innerHTML = "<tr><td colspan='6'>Consultando Snowflake…</td></tr>";
   try {
     const res = await fetch("/api/medicos-novos", {
       method: "POST",
@@ -295,11 +302,11 @@ async function buscarLista() {
     biState.novos = data.linhas || [];
     document.getElementById("novos-count").textContent = `${biFmt(data.total)} registros`;
     if (data.aviso && !biState.novos.length) {
-      bodyEl.innerHTML = `<tr><td colspan="7">${data.aviso}</td></tr>`;
+      bodyEl.innerHTML = `<tr><td colspan="6">${data.aviso}</td></tr>`;
       return;
     }
     if (!biState.novos.length) {
-      bodyEl.innerHTML = "<tr><td colspan='7'>Nenhum médico encontrado nesse filtro.</td></tr>";
+      bodyEl.innerHTML = "<tr><td colspan='6'>Nenhum médico encontrado nesse mês.</td></tr>";
       return;
     }
     bodyEl.innerHTML = biState.novos.map((r) => `
@@ -310,11 +317,10 @@ async function buscarLista() {
         <td>${r.uf || "—"}</td>
         <td>${r.telefone || "—"}</td>
         <td>${r.email || "—"}</td>
-        <td>${r.data || "—"}</td>
       </tr>
     `).join("");
   } catch (err) {
-    bodyEl.innerHTML = `<tr><td colspan="7">${err.message}</td></tr>`;
+    bodyEl.innerHTML = `<tr><td colspan="6">${err.message}</td></tr>`;
   }
 }
 
@@ -334,7 +340,6 @@ function switchTab(tab) {
 }
 
 async function initBi() {
-  document.getElementById("novos-mes").value = mesAtual();
   document.querySelectorAll("[data-tab]").forEach((btn) => {
     btn.addEventListener("click", () => switchTab(btn.dataset.tab));
   });
@@ -348,10 +353,6 @@ async function initBi() {
   document.getElementById("btn-csv").addEventListener("click", downloadNovosCsv);
   document.getElementById("modo-todos").addEventListener("click", () => setModo("todos"));
   document.getElementById("modo-novos").addEventListener("click", () => setModo("novos"));
-  document.getElementById("novos-mes").addEventListener("change", () => {
-    atualizarTitulo();
-    buscarLista();
-  });
   document.getElementById("bi-mensal").addEventListener("click", (event) => {
     const col = event.target.closest(".month-col");
     if (col && col.dataset.mes) escolherMes(col.dataset.mes);

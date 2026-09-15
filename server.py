@@ -569,9 +569,7 @@ def query_medicos_novos(override: dict | None = None) -> dict:
         safe_mun = municipio.replace("'", "''")
         city_filter += f" AND UPPER(p.MUNICIPIO) = UPPER('{safe_mun}')"
 
-    date_filter = ""
-    if modo == "novos":
-        date_filter = f"""
+    date_filter = f"""
               AND b.DT_NOVO >= DATE_FROM_PARTS({int(ano)}, {int(mo)}, 1)
               AND b.DT_NOVO < DATEADD(MONTH, 1, DATE_FROM_PARTS({int(ano)}, {int(mo)}, 1))
         """
@@ -597,7 +595,7 @@ def query_medicos_novos(override: dict | None = None) -> dict:
                    TO_CHAR(b.DT_NOVO, 'YYYY-MM-DD')
             FROM GOLD.TB_MEDICOS m
             JOIN cid c ON c.UF_CRM = m.UF_CRM
-            {"JOIN" if modo == "novos" else "LEFT JOIN"} base b ON b.UF_CRM = m.UF_CRM
+            JOIN base b ON b.UF_CRM = m.UF_CRM
             LEFT JOIN (
               SELECT UF_CRM, TELEFONE
               FROM GOLD.TB_MEDICOS_TELEFONES_FREQUENCIA

@@ -392,9 +392,7 @@ async function queryMedicosNovos(opts = {}) {
   if (ibge) cityFilter += ` AND LPAD(REGEXP_REPLACE(TO_VARCHAR(p.IBGE), '[^0-9]', ''), 7, '0') = '${ibge}'`;
   else if (municipio) cityFilter += ` AND UPPER(p.MUNICIPIO) = UPPER('${municipio.replace(/'/g, "''")}')`;
 
-  const dateFilter = modo === "novos"
-    ? `AND b.DT_NOVO >= DATE_FROM_PARTS(${ano}, ${mo}, 1) AND b.DT_NOVO < DATEADD(MONTH, 1, DATE_FROM_PARTS(${ano}, ${mo}, 1))`
-    : "";
+  const dateFilter = `AND b.DT_NOVO >= DATE_FROM_PARTS(${ano}, ${mo}, 1) AND b.DT_NOVO < DATEADD(MONTH, 1, DATE_FROM_PARTS(${ano}, ${mo}, 1))`;
   const telJoin = `
     LEFT JOIN (
       SELECT UF_CRM, TELEFONE FROM GOLD.TB_MEDICOS_TELEFONES_FREQUENCIA
@@ -420,7 +418,7 @@ async function queryMedicosNovos(opts = {}) {
     SELECT m.UF_CRM, m.NOME, c.MUNICIPIO, COALESCE(c.UF, m.UF), tel.TELEFONE, em.EMAIL, TO_CHAR(b.DT_NOVO, 'YYYY-MM-DD')
     FROM GOLD.TB_MEDICOS m
     JOIN cid c ON c.UF_CRM = m.UF_CRM
-    ${modo === "novos" ? "JOIN" : "LEFT JOIN"} base b ON b.UF_CRM = m.UF_CRM
+    JOIN base b ON b.UF_CRM = m.UF_CRM
     ${telJoin}
     WHERE UPPER(m.SITUACAO) = 'ATIVO' ${dateFilter}
     ORDER BY m.NOME LIMIT 8000
