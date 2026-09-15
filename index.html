@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/style.css?v=22" />
+  <link rel="stylesheet" href="assets/style.css?v=24" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 </head>
 <body>
@@ -220,7 +220,7 @@
               </label>
               <button type="button" class="btn ghost" id="map-reset">Ver Brasil</button>
             </div>
-            <p class="map-hint">Clique em um estado no mapa para dar zoom e ver o calor por cidade. São Paulo já vem com municípios.</p>
+            <p class="map-hint">Clique no estado e depois na cidade para listar os médicos daquele município.</p>
             <div id="map-br"></div>
             <div class="heat-legend">
               <span>menor</span>
@@ -232,8 +232,12 @@
 
         <section class="panel novos-panel">
           <div class="novos-toolbar">
-            <h2>Médicos novos no mês</h2>
-            <label>
+            <h2 id="lista-titulo">Médicos</h2>
+            <div class="modo-toggle" role="group" aria-label="Tipo de lista">
+              <button type="button" class="tab on" data-modo="todos" id="modo-todos">Todos os médicos</button>
+              <button type="button" class="tab" data-modo="novos" id="modo-novos">Médicos novos</button>
+            </div>
+            <label id="mes-wrap" hidden>
               Mês
               <input type="month" id="novos-mes" />
             </label>
@@ -241,19 +245,22 @@
             <button type="button" class="btn ghost" id="btn-csv">Baixar CSV</button>
             <span id="novos-count">0 registros</span>
           </div>
+          <p class="map-hint" id="lista-local">Clique numa cidade no mapa para ver de onde é cada médico.</p>
           <div class="table-wrap">
             <table class="novos-table">
               <thead>
                 <tr>
                   <th>UF+CRM</th>
                   <th>Nome</th>
+                  <th>Cidade</th>
+                  <th>UF</th>
                   <th>Telefone</th>
                   <th>E-mail</th>
                   <th>Data inscrição</th>
                 </tr>
               </thead>
               <tbody id="novos-body">
-                <tr><td colspan="5">Escolha o mês e clique em Buscar.</td></tr>
+                <tr><td colspan="7">Clique numa cidade no mapa ou busque médicos novos do mês.</td></tr>
               </tbody>
             </table>
           </div>
@@ -271,7 +278,7 @@
     });
   </script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="assets/app.js?v=22"></script>
-  <script src="assets/bi.js?v=22"></script>
+  <script src="assets/app.js?v=24"></script>
+  <script src="assets/bi.js?v=24"></script>
 </body>
 </html>

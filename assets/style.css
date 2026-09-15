@@ -738,6 +738,14 @@ input, textarea {
   background: #0a1210;
 }
 
+.modo-toggle { display: flex; gap: 6px; flex-wrap: wrap; }
+
+#mes-wrap[hidden] { display: none !important; }
+
+#lista-local { margin: 0 0 10px; }
+
+.leaflet-interactive { cursor: pointer; }
+
 .heat-legend {
   display: flex;
   align-items: center;

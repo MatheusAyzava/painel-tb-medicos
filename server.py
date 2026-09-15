@@ -540,27 +540,88 @@ def query_dadosfera_bi(override: dict | None = None) -> dict:
 
 def query_medicos_novos(override: dict | None = None) -> dict:
     cfg = merge_cfg(override)
-    mes = str((override or {}).get("mes") or "").strip()
+    body = override or {}
+    modo = "todos" if str(body.get("modo") or "").lower() == "todos" else "novos"
+    mes = str(body.get("mes") or "").strip()
     if not re.fullmatch(r"\d{4}-\d{2}", mes):
         mes = datetime.now().strftime("%Y-%m")
     ano, mo = mes.split("-")
-    ctx = connect_snowflake(cfg)
-    warehouse = (cfg.get("snowflake_warehouse") or "COMPUTE_WH").strip()
-    try:
-        cur = ctx.cursor()
-        cur.execute(f"USE WAREHOUSE {warehouse}")
-        cur.execute("USE DATABASE DADOSFERA_PRD_DIGITALSOLVERS")
-        cur.close()
-        rows = snowflake_fetch(
-            ctx,
-            f"""
+    uf = re.sub(r"[^A-Za-z]", "", str(body.get("uf") or "")).upper()[:2]
+    municipio = re.sub(r"[^A-Za-zÀ-ÿ0-9 .\-']", "", str(body.get("municipio") or ""))[:80]
+    ibge = re.sub(r"\D", "", str(body.get("ibge") or ""))
+    if ibge:
+        ibge = ibge.zfill(7)
+    if modo == "todos" and not uf and not municipio and not ibge:
+        return {
+            "modo": modo,
+            "mes": mes,
+            "total": 0,
+            "linhas": [],
+            "aviso": "Clique numa cidade no mapa para listar os médicos.",
+        }
+
+    city_filter = ""
+    if uf:
+        city_filter += f" AND p.UF = '{uf}'"
+    if ibge:
+        city_filter += f" AND LPAD(REGEXP_REPLACE(TO_VARCHAR(p.IBGE), '[^0-9]', ''), 7, '0') = '{ibge}'"
+    elif municipio:
+        safe_mun = municipio.replace("'", "''")
+        city_filter += f" AND UPPER(p.MUNICIPIO) = UPPER('{safe_mun}')"
+
+    date_filter = ""
+    if modo == "novos":
+        date_filter = f"""
+              AND b.DT_NOVO >= DATE_FROM_PARTS({int(ano)}, {int(mo)}, 1)
+              AND b.DT_NOVO < DATEADD(MONTH, 1, DATE_FROM_PARTS({int(ano)}, {int(mo)}, 1))
+        """
+
+    if city_filter:
+        sql = f"""
+            WITH cid AS (
+              SELECT UF_CRM, MUNICIPIO, UF, IBGE
+              FROM GOLD.TB_CNES_PROFISSIONAIS p
+              WHERE CBO LIKE '225%'
+                AND NULLIF(UF_CRM, '') IS NOT NULL
+                AND MUNICIPIO IS NOT NULL
+                {city_filter}
+              QUALIFY ROW_NUMBER() OVER (PARTITION BY UF_CRM ORDER BY UPDATE_DATE DESC NULLS LAST) = 1
+            ),
+            base AS (
+              SELECT UF_CRM,
+                     MIN(COALESCE(TRY_TO_DATE(DT_INSCRICAO, 'DD/MM/YYYY'), TRY_TO_DATE(DT_INSCRICAO))) AS DT_NOVO
+              FROM GOLD.TB_ESPECIALIDADE_X_FONTES
+              GROUP BY UF_CRM
+            )
+            SELECT m.UF_CRM, m.NOME, c.MUNICIPIO, COALESCE(c.UF, m.UF), tel.TELEFONE, em.EMAIL,
+                   TO_CHAR(b.DT_NOVO, 'YYYY-MM-DD')
+            FROM GOLD.TB_MEDICOS m
+            JOIN cid c ON c.UF_CRM = m.UF_CRM
+            {"JOIN" if modo == "novos" else "LEFT JOIN"} base b ON b.UF_CRM = m.UF_CRM
+            LEFT JOIN (
+              SELECT UF_CRM, TELEFONE
+              FROM GOLD.TB_MEDICOS_TELEFONES_FREQUENCIA
+              QUALIFY ROW_NUMBER() OVER (PARTITION BY UF_CRM ORDER BY QTDE_REPETICOES DESC NULLS LAST) = 1
+            ) tel ON tel.UF_CRM = m.UF_CRM
+            LEFT JOIN (
+              SELECT UF_CRM, EMAIL
+              FROM GOLD.TB_MEDICOS_EMAILS_FREQUENCIA
+              QUALIFY ROW_NUMBER() OVER (PARTITION BY UF_CRM ORDER BY QTDE_REPETICOES DESC NULLS LAST) = 1
+            ) em ON em.UF_CRM = m.UF_CRM
+            WHERE UPPER(m.SITUACAO) = 'ATIVO'
+              {date_filter}
+            ORDER BY m.NOME
+            LIMIT 8000
+        """
+    else:
+        sql = f"""
             WITH base AS (
               SELECT UF_CRM,
                      MIN(COALESCE(TRY_TO_DATE(DT_INSCRICAO, 'DD/MM/YYYY'), TRY_TO_DATE(DT_INSCRICAO))) AS DT_NOVO
               FROM GOLD.TB_ESPECIALIDADE_X_FONTES
               GROUP BY UF_CRM
             )
-            SELECT m.UF_CRM, m.NOME, tel.TELEFONE, em.EMAIL, TO_CHAR(b.DT_NOVO, 'YYYY-MM-DD')
+            SELECT m.UF_CRM, m.NOME, NULL, m.UF, tel.TELEFONE, em.EMAIL, TO_CHAR(b.DT_NOVO, 'YYYY-MM-DD')
             FROM GOLD.TB_MEDICOS m
             JOIN base b ON b.UF_CRM = m.UF_CRM
             LEFT JOIN (
@@ -573,24 +634,41 @@ def query_medicos_novos(override: dict | None = None) -> dict:
               FROM GOLD.TB_MEDICOS_EMAILS_FREQUENCIA
               QUALIFY ROW_NUMBER() OVER (PARTITION BY UF_CRM ORDER BY QTDE_REPETICOES DESC NULLS LAST) = 1
             ) em ON em.UF_CRM = m.UF_CRM
-            WHERE b.DT_NOVO >= DATE_FROM_PARTS({int(ano)}, {int(mo)}, 1)
-              AND b.DT_NOVO < DATEADD(MONTH, 1, DATE_FROM_PARTS({int(ano)}, {int(mo)}, 1))
-              AND UPPER(m.SITUACAO) = 'ATIVO'
+            WHERE UPPER(m.SITUACAO) = 'ATIVO'
+              {date_filter}
             ORDER BY m.NOME
             LIMIT 8000
-            """,
-        )[1]
+        """
+
+    ctx = connect_snowflake(cfg)
+    warehouse = (cfg.get("snowflake_warehouse") or "COMPUTE_WH").strip()
+    try:
+        cur = ctx.cursor()
+        cur.execute(f"USE WAREHOUSE {warehouse}")
+        cur.execute("USE DATABASE DADOSFERA_PRD_DIGITALSOLVERS")
+        cur.close()
+        rows = snowflake_fetch(ctx, sql)[1]
         lista = [
             {
                 "uf_crm": str(r[0] or ""),
                 "nome": str(r[1] or ""),
-                "telefone": str(r[2] or ""),
-                "email": str(r[3] or ""),
-                "data": str(r[4] or ""),
+                "cidade": str(r[2] or ""),
+                "uf": str(r[3] or ""),
+                "telefone": str(r[4] or ""),
+                "email": str(r[5] or ""),
+                "data": str(r[6] or ""),
             }
             for r in rows
         ]
-        return {"mes": mes, "total": len(lista), "linhas": lista}
+        return {
+            "modo": modo,
+            "mes": mes,
+            "uf": uf,
+            "municipio": municipio,
+            "ibge": ibge,
+            "total": len(lista),
+            "linhas": lista,
+        }
     finally:
         ctx.close()
 

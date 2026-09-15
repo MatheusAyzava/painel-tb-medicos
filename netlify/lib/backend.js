@@ -374,44 +374,80 @@ async function queryDadosferaBi() {
   };
 }
 
-async function queryMedicosNovos(mes) {
-  const ok = /^\d{4}-\d{2}$/.test(String(mes || ""));
-  const stamp = ok ? String(mes) : new Date().toISOString().slice(0, 7);
+async function queryMedicosNovos(opts = {}) {
+  const modo = String(opts.modo || "").toLowerCase() === "todos" ? "todos" : "novos";
+  const ok = /^\d{4}-\d{2}$/.test(String(opts.mes || ""));
+  const stamp = ok ? String(opts.mes) : new Date().toISOString().slice(0, 7);
   const [ano, mo] = stamp.split("-").map(Number);
-  const rows = await snowflakeSql(`
-    WITH base AS (
-      SELECT UF_CRM,
-             MIN(COALESCE(TRY_TO_DATE(DT_INSCRICAO, 'DD/MM/YYYY'), TRY_TO_DATE(DT_INSCRICAO))) AS DT_NOVO
-      FROM GOLD.TB_ESPECIALIDADE_X_FONTES
-      GROUP BY UF_CRM
-    )
-    SELECT m.UF_CRM, m.NOME, tel.TELEFONE, em.EMAIL, TO_CHAR(b.DT_NOVO, 'YYYY-MM-DD')
-    FROM GOLD.TB_MEDICOS m
-    JOIN base b ON b.UF_CRM = m.UF_CRM
+  const uf = String(opts.uf || "").replace(/[^A-Za-z]/g, "").toUpperCase().slice(0, 2);
+  const municipio = String(opts.municipio || "").replace(/[^A-Za-zÀ-ÿ0-9 .\-']/g, "").slice(0, 80);
+  let ibge = String(opts.ibge || "").replace(/\D/g, "");
+  if (ibge) ibge = ibge.padStart(7, "0");
+  if (modo === "todos" && !uf && !municipio && !ibge) {
+    return { modo, mes: stamp, total: 0, linhas: [], aviso: "Clique numa cidade no mapa para listar os médicos." };
+  }
+
+  let cityFilter = "";
+  if (uf) cityFilter += ` AND p.UF = '${uf}'`;
+  if (ibge) cityFilter += ` AND LPAD(REGEXP_REPLACE(TO_VARCHAR(p.IBGE), '[^0-9]', ''), 7, '0') = '${ibge}'`;
+  else if (municipio) cityFilter += ` AND UPPER(p.MUNICIPIO) = UPPER('${municipio.replace(/'/g, "''")}')`;
+
+  const dateFilter = modo === "novos"
+    ? `AND b.DT_NOVO >= DATE_FROM_PARTS(${ano}, ${mo}, 1) AND b.DT_NOVO < DATEADD(MONTH, 1, DATE_FROM_PARTS(${ano}, ${mo}, 1))`
+    : "";
+  const telJoin = `
     LEFT JOIN (
-      SELECT UF_CRM, TELEFONE
-      FROM GOLD.TB_MEDICOS_TELEFONES_FREQUENCIA
+      SELECT UF_CRM, TELEFONE FROM GOLD.TB_MEDICOS_TELEFONES_FREQUENCIA
       QUALIFY ROW_NUMBER() OVER (PARTITION BY UF_CRM ORDER BY QTDE_REPETICOES DESC NULLS LAST) = 1
     ) tel ON tel.UF_CRM = m.UF_CRM
     LEFT JOIN (
-      SELECT UF_CRM, EMAIL
-      FROM GOLD.TB_MEDICOS_EMAILS_FREQUENCIA
+      SELECT UF_CRM, EMAIL FROM GOLD.TB_MEDICOS_EMAILS_FREQUENCIA
       QUALIFY ROW_NUMBER() OVER (PARTITION BY UF_CRM ORDER BY QTDE_REPETICOES DESC NULLS LAST) = 1
-    ) em ON em.UF_CRM = m.UF_CRM
-    WHERE b.DT_NOVO >= DATE_FROM_PARTS(${ano}, ${mo}, 1)
-      AND b.DT_NOVO < DATEADD(MONTH, 1, DATE_FROM_PARTS(${ano}, ${mo}, 1))
-      AND UPPER(m.SITUACAO) = 'ATIVO'
-    ORDER BY m.NOME
-    LIMIT 8000
-  `);
+    ) em ON em.UF_CRM = m.UF_CRM`;
+
+  const sql = cityFilter ? `
+    WITH cid AS (
+      SELECT UF_CRM, MUNICIPIO, UF, IBGE
+      FROM GOLD.TB_CNES_PROFISSIONAIS p
+      WHERE CBO LIKE '225%' AND NULLIF(UF_CRM, '') IS NOT NULL AND MUNICIPIO IS NOT NULL
+        ${cityFilter}
+      QUALIFY ROW_NUMBER() OVER (PARTITION BY UF_CRM ORDER BY UPDATE_DATE DESC NULLS LAST) = 1
+    ),
+    base AS (
+      SELECT UF_CRM, MIN(COALESCE(TRY_TO_DATE(DT_INSCRICAO, 'DD/MM/YYYY'), TRY_TO_DATE(DT_INSCRICAO))) AS DT_NOVO
+      FROM GOLD.TB_ESPECIALIDADE_X_FONTES GROUP BY UF_CRM
+    )
+    SELECT m.UF_CRM, m.NOME, c.MUNICIPIO, COALESCE(c.UF, m.UF), tel.TELEFONE, em.EMAIL, TO_CHAR(b.DT_NOVO, 'YYYY-MM-DD')
+    FROM GOLD.TB_MEDICOS m
+    JOIN cid c ON c.UF_CRM = m.UF_CRM
+    ${modo === "novos" ? "JOIN" : "LEFT JOIN"} base b ON b.UF_CRM = m.UF_CRM
+    ${telJoin}
+    WHERE UPPER(m.SITUACAO) = 'ATIVO' ${dateFilter}
+    ORDER BY m.NOME LIMIT 8000
+  ` : `
+    WITH base AS (
+      SELECT UF_CRM, MIN(COALESCE(TRY_TO_DATE(DT_INSCRICAO, 'DD/MM/YYYY'), TRY_TO_DATE(DT_INSCRICAO))) AS DT_NOVO
+      FROM GOLD.TB_ESPECIALIDADE_X_FONTES GROUP BY UF_CRM
+    )
+    SELECT m.UF_CRM, m.NOME, NULL, m.UF, tel.TELEFONE, em.EMAIL, TO_CHAR(b.DT_NOVO, 'YYYY-MM-DD')
+    FROM GOLD.TB_MEDICOS m
+    JOIN base b ON b.UF_CRM = m.UF_CRM
+    ${telJoin}
+    WHERE UPPER(m.SITUACAO) = 'ATIVO' ${dateFilter}
+    ORDER BY m.NOME LIMIT 8000
+  `;
+
+  const rows = await snowflakeSql(sql);
   const lista = (rows || []).map((r) => ({
     uf_crm: String(r[0] || ""),
     nome: String(r[1] || ""),
-    telefone: String(r[2] || ""),
-    email: String(r[3] || ""),
-    data: String(r[4] || ""),
+    cidade: String(r[2] || ""),
+    uf: String(r[3] || ""),
+    telefone: String(r[4] || ""),
+    email: String(r[5] || ""),
+    data: String(r[6] || ""),
   }));
-  return { mes: stamp, total: lista.length, linhas: lista };
+  return { modo, mes: stamp, uf, municipio, ibge, total: lista.length, linhas: lista };
 }
 
 function queryCnes() {
