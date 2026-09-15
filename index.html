@@ -7,9 +7,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/style.css?v=18" />
+  <link rel="stylesheet" href="assets/style.css?v=20" />
 </head>
 <body>
+  <div class="keys-backdrop" id="keys-backdrop" hidden></div>
   <div class="app">
     <aside class="keys" id="keys">
       <header class="keys-head">
@@ -53,9 +54,14 @@
 
     <main class="viz">
       <header class="viz-head">
-        <div>
-          <p class="eyebrow">TB Médicos</p>
-          <h1>Comparativo das 3 fontes</h1>
+        <div class="viz-title">
+          <button type="button" class="menu-toggle" id="menu-toggle" aria-label="Abrir menu de conexões">
+            <span></span><span></span><span></span>
+          </button>
+          <div>
+            <p class="eyebrow">TB Médicos</p>
+            <h1>Comparativo das 3 fontes</h1>
+          </div>
         </div>
         <div class="stamps" id="stamps"></div>
       </header>
@@ -144,6 +150,6 @@
       el.textContent = event.message || "Erro no painel";
     });
   </script>
-  <script src="assets/app.js?v=18"></script>
+  <script src="assets/app.js?v=20"></script>
 </body>
 </html>

@@ -591,6 +591,43 @@ async function loadStatus() {
   }
 }
 
+function isDrawerLayout() {
+  return window.matchMedia("(max-width: 860px), (hover: none) and (pointer: coarse)").matches;
+}
+
+function bindMenu() {
+  const keys = $("keys");
+  const toggle = $("menu-toggle");
+  const backdrop = $("keys-backdrop");
+  if (!keys || !toggle || !backdrop) return;
+  const close = () => {
+    keys.classList.remove("open");
+    backdrop.hidden = true;
+    document.body.classList.remove("menu-open");
+  };
+  const open = () => {
+    keys.classList.add("open");
+    backdrop.hidden = false;
+    document.body.classList.add("menu-open");
+  };
+  toggle.addEventListener("click", () => {
+    if (keys.classList.contains("open")) close();
+    else open();
+  });
+  backdrop.addEventListener("click", close);
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") close();
+  });
+  keys.querySelectorAll("button").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      if (isDrawerLayout()) close();
+    });
+  });
+  window.addEventListener("resize", () => {
+    if (!isDrawerLayout()) close();
+  });
+}
+
 function bindUi() {
   $("btn-snowflake").addEventListener("click", pullSnowflake);
   $("btn-databricks").addEventListener("click", pullDatabricks);
@@ -627,6 +664,7 @@ async function bind() {
     }
     render();
     await loadSnapshot();
+    bindMenu();
     bindUi();
     const live = await loadStatus();
     if (live) {
