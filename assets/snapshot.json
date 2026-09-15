@@ -9,21 +9,25 @@
       "atualizado_cfm": "2026-09-15 07:13:04",
       "extras": [
         {
-          "label": "Dadosfera · CRMs únicos ativos",
+          "label": "CRMs únicos ativos",
           "value": 773790,
           "accent": true
         },
         {
-          "label": "Dadosfera · CPFs únicos ativos",
+          "label": "CPFs únicos ativos",
           "value": 678322
         },
         {
-          "label": "Dadosfera · Total médicos ativos",
+          "label": "Total médicos ativos",
           "value": 773790
         },
         {
-          "label": "Dadosfera · Total registros",
+          "label": "Total registros (todas situações)",
           "value": 1149824
+        },
+        {
+          "label": "Especialidades",
+          "value": 61
         }
       ]
     },
@@ -51,6 +55,14 @@
         {
           "label": "Databricks · Total registros",
           "value": 1148754
+        },
+        {
+          "label": "Databricks · Bronze CNES",
+          "value": 488718
+        },
+        {
+          "label": "Databricks · Silver CNES",
+          "value": 519364
         }
       ]
     },

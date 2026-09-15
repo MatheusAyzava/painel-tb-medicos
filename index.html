@@ -7,7 +7,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/style.css?v=21" />
+  <link rel="stylesheet" href="assets/style.css?v=22" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 </head>
 <body>
   <div class="keys-backdrop" id="keys-backdrop" hidden></div>
@@ -56,6 +57,14 @@
     </aside>
 
     <main class="viz">
+      <nav class="top-nav">
+        <img class="brand-logo" src="assets/logo-ds.png" alt="Digital Solvers by LLYC" />
+        <div class="tab-bar">
+          <button type="button" class="tab on" data-tab="comparativo">Comparativo</button>
+          <button type="button" class="tab" data-tab="dadosfera">Dadosfera CFM</button>
+        </div>
+      </nav>
+      <div id="view-comparativo">
       <header class="viz-head">
         <div class="viz-title">
           <button type="button" class="menu-toggle" id="menu-toggle" aria-label="Abrir menu de conexões">
@@ -142,6 +151,114 @@
           </div>
         </article>
       </section>
+      </div>
+
+      <div id="view-dadosfera" hidden>
+        <header class="bi-head">
+          <div>
+            <p class="eyebrow">Digital Solvers · Dadosfera</p>
+            <h1>CFM · painel analítico</h1>
+          </div>
+          <div class="bi-kpis">
+            <div><b id="bi-crm">0</b><span>CRM</span></div>
+            <div><b id="bi-medicos">0</b><span>Médicos</span></div>
+            <div><b id="bi-esp">0</b><span>Especialidades</span></div>
+          </div>
+          <p class="bi-updated" id="bi-updated">Atualizado em: —</p>
+        </header>
+
+        <section class="bi-grid bi-top">
+          <article class="panel donut-panel">
+            <h2>Gênero</h2>
+            <div class="donut-wrap">
+              <svg id="bi-donut" viewBox="0 0 120 120" aria-hidden="true"></svg>
+              <div class="donut-center">
+                <strong id="bi-donut-total">0</strong>
+                <span>ativos</span>
+              </div>
+            </div>
+            <ul class="legend" id="bi-legend"></ul>
+          </article>
+          <article class="panel">
+            <h2>Evolução mensal · médicos novos (DT inscrição)</h2>
+            <div class="month-chart" id="bi-mensal"></div>
+          </article>
+          <article class="panel">
+            <h2>Região</h2>
+            <div class="bars" id="bi-regiao"></div>
+          </article>
+        </section>
+
+        <section class="bi-grid bi-mid">
+          <article class="panel">
+            <h2>Faixa etária</h2>
+            <div class="bars" id="bi-faixa"></div>
+          </article>
+          <article class="panel">
+            <h2>Especialidade DS</h2>
+            <div class="bars" id="bi-esp-ds"></div>
+          </article>
+          <article class="panel">
+            <h2>Especialidade CFM</h2>
+            <div class="bars" id="bi-esp-cfm"></div>
+          </article>
+          <article class="panel">
+            <h2>UF</h2>
+            <div class="bars uf" id="bi-ufs"></div>
+          </article>
+        </section>
+
+        <section class="bi-grid bi-map-row">
+          <article class="panel map-panel">
+            <div class="map-toolbar">
+              <h2>Concentração de médicos</h2>
+              <label>
+                Estado
+                <select id="map-uf">
+                  <option value="BR">Brasil</option>
+                </select>
+              </label>
+              <button type="button" class="btn ghost" id="map-reset">Ver Brasil</button>
+            </div>
+            <p class="map-hint">Clique em um estado no mapa para dar zoom e ver o calor por cidade. São Paulo já vem com municípios.</p>
+            <div id="map-br"></div>
+            <div class="heat-legend">
+              <span>menor</span>
+              <i></i>
+              <span>maior concentração</span>
+            </div>
+          </article>
+        </section>
+
+        <section class="panel novos-panel">
+          <div class="novos-toolbar">
+            <h2>Médicos novos no mês</h2>
+            <label>
+              Mês
+              <input type="month" id="novos-mes" />
+            </label>
+            <button type="button" class="btn" id="btn-novos">Buscar</button>
+            <button type="button" class="btn ghost" id="btn-csv">Baixar CSV</button>
+            <span id="novos-count">0 registros</span>
+          </div>
+          <div class="table-wrap">
+            <table class="novos-table">
+              <thead>
+                <tr>
+                  <th>UF+CRM</th>
+                  <th>Nome</th>
+                  <th>Telefone</th>
+                  <th>E-mail</th>
+                  <th>Data inscrição</th>
+                </tr>
+              </thead>
+              <tbody id="novos-body">
+                <tr><td colspan="5">Escolha o mês e clique em Buscar.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
     </main>
   </div>
   <p class="toast" id="toast" hidden></p>
@@ -153,6 +270,8 @@
       el.textContent = event.message || "Erro no painel";
     });
   </script>
-  <script src="assets/app.js?v=21"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="assets/app.js?v=22"></script>
+  <script src="assets/bi.js?v=22"></script>
 </body>
 </html>

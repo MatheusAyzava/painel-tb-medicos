@@ -267,6 +267,153 @@ function loadSnapshot() {
   return require("../../assets/snapshot.json");
 }
 
+function labelRows(rows) {
+  return (rows || []).filter((r) => r).map((r) => ({ label: String(r[0] || "Não informado"), value: toNumber(r[1]) }));
+}
+
+const UF_REGIAO = {
+  AC: "Norte", AP: "Norte", AM: "Norte", PA: "Norte", RO: "Norte", RR: "Norte", TO: "Norte",
+  AL: "Nordeste", BA: "Nordeste", CE: "Nordeste", MA: "Nordeste", PB: "Nordeste",
+  PE: "Nordeste", PI: "Nordeste", RN: "Nordeste", SE: "Nordeste",
+  ES: "Sudeste", MG: "Sudeste", RJ: "Sudeste", SP: "Sudeste",
+  PR: "Sul", RS: "Sul", SC: "Sul",
+  DF: "Centro-Oeste", GO: "Centro-Oeste", MS: "Centro-Oeste", MT: "Centro-Oeste",
+};
+
+async function queryDadosferaBi() {
+  const kpis = (await snowflakeSql(`
+    SELECT
+      (SELECT COUNT(DISTINCT UF_CRM) FROM GOLD.TB_MEDICOS WHERE UPPER(SITUACAO) = 'ATIVO'),
+      (SELECT COUNT(DISTINCT CPF) FROM GOLD.TB_MEDICOS WHERE UPPER(SITUACAO) = 'ATIVO'),
+      (SELECT COUNT(DISTINCT ESPECIALIDADE) FROM GOLD.TB_ESPECIALIDADE_X_FONTES),
+      (SELECT MAX(UPDATE_DATE) FROM GOLD.TB_MEDICOS)
+  `))[0] || [];
+
+  const [genero, faixa, especialidadeDs, especialidadeCfm, ufsRaw, mensal, cidadesRaw] = await Promise.all([
+    snowflakeSql(`
+      SELECT COALESCE(GENERO, 'Não informado'), COUNT(*)
+      FROM GOLD.TB_MEDICOS
+      WHERE UPPER(SITUACAO) = 'ATIVO'
+      GROUP BY 1 ORDER BY 2 DESC
+    `),
+    snowflakeSql(`
+      SELECT COALESCE(FAIXA_ETARIA, 'Não definida'), COUNT(DISTINCT UF_CRM)
+      FROM GOLD.TB_ESPECIALIDADE_X_FONTES
+      WHERE UPPER(SITUACAO) = 'ATIVO'
+      GROUP BY 1 ORDER BY 2 DESC
+    `),
+    snowflakeSql(`
+      SELECT COALESCE(NULLIF(ESPECIALIDADE, ''), 'SEM ESPECIALIDADE'), COUNT(DISTINCT UF_CRM)
+      FROM GOLD.TB_ESPECIALIDADE_X_FONTES
+      WHERE UPPER(SITUACAO) = 'ATIVO'
+      GROUP BY 1 ORDER BY 2 DESC LIMIT 12
+    `),
+    snowflakeSql(`
+      SELECT COALESCE(NULLIF(ESPECIALIDADE_RQE, ''), 'SEM ESPECIALIDADE'), COUNT(DISTINCT UF_CRM)
+      FROM GOLD.TB_ESPECIALIDADE_X_FONTES
+      WHERE UPPER(SITUACAO) = 'ATIVO'
+      GROUP BY 1 ORDER BY 2 DESC LIMIT 12
+    `),
+    snowflakeSql(`
+      SELECT UF, COUNT(DISTINCT UF_CRM) N
+      FROM GOLD.TB_MEDICOS
+      WHERE UPPER(SITUACAO) = 'ATIVO' AND UF IS NOT NULL
+      GROUP BY UF ORDER BY N DESC
+    `),
+    snowflakeSql(`
+      SELECT TO_CHAR(DATE_TRUNC('MONTH', COALESCE(
+               TRY_TO_DATE(DT_INSCRICAO, 'DD/MM/YYYY'),
+               TRY_TO_DATE(DT_INSCRICAO)
+             )), 'YYYY-MM') M,
+             COUNT(DISTINCT UF_CRM) N
+      FROM GOLD.TB_ESPECIALIDADE_X_FONTES
+      WHERE COALESCE(TRY_TO_DATE(DT_INSCRICAO, 'DD/MM/YYYY'), TRY_TO_DATE(DT_INSCRICAO)) >= DATEADD(MONTH, -35, DATE_TRUNC('MONTH', CURRENT_DATE()))
+      GROUP BY 1 ORDER BY 1
+    `),
+    snowflakeSql(`
+      SELECT UF, MUNICIPIO, IBGE, N FROM (
+        SELECT UF, MUNICIPIO, IBGE, N,
+               ROW_NUMBER() OVER (PARTITION BY UF ORDER BY N DESC) RN
+        FROM (
+          SELECT UF, MUNICIPIO, IBGE, COUNT(DISTINCT COALESCE(NULLIF(UF_CRM, ''), CPF)) N
+          FROM GOLD.TB_CNES_PROFISSIONAIS
+          WHERE CBO LIKE '225%' AND MUNICIPIO IS NOT NULL
+          GROUP BY 1,2,3
+        )
+      )
+      WHERE RN <= 40 OR UF = 'SP'
+      ORDER BY N DESC
+    `),
+  ]);
+
+  const ufs = ufsRaw.filter((r) => r && r[0]).map((r) => ({ uf: String(r[0]), value: toNumber(r[1]) }));
+  const regioes = {};
+  ufs.forEach((item) => {
+    const key = UF_REGIAO[item.uf] || "Outros";
+    regioes[key] = (regioes[key] || 0) + item.value;
+  });
+  return {
+    fonte: "dadosfera",
+    crm: toNumber(kpis[0]),
+    medicos: toNumber(kpis[1]),
+    especialidades: toNumber(kpis[2]),
+    atualizado_em: kpis[3],
+    genero: labelRows(genero),
+    faixa: labelRows(faixa),
+    especialidade_ds: labelRows(especialidadeDs),
+    especialidade_cfm: labelRows(especialidadeCfm),
+    ufs,
+    regioes: Object.entries(regioes).map(([label, value]) => ({ label, value })).sort((a, b) => b.value - a.value),
+    mensal: (mensal || []).filter((r) => r && r[0]).map((r) => ({ mes: String(r[0]), value: toNumber(r[1]) })),
+    cidades: (cidadesRaw || []).map((r) => ({
+      uf: String(r[0] || ""),
+      municipio: String(r[1] || ""),
+      ibge: String(r[2] || ""),
+      value: toNumber(r[3]),
+    })),
+  };
+}
+
+async function queryMedicosNovos(mes) {
+  const ok = /^\d{4}-\d{2}$/.test(String(mes || ""));
+  const stamp = ok ? String(mes) : new Date().toISOString().slice(0, 7);
+  const [ano, mo] = stamp.split("-").map(Number);
+  const rows = await snowflakeSql(`
+    WITH base AS (
+      SELECT UF_CRM,
+             MIN(COALESCE(TRY_TO_DATE(DT_INSCRICAO, 'DD/MM/YYYY'), TRY_TO_DATE(DT_INSCRICAO))) AS DT_NOVO
+      FROM GOLD.TB_ESPECIALIDADE_X_FONTES
+      GROUP BY UF_CRM
+    )
+    SELECT m.UF_CRM, m.NOME, tel.TELEFONE, em.EMAIL, TO_CHAR(b.DT_NOVO, 'YYYY-MM-DD')
+    FROM GOLD.TB_MEDICOS m
+    JOIN base b ON b.UF_CRM = m.UF_CRM
+    LEFT JOIN (
+      SELECT UF_CRM, TELEFONE
+      FROM GOLD.TB_MEDICOS_TELEFONES_FREQUENCIA
+      QUALIFY ROW_NUMBER() OVER (PARTITION BY UF_CRM ORDER BY QTDE_REPETICOES DESC NULLS LAST) = 1
+    ) tel ON tel.UF_CRM = m.UF_CRM
+    LEFT JOIN (
+      SELECT UF_CRM, EMAIL
+      FROM GOLD.TB_MEDICOS_EMAILS_FREQUENCIA
+      QUALIFY ROW_NUMBER() OVER (PARTITION BY UF_CRM ORDER BY QTDE_REPETICOES DESC NULLS LAST) = 1
+    ) em ON em.UF_CRM = m.UF_CRM
+    WHERE b.DT_NOVO >= DATE_FROM_PARTS(${ano}, ${mo}, 1)
+      AND b.DT_NOVO < DATEADD(MONTH, 1, DATE_FROM_PARTS(${ano}, ${mo}, 1))
+      AND UPPER(m.SITUACAO) = 'ATIVO'
+    ORDER BY m.NOME
+    LIMIT 8000
+  `);
+  const lista = (rows || []).map((r) => ({
+    uf_crm: String(r[0] || ""),
+    nome: String(r[1] || ""),
+    telefone: String(r[2] || ""),
+    email: String(r[3] || ""),
+    data: String(r[4] || ""),
+  }));
+  return { mes: stamp, total: lista.length, linhas: lista };
+}
+
 function queryCnes() {
   const snap = loadSnapshot();
   const manual = (snap.fontes || {}).manual || {};
@@ -310,5 +457,7 @@ module.exports = {
   querySnowflake,
   queryDatabricks,
   queryCnes,
+  queryDadosferaBi,
+  queryMedicosNovos,
   statusPayload,
 };

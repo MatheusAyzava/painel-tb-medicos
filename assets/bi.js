@@ -1,0 +1,282 @@
+const UF_CENTRO = {
+  AC: [-8.77, -70.55], AL: [-9.57, -36.55], AM: [-3.47, -62.21], AP: [1.41, -51.77],
+  BA: [-12.97, -41.57], CE: [-5.20, -39.53], DF: [-15.78, -47.93], ES: [-19.19, -40.34],
+  GO: [-15.98, -49.86], MA: [-5.42, -45.44], MG: [-18.10, -44.38], MS: [-20.51, -54.54],
+  MT: [-12.64, -55.42], PA: [-3.79, -52.48], PB: [-7.28, -36.72], PE: [-8.38, -37.86],
+  PI: [-6.60, -42.28], PR: [-24.89, -51.55], RJ: [-22.25, -42.66], RN: [-5.81, -36.59],
+  RO: [-10.83, -63.34], RR: [1.99, -61.33], RS: [-30.17, -53.50], SC: [-27.45, -50.95],
+  SE: [-10.57, -37.45], SP: [-22.19, -48.79], TO: [-9.46, -48.26],
+};
+
+const biState = { data: null, munis: [], map: null, layer: null, novos: [] };
+
+function biFmt(n) {
+  return Math.round(Number(n) || 0).toLocaleString("pt-BR");
+}
+
+function heatColor(t) {
+  const x = Math.max(0, Math.min(1, t));
+  if (x < 0.33) return `rgb(29, ${Math.round(78 + x * 300)}, 216)`;
+  if (x < 0.66) return `rgb(${Math.round(29 + (x - 0.33) * 600)}, 224, ${Math.round(108 - (x - 0.33) * 180)})`;
+  return `rgb(239, ${Math.round(196 - (x - 0.66) * 280)}, 68)`;
+}
+
+function fillBars(id, rows, labelKey = "label") {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const max = Math.max(...rows.map((r) => r.value), 1);
+  el.innerHTML = rows.map((r) => `
+    <div class="bar-row">
+      <span>${r[labelKey] || r.uf || r.label}</span>
+      <i><b style="width:${(r.value / max) * 100}%"></b></i>
+      <em>${biFmt(r.value)}</em>
+    </div>
+  `).join("");
+}
+
+function drawBiPie(slices, total) {
+  const svg = document.getElementById("bi-donut");
+  if (!svg) return;
+  while (svg.firstChild) svg.removeChild(svg.firstChild);
+  const cx = 60, cy = 60, r0 = 28, r1 = 52;
+  let angle = -Math.PI / 2;
+  slices.forEach((s) => {
+    const sweep = (s.value / total) * 2 * Math.PI;
+    const next = angle + sweep;
+    const large = next - angle > Math.PI ? 1 : 0;
+    const p = (r, a) => [cx + r * Math.cos(a), cy + r * Math.sin(a)];
+    const [x0, y0] = p(r1, angle);
+    const [x1, y1] = p(r1, next);
+    const [x2, y2] = p(r0, next);
+    const [x3, y3] = p(r0, angle);
+    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    path.setAttribute("d", `M ${x0} ${y0} A ${r1} ${r1} 0 ${large} 1 ${x1} ${y1} L ${x2} ${y2} A ${r0} ${r0} 0 ${large} 0 ${x3} ${y3} Z`);
+    path.setAttribute("fill", s.color);
+    svg.appendChild(path);
+    angle = next;
+  });
+}
+
+function renderBi(data) {
+  biState.data = data;
+  document.getElementById("bi-crm").textContent = biFmt(data.crm);
+  document.getElementById("bi-medicos").textContent = biFmt(data.medicos);
+  document.getElementById("bi-esp").textContent = biFmt(data.especialidades);
+  const upd = data.atualizado_em ? new Date(data.atualizado_em) : null;
+  document.getElementById("bi-updated").textContent = upd && !Number.isNaN(upd.getTime())
+    ? `Atualizado em: ${upd.toLocaleString("pt-BR")}`
+    : `Atualizado em: ${data.atualizado_em || "—"}`;
+
+  const genderColors = { feminino: "#ff5b7a", masculino: "#22e06c" };
+  const slices = (data.genero || []).map((g) => ({
+    key: g.label,
+    color: genderColors[String(g.label).toLowerCase()] || "#f0c14a",
+    value: g.value,
+  }));
+  const total = slices.reduce((s, g) => s + g.value, 0) || 1;
+  document.getElementById("bi-donut-total").textContent = biFmt(total);
+  drawBiPie(slices, total);
+  document.getElementById("bi-legend").innerHTML = slices.map((g) => {
+    const pct = ((g.value / total) * 100).toFixed(1).replace(".", ",");
+    return `<li><i style="background:${g.color}"></i>${g.key} · ${biFmt(g.value)} (${pct}%)</li>`;
+  }).join("");
+
+  const maxM = Math.max(...(data.mensal || []).map((m) => m.value), 1);
+  document.getElementById("bi-mensal").innerHTML = (data.mensal || []).map((m) => `
+    <div class="month-col" title="${m.mes}: ${biFmt(m.value)}">
+      <i style="height:${Math.max(4, (m.value / maxM) * 100)}%"></i>
+      <span>${m.mes.slice(2)}</span>
+    </div>
+  `).join("");
+
+  fillBars("bi-regiao", data.regioes || []);
+  fillBars("bi-faixa", data.faixa || []);
+  fillBars("bi-esp-ds", data.especialidade_ds || []);
+  fillBars("bi-esp-cfm", data.especialidade_cfm || []);
+  fillBars("bi-ufs", (data.ufs || []).slice(0, 16), "uf");
+
+  const sel = document.getElementById("map-uf");
+  const current = sel.value;
+  const ufs = ["BR", ...[...new Set((data.cidades || []).map((c) => c.uf).filter(Boolean))].sort()];
+  sel.innerHTML = ufs.map((u) => `<option value="${u}">${u === "BR" ? "Brasil" : u}</option>`).join("");
+  sel.value = ufs.includes(current) ? current : "BR";
+  drawMap(sel.value);
+}
+
+function padIbge(code) {
+  return String(code || "").replace(/\D/g, "").padStart(7, "0");
+}
+
+function ensureMap() {
+  if (biState.map || typeof L === "undefined") return biState.map;
+  biState.map = L.map("map-br", { zoomControl: true, attributionControl: false }).setView([-14.2, -54], 4);
+  L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", { maxZoom: 12 }).addTo(biState.map);
+  return biState.map;
+}
+
+function drawMap(uf) {
+  const map = ensureMap();
+  if (!map || !biState.data) return;
+  if (biState.layer) {
+    map.removeLayer(biState.layer);
+    biState.layer = null;
+  }
+  const group = L.layerGroup();
+  const bounds = [];
+  if (!uf || uf === "BR") {
+    const ufs = biState.data.ufs || [];
+    const max = Math.max(...ufs.map((u) => u.value), 1);
+    ufs.forEach((item) => {
+      const ll = UF_CENTRO[item.uf];
+      if (!ll) return;
+      bounds.push(ll);
+      const t = item.value / max;
+      L.circleMarker(ll, {
+        radius: 8 + Math.sqrt(t) * 18,
+        color: heatColor(t),
+        fillColor: heatColor(t),
+        fillOpacity: 0.72,
+        weight: 1,
+      }).bindTooltip(`${item.uf}: ${biFmt(item.value)} CRMs`).on("click", () => {
+        document.getElementById("map-uf").value = item.uf;
+        drawMap(item.uf);
+      }).addTo(group);
+    });
+    group.addTo(map);
+    biState.layer = group;
+    map.setView([-14.2, -54], 4);
+    return;
+  }
+
+  const byIbge = new Map(biState.munis.map((m) => [m.i, m]));
+  const cidades = (biState.data.cidades || []).filter((c) => c.uf === uf);
+  const max = Math.max(...cidades.map((c) => c.value), 1);
+  cidades.forEach((c) => {
+    const geo = byIbge.get(padIbge(c.ibge)) || biState.munis.find((m) => m.u === uf && m.n.toLowerCase() === String(c.municipio).toLowerCase());
+    if (!geo) return;
+    const ll = [geo.y, geo.x];
+    bounds.push(ll);
+    const t = c.value / max;
+    L.circleMarker(ll, {
+      radius: 5 + Math.sqrt(t) * 16,
+      color: heatColor(t),
+      fillColor: heatColor(t),
+      fillOpacity: 0.75,
+      weight: 1,
+    }).bindTooltip(`${c.municipio}: ${biFmt(c.value)}`).addTo(group);
+  });
+  group.addTo(map);
+  biState.layer = group;
+  if (bounds.length) map.fitBounds(bounds, { padding: [24, 24], maxZoom: 8 });
+  else if (UF_CENTRO[uf]) map.setView(UF_CENTRO[uf], 6);
+  setTimeout(() => map.invalidateSize(), 80);
+}
+
+async function loadBi() {
+  try {
+    const snap = await fetch("assets/snapshot-bi.json", { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+    if (snap) renderBi(snap);
+    const res = await fetch("/api/dadosfera-bi", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: "{}",
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Falha no painel Dadosfera");
+    renderBi(data);
+  } catch (err) {
+    const toast = document.getElementById("toast");
+    if (toast) {
+      toast.hidden = false;
+      toast.textContent = err.message || "Não carreguei o painel Dadosfera.";
+    }
+  }
+}
+
+function csvEscape(value) {
+  const text = String(value || "");
+  if (/[;"\n]/.test(text)) return `"${text.replace(/"/g, '""')}"`;
+  return text;
+}
+
+function downloadNovosCsv() {
+  if (!biState.novos.length) return;
+  const header = "UF_CRM;NOME;TELEFONE;EMAIL;DATA_INSCRICAO";
+  const body = biState.novos.map((r) => [r.uf_crm, r.nome, r.telefone, r.email, r.data].map(csvEscape).join(";")).join("\n");
+  const blob = new Blob(["\ufeff" + header + "\n" + body], { type: "text/csv;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `medicos-novos-${document.getElementById("novos-mes").value || "mes"}.csv`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+async function buscarNovos() {
+  const mes = document.getElementById("novos-mes").value;
+  const body = document.getElementById("novos-body");
+  body.innerHTML = "<tr><td colspan='5'>Consultando Snowflake…</td></tr>";
+  try {
+    const res = await fetch("/api/medicos-novos", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ mes }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Falha ao buscar médicos novos");
+    biState.novos = data.linhas || [];
+    document.getElementById("novos-count").textContent = `${biFmt(data.total)} registros`;
+    if (!biState.novos.length) {
+      body.innerHTML = "<tr><td colspan='5'>Nenhum médico novo neste mês.</td></tr>";
+      return;
+    }
+    body.innerHTML = biState.novos.map((r) => `
+      <tr>
+        <td>${r.uf_crm}</td>
+        <td>${r.nome}</td>
+        <td>${r.telefone || "—"}</td>
+        <td>${r.email || "—"}</td>
+        <td>${r.data || "—"}</td>
+      </tr>
+    `).join("");
+  } catch (err) {
+    body.innerHTML = `<tr><td colspan="5">${err.message}</td></tr>`;
+  }
+}
+
+function switchTab(tab) {
+  const comparativo = document.getElementById("view-comparativo");
+  const dadosfera = document.getElementById("view-dadosfera");
+  comparativo.hidden = tab !== "comparativo";
+  dadosfera.hidden = tab !== "dadosfera";
+  document.querySelectorAll(".tab").forEach((btn) => btn.classList.toggle("on", btn.dataset.tab === tab));
+  if (tab === "dadosfera") {
+    location.hash = "dadosfera";
+    if (!biState.data) loadBi();
+    setTimeout(() => biState.map && biState.map.invalidateSize(), 120);
+  } else {
+    if (location.hash.replace("#", "") === "dadosfera") location.hash = "";
+  }
+}
+
+async function initBi() {
+  const now = new Date();
+  document.getElementById("novos-mes").value = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+  document.querySelectorAll(".tab").forEach((btn) => {
+    btn.addEventListener("click", () => switchTab(btn.dataset.tab));
+  });
+  if (location.hash.replace("#", "") === "dadosfera") switchTab("dadosfera");
+  document.getElementById("map-uf").addEventListener("change", (e) => drawMap(e.target.value));
+  document.getElementById("map-reset").addEventListener("click", () => {
+    document.getElementById("map-uf").value = "BR";
+    drawMap("BR");
+  });
+  document.getElementById("btn-novos").addEventListener("click", buscarNovos);
+  document.getElementById("btn-csv").addEventListener("click", downloadNovosCsv);
+  try {
+    biState.munis = await fetch("assets/municipios.json").then((r) => r.json());
+  } catch {
+    biState.munis = [];
+  }
+}
+
+initBi();

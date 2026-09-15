@@ -4,12 +4,18 @@
 
 [functions]
   node_bundler = "esbuild"
-  included_files = ["assets/snapshot.json"]
+  included_files = ["assets/snapshot.json", "assets/snapshot-bi.json"]
 
 [functions.snowflake]
   timeout = 26
 
 [functions.databricks]
+  timeout = 26
+
+[functions.dadosfera-bi]
+  timeout = 26
+
+[functions.medicos-novos]
   timeout = 26
 
 [functions.status]

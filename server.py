@@ -397,6 +397,204 @@ def query_snowflake(override: dict | None = None) -> dict:
         ctx.close()
 
 
+UF_REGIAO = {
+    "AC": "Norte", "AP": "Norte", "AM": "Norte", "PA": "Norte", "RO": "Norte", "RR": "Norte", "TO": "Norte",
+    "AL": "Nordeste", "BA": "Nordeste", "CE": "Nordeste", "MA": "Nordeste", "PB": "Nordeste",
+    "PE": "Nordeste", "PI": "Nordeste", "RN": "Nordeste", "SE": "Nordeste",
+    "ES": "Sudeste", "MG": "Sudeste", "RJ": "Sudeste", "SP": "Sudeste",
+    "PR": "Sul", "RS": "Sul", "SC": "Sul",
+    "DF": "Centro-Oeste", "GO": "Centro-Oeste", "MS": "Centro-Oeste", "MT": "Centro-Oeste",
+}
+
+
+def label_rows(rows):
+    return [{"label": str(r[0] or "Não informado"), "value": as_int([r[1]])} for r in rows if r]
+
+
+def query_dadosfera_bi(override: dict | None = None) -> dict:
+    cfg = merge_cfg(override)
+    ctx = connect_snowflake(cfg)
+    warehouse = (cfg.get("snowflake_warehouse") or "COMPUTE_WH").strip()
+    try:
+        cur = ctx.cursor()
+        cur.execute(f"USE WAREHOUSE {warehouse}")
+        cur.execute("USE DATABASE DADOSFERA_PRD_DIGITALSOLVERS")
+        cur.close()
+
+        def q(sql: str):
+            return snowflake_fetch(ctx, sql)[1]
+
+        kpis = q(
+            """
+            SELECT
+              (SELECT COUNT(DISTINCT UF_CRM) FROM GOLD.TB_MEDICOS WHERE UPPER(SITUACAO) = 'ATIVO') AS CRM,
+              (SELECT COUNT(DISTINCT CPF) FROM GOLD.TB_MEDICOS WHERE UPPER(SITUACAO) = 'ATIVO') AS MEDICOS,
+              (SELECT COUNT(DISTINCT ESPECIALIDADE) FROM GOLD.TB_ESPECIALIDADE_X_FONTES) AS ESPECIALIDADES,
+              (SELECT MAX(UPDATE_DATE) FROM GOLD.TB_MEDICOS) AS ATUALIZADO
+            """
+        )[0]
+        genero = label_rows(q(
+            """
+            SELECT COALESCE(GENERO, 'Não informado'), COUNT(*)
+            FROM GOLD.TB_MEDICOS
+            WHERE UPPER(SITUACAO) = 'ATIVO'
+            GROUP BY 1
+            ORDER BY 2 DESC
+            """
+        ))
+        faixa = label_rows(q(
+            """
+            SELECT COALESCE(FAIXA_ETARIA, 'Não definida'), COUNT(DISTINCT UF_CRM)
+            FROM GOLD.TB_ESPECIALIDADE_X_FONTES
+            WHERE UPPER(SITUACAO) = 'ATIVO'
+            GROUP BY 1
+            ORDER BY 2 DESC
+            """
+        ))
+        especialidade_ds = label_rows(q(
+            """
+            SELECT COALESCE(NULLIF(ESPECIALIDADE, ''), 'SEM ESPECIALIDADE'), COUNT(DISTINCT UF_CRM)
+            FROM GOLD.TB_ESPECIALIDADE_X_FONTES
+            WHERE UPPER(SITUACAO) = 'ATIVO'
+            GROUP BY 1
+            ORDER BY 2 DESC
+            LIMIT 12
+            """
+        ))
+        especialidade_cfm = label_rows(q(
+            """
+            SELECT COALESCE(NULLIF(ESPECIALIDADE_RQE, ''), 'SEM ESPECIALIDADE'), COUNT(DISTINCT UF_CRM)
+            FROM GOLD.TB_ESPECIALIDADE_X_FONTES
+            WHERE UPPER(SITUACAO) = 'ATIVO'
+            GROUP BY 1
+            ORDER BY 2 DESC
+            LIMIT 12
+            """
+        ))
+        ufs = [{"uf": str(r[0]), "value": as_int([r[1]])} for r in q(
+            """
+            SELECT UF, COUNT(DISTINCT UF_CRM) AS N
+            FROM GOLD.TB_MEDICOS
+            WHERE UPPER(SITUACAO) = 'ATIVO' AND UF IS NOT NULL
+            GROUP BY UF
+            ORDER BY N DESC
+            """
+        ) if r and r[0]]
+        regioes = {}
+        for item in ufs:
+            regioes[UF_REGIAO.get(item["uf"], "Outros")] = regioes.get(UF_REGIAO.get(item["uf"], "Outros"), 0) + item["value"]
+        mensal = [{"mes": str(r[0]), "value": as_int([r[1]])} for r in q(
+            """
+            SELECT TO_CHAR(DATE_TRUNC('MONTH', COALESCE(
+                     TRY_TO_DATE(DT_INSCRICAO, 'DD/MM/YYYY'),
+                     TRY_TO_DATE(DT_INSCRICAO)
+                   )), 'YYYY-MM') AS M,
+                   COUNT(DISTINCT UF_CRM) AS N
+            FROM GOLD.TB_ESPECIALIDADE_X_FONTES
+            WHERE COALESCE(TRY_TO_DATE(DT_INSCRICAO, 'DD/MM/YYYY'), TRY_TO_DATE(DT_INSCRICAO)) >= DATEADD(MONTH, -35, DATE_TRUNC('MONTH', CURRENT_DATE()))
+            GROUP BY 1
+            ORDER BY 1
+            """
+        ) if r and r[0]]
+        cidades = [
+            {"uf": str(r[0] or ""), "municipio": str(r[1] or ""), "ibge": str(r[2] or ""), "value": as_int([r[3]])}
+            for r in q(
+                """
+                SELECT UF, MUNICIPIO, IBGE, N FROM (
+                  SELECT UF, MUNICIPIO, IBGE, N,
+                         ROW_NUMBER() OVER (PARTITION BY UF ORDER BY N DESC) AS RN
+                  FROM (
+                    SELECT UF, MUNICIPIO, IBGE,
+                           COUNT(DISTINCT COALESCE(NULLIF(UF_CRM, ''), CPF)) AS N
+                    FROM GOLD.TB_CNES_PROFISSIONAIS
+                    WHERE CBO LIKE '225%' AND MUNICIPIO IS NOT NULL
+                    GROUP BY 1, 2, 3
+                  )
+                )
+                WHERE RN <= 40 OR UF = 'SP'
+                ORDER BY N DESC
+                """
+            )
+        ]
+        payload = {
+            "fonte": "dadosfera",
+            "crm": as_int([kpis[0]]),
+            "medicos": as_int([kpis[1]]),
+            "especialidades": as_int([kpis[2]]),
+            "atualizado_em": kpis[3],
+            "genero": genero,
+            "faixa": faixa,
+            "especialidade_ds": especialidade_ds,
+            "especialidade_cfm": especialidade_cfm,
+            "ufs": ufs,
+            "regioes": [{"label": k, "value": v} for k, v in sorted(regioes.items(), key=lambda x: -x[1])],
+            "mensal": mensal,
+            "cidades": cidades,
+        }
+        SNAPSHOT_BI = ROOT / "assets" / "snapshot-bi.json"
+        SNAPSHOT_BI.write_text(json.dumps(payload, ensure_ascii=False, default=str, indent=2), encoding="utf-8")
+        return payload
+    finally:
+        ctx.close()
+
+
+def query_medicos_novos(override: dict | None = None) -> dict:
+    cfg = merge_cfg(override)
+    mes = str((override or {}).get("mes") or "").strip()
+    if not re.fullmatch(r"\d{4}-\d{2}", mes):
+        mes = datetime.now().strftime("%Y-%m")
+    ano, mo = mes.split("-")
+    ctx = connect_snowflake(cfg)
+    warehouse = (cfg.get("snowflake_warehouse") or "COMPUTE_WH").strip()
+    try:
+        cur = ctx.cursor()
+        cur.execute(f"USE WAREHOUSE {warehouse}")
+        cur.execute("USE DATABASE DADOSFERA_PRD_DIGITALSOLVERS")
+        cur.close()
+        rows = snowflake_fetch(
+            ctx,
+            f"""
+            WITH base AS (
+              SELECT UF_CRM,
+                     MIN(COALESCE(TRY_TO_DATE(DT_INSCRICAO, 'DD/MM/YYYY'), TRY_TO_DATE(DT_INSCRICAO))) AS DT_NOVO
+              FROM GOLD.TB_ESPECIALIDADE_X_FONTES
+              GROUP BY UF_CRM
+            )
+            SELECT m.UF_CRM, m.NOME, tel.TELEFONE, em.EMAIL, TO_CHAR(b.DT_NOVO, 'YYYY-MM-DD')
+            FROM GOLD.TB_MEDICOS m
+            JOIN base b ON b.UF_CRM = m.UF_CRM
+            LEFT JOIN (
+              SELECT UF_CRM, TELEFONE
+              FROM GOLD.TB_MEDICOS_TELEFONES_FREQUENCIA
+              QUALIFY ROW_NUMBER() OVER (PARTITION BY UF_CRM ORDER BY QTDE_REPETICOES DESC NULLS LAST) = 1
+            ) tel ON tel.UF_CRM = m.UF_CRM
+            LEFT JOIN (
+              SELECT UF_CRM, EMAIL
+              FROM GOLD.TB_MEDICOS_EMAILS_FREQUENCIA
+              QUALIFY ROW_NUMBER() OVER (PARTITION BY UF_CRM ORDER BY QTDE_REPETICOES DESC NULLS LAST) = 1
+            ) em ON em.UF_CRM = m.UF_CRM
+            WHERE b.DT_NOVO >= DATE_FROM_PARTS({int(ano)}, {int(mo)}, 1)
+              AND b.DT_NOVO < DATEADD(MONTH, 1, DATE_FROM_PARTS({int(ano)}, {int(mo)}, 1))
+              AND UPPER(m.SITUACAO) = 'ATIVO'
+            ORDER BY m.NOME
+            LIMIT 8000
+            """,
+        )[1]
+        lista = [
+            {
+                "uf_crm": str(r[0] or ""),
+                "nome": str(r[1] or ""),
+                "telefone": str(r[2] or ""),
+                "email": str(r[3] or ""),
+                "data": str(r[4] or ""),
+            }
+            for r in rows
+        ]
+        return {"mes": mes, "total": len(lista), "linhas": lista}
+    finally:
+        ctx.close()
+
+
 def normalize_host(host: str) -> str:
     host = (host or "").strip().rstrip("/")
     host = host.replace("https://", "").replace("http://", "")
@@ -998,6 +1196,12 @@ class Handler(SimpleHTTPRequestHandler):
             body = read_json(self)
             if parsed.path == "/api/snowflake":
                 send_json(self, query_snowflake(body))
+                return
+            if parsed.path == "/api/dadosfera-bi":
+                send_json(self, query_dadosfera_bi(body))
+                return
+            if parsed.path == "/api/medicos-novos":
+                send_json(self, query_medicos_novos(body))
                 return
             if parsed.path == "/api/databricks":
                 send_json(self, query_databricks(body))
