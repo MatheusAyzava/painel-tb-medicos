@@ -8,7 +8,25 @@ const UF_CENTRO = {
   SE: [-10.57, -37.45], SP: [-22.19, -48.79], TO: [-9.46, -48.26],
 };
 
-const biState = { data: null, munis: [], map: null, layer: null, novos: [], modo: "todos", cidade: null };
+const biState = { data: null, munis: [], map: null, layer: null, novos: [], modo: "novos", cidade: null };
+
+const MES_NOMES = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"];
+
+function mesAtual() {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+}
+
+function mesValue() {
+  return document.getElementById("novos-mes").value || mesAtual();
+}
+
+function mesLabel(mes) {
+  const [ano, mo] = String(mes || "").split("-");
+  const idx = Number(mo) - 1;
+  if (!ano || idx < 0 || idx > 11) return mes || "";
+  return `${MES_NOMES[idx]} de ${ano}`;
+}
 
 function biFmt(n) {
   return Math.round(Number(n) || 0).toLocaleString("pt-BR");
@@ -81,9 +99,10 @@ function renderBi(data) {
     return `<li><i style="background:${g.color}"></i>${g.key} · ${biFmt(g.value)} (${pct}%)</li>`;
   }).join("");
 
+  const escolhido = mesValue();
   const maxM = Math.max(...(data.mensal || []).map((m) => m.value), 1);
   document.getElementById("bi-mensal").innerHTML = (data.mensal || []).map((m) => `
-    <div class="month-col" title="${m.mes}: ${biFmt(m.value)}">
+    <div class="month-col${m.mes === escolhido ? " on" : ""}" data-mes="${m.mes}" title="${m.mes}: ${biFmt(m.value)}">
       <i style="height:${Math.max(4, (m.value / maxM) * 100)}%"></i>
       <span>${m.mes.slice(2)}</span>
     </div>
@@ -194,18 +213,44 @@ function csvEscape(value) {
   return text;
 }
 
+function atualizarTitulo() {
+  const mes = mesLabel(mesValue());
+  document.getElementById("lista-titulo").textContent = biState.modo === "novos"
+    ? `Médicos novos · ${mes}`
+    : `Todos os médicos · ${mes}`;
+  const cidade = biState.cidade
+    ? `${biState.cidade.municipio} · ${biState.cidade.uf}`
+    : "Brasil";
+  document.getElementById("lista-local").textContent = biState.modo === "novos"
+    ? `${cidade} · inscritos em ${mes}`
+    : `${cidade} · todos os ativos (mês só vale para médicos novos)`;
+  document.querySelectorAll(".month-col").forEach((col) => {
+    col.classList.toggle("on", col.dataset.mes === mesValue());
+  });
+}
+
 function setModo(modo) {
-  biState.modo = modo === "novos" ? "novos" : "todos";
+  biState.modo = modo === "todos" ? "todos" : "novos";
   document.getElementById("modo-todos").classList.toggle("on", biState.modo === "todos");
   document.getElementById("modo-novos").classList.toggle("on", biState.modo === "novos");
-  document.getElementById("mes-wrap").hidden = biState.modo !== "novos";
-  document.getElementById("lista-titulo").textContent = biState.modo === "novos" ? "Médicos novos" : "Todos os médicos";
+  atualizarTitulo();
   if (biState.cidade) buscarLista();
 }
 
 function abrirCidade(cidade) {
   biState.cidade = cidade;
-  document.getElementById("lista-local").textContent = `${cidade.municipio} · ${cidade.uf} · ${biFmt(cidade.value)} no mapa`;
+  atualizarTitulo();
+  document.getElementById("novos-body").scrollIntoView({ behavior: "smooth", block: "start" });
+  buscarLista();
+}
+
+function escolherMes(mes) {
+  if (!/^\d{4}-\d{2}$/.test(mes)) return;
+  document.getElementById("novos-mes").value = mes;
+  biState.modo = "novos";
+  document.getElementById("modo-todos").classList.toggle("on", false);
+  document.getElementById("modo-novos").classList.toggle("on", true);
+  atualizarTitulo();
   document.getElementById("novos-body").scrollIntoView({ behavior: "smooth", block: "start" });
   buscarLista();
 }
@@ -224,7 +269,7 @@ function downloadNovosCsv() {
 }
 
 async function buscarLista() {
-  const mes = document.getElementById("novos-mes").value;
+  const mes = mesValue();
   const bodyEl = document.getElementById("novos-body");
   const payload = { modo: biState.modo, mes };
   if (biState.cidade) {
@@ -232,8 +277,9 @@ async function buscarLista() {
     payload.municipio = biState.cidade.municipio;
     payload.ibge = biState.cidade.ibge;
   }
+  atualizarTitulo();
   if (biState.modo === "todos" && !biState.cidade) {
-    bodyEl.innerHTML = "<tr><td colspan='7'>Clique numa cidade no mapa para ver todos os médicos dali.</td></tr>";
+    bodyEl.innerHTML = "<tr><td colspan='7'>Clique numa cidade no mapa para ver todos os médicos dali, ou escolha Médicos novos para filtrar o mês.</td></tr>";
     document.getElementById("novos-count").textContent = "0 registros";
     return;
   }
@@ -277,7 +323,7 @@ function switchTab(tab) {
   const dadosfera = document.getElementById("view-dadosfera");
   comparativo.hidden = tab !== "comparativo";
   dadosfera.hidden = tab !== "dadosfera";
-  document.querySelectorAll(".tab").forEach((btn) => btn.classList.toggle("on", btn.dataset.tab === tab));
+  document.querySelectorAll("[data-tab]").forEach((btn) => btn.classList.toggle("on", btn.dataset.tab === tab));
   if (tab === "dadosfera") {
     location.hash = "dadosfera";
     if (!biState.data) loadBi();
@@ -288,9 +334,8 @@ function switchTab(tab) {
 }
 
 async function initBi() {
-  const now = new Date();
-  document.getElementById("novos-mes").value = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
-  document.querySelectorAll(".tab").forEach((btn) => {
+  document.getElementById("novos-mes").value = mesAtual();
+  document.querySelectorAll("[data-tab]").forEach((btn) => {
     btn.addEventListener("click", () => switchTab(btn.dataset.tab));
   });
   if (location.hash.replace("#", "") === "dadosfera") switchTab("dadosfera");
@@ -303,7 +348,16 @@ async function initBi() {
   document.getElementById("btn-csv").addEventListener("click", downloadNovosCsv);
   document.getElementById("modo-todos").addEventListener("click", () => setModo("todos"));
   document.getElementById("modo-novos").addEventListener("click", () => setModo("novos"));
-  setModo("todos");
+  document.getElementById("novos-mes").addEventListener("change", () => {
+    atualizarTitulo();
+    buscarLista();
+  });
+  document.getElementById("bi-mensal").addEventListener("click", (event) => {
+    const col = event.target.closest(".month-col");
+    if (col && col.dataset.mes) escolherMes(col.dataset.mes);
+  });
+  biState.modo = "novos";
+  atualizarTitulo();
   try {
     biState.munis = await fetch("assets/municipios.json").then((r) => r.json());
   } catch {

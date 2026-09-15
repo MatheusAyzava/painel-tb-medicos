@@ -702,7 +702,12 @@ input, textarea {
   justify-content: flex-end;
   align-items: center;
   gap: 4px;
+  cursor: pointer;
+  border-radius: 4px;
 }
+
+.month-col.on i { background: #f0c14a; }
+.month-col:hover i { background: #3dff9a; }
 
 .month-col i {
   display: block;
