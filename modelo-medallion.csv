@@ -1,0 +1,15 @@
+plataforma,camada,uf,metrica,valor,atualizado_em
+dadosfera,gold,,,326000,2026-06-30
+databricks,gold,,,776000,2026-06-30
+databricks,silver,,,330000,2026-06-30
+manual,bronze,,,758000,2026-07-02
+,,,Total Médicos CNES,1000000,
+,,,Total Ativos CFM,763000,
+,,,Sem Especialidade (UF),144000,
+,,,Sem Telefone (UF),72000,
+,,,Sem Email (Check),63000,
+databricks,gold,SP,,211000,2026-06-30
+databricks,gold,MG,,84000,2026-06-30
+databricks,gold,RJ,,84000,2026-06-30
+databricks,gold,PR,,45000,2026-06-30
+databricks,gold,RS,,44000,2026-06-30

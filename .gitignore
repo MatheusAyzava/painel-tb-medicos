@@ -1,0 +1,8 @@
+secrets/
+preview-painel.png
+__pycache__/
+*.pyc
+.venv/
+.netlify/
+publish/
+*.zip

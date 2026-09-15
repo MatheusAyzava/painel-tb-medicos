@@ -1,0 +1,2 @@
+cryptography
+snowflake-connector-python
