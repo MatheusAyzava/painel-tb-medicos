@@ -21,31 +21,67 @@ function toNumber(value) {
   return Number.isFinite(n) ? n : 0;
 }
 
-function pemFromEnv() {
-  let raw = process.env.SNOWFLAKE_PRIVATE_KEY || "";
-  raw = raw.replace(/\\n/g, "\n").trim();
-  if (!raw) throw new Error("SNOWFLAKE_PRIVATE_KEY não configurada no Netlify.");
-  if (!raw.includes("BEGIN")) {
-    raw = `-----BEGIN PRIVATE KEY-----\n${raw}\n-----END PRIVATE KEY-----`;
-  }
-  return raw;
+function rebuildPem(type, body) {
+  const lines = String(body).match(/.{1,64}/g) || [];
+  return `-----BEGIN ${type}-----\n${lines.join("\n")}\n-----END ${type}-----`;
 }
 
-function snowflakeFingerprint(pem) {
-  const privateKey = crypto.createPrivateKey(pem);
-  const publicKey = crypto.createPublicKey(privateKey);
-  const der = publicKey.export({ type: "spki", format: "der" });
+function extractKeyBody(raw) {
+  let text = String(raw || "").replace(/^\uFEFF/, "").replace(/\r/g, "").trim();
+  if ((text.startsWith('"') && text.endsWith('"')) || (text.startsWith("'") && text.endsWith("'"))) {
+    text = text.slice(1, -1);
+  }
+  text = text.replace(/\\n/g, "\n").trim();
+  const block = text.match(/-----BEGIN [A-Z0-9 ]+-----([\s\S]*?)-----END [A-Z0-9 ]+-----/);
+  const body = block
+    ? block[1]
+    : text.replace(/-----BEGIN [A-Z0-9 ]+-----/g, "").replace(/-----END [A-Z0-9 ]+-----/g, "");
+  return body.replace(/[^A-Za-z0-9+/=]/g, "");
+}
+
+function loadPrivateKey() {
+  const raw = process.env.SNOWFLAKE_PRIVATE_KEY || "";
+  if (!raw.trim()) throw new Error("SNOWFLAKE_PRIVATE_KEY não configurada no Netlify.");
+  const body = extractKeyBody(raw);
+  if (!body) throw new Error("SNOWFLAKE_PRIVATE_KEY está vazia ou inválida.");
+  const der = Buffer.from(body, "base64");
+  const passphrase = process.env.SNOWFLAKE_PRIVATE_KEY_PASSPHRASE || process.env.SNOWFLAKE_PASSPHRASE || "";
+  const attempts = [
+    { key: der, format: "der", type: "pkcs8" },
+    { key: der, format: "der", type: "pkcs1" },
+    { key: rebuildPem("PRIVATE KEY", body), format: "pem" },
+    { key: rebuildPem("RSA PRIVATE KEY", body), format: "pem" },
+  ];
+  if (passphrase) {
+    attempts.push(
+      { key: rebuildPem("ENCRYPTED PRIVATE KEY", body), format: "pem", passphrase },
+      { key: rebuildPem("PRIVATE KEY", body), format: "pem", passphrase },
+      { key: rebuildPem("RSA PRIVATE KEY", body), format: "pem", passphrase },
+    );
+  }
+  for (const opts of attempts) {
+    try {
+      return crypto.createPrivateKey(opts);
+    } catch {
+      /* tenta o próximo formato */
+    }
+  }
+  throw new Error("Chave RSA do Snowflake ilegível. No Netlify, use PEM PKCS#8 (BEGIN PRIVATE KEY) em SNOWFLAKE_PRIVATE_KEY.");
+}
+
+function snowflakeFingerprint(key) {
+  const der = crypto.createPublicKey(key).export({ type: "spki", format: "der" });
   return crypto.createHash("sha256").update(der).digest("base64");
 }
 
 function snowflakeJwt() {
-  const pem = pemFromEnv();
+  const key = loadPrivateKey();
   const account = (process.env.SNOWFLAKE_ACCOUNT || "").replace(/\.snowflakecomputing\.com$/i, "").toUpperCase();
   const user = (process.env.SNOWFLAKE_USER || "").toUpperCase();
   if (!account || !user) throw new Error("SNOWFLAKE_ACCOUNT / SNOWFLAKE_USER ausentes.");
   const now = Math.floor(Date.now() / 1000);
   const payload = {
-    iss: `${account}.${user}.SHA256:${snowflakeFingerprint(pem)}`,
+    iss: `${account}.${user}.SHA256:${snowflakeFingerprint(key)}`,
     sub: `${account}.${user}`,
     iat: now,
     exp: now + 55 * 60,
@@ -54,7 +90,7 @@ function snowflakeJwt() {
   const body = Buffer.from(JSON.stringify(payload)).toString("base64url");
   const data = `${header}.${body}`;
   const sig = crypto.sign("sha256", Buffer.from(data), {
-    key: pem,
+    key,
     padding: crypto.constants.RSA_PKCS1_PADDING,
   });
   return { token: `${data}.${sig.toString("base64url")}`, account };
