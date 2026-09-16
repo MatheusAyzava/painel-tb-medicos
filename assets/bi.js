@@ -147,8 +147,7 @@ function renderBi(data) {
       <div class="month-year-bars">
         ${grupo.items.map((m) => `
           <div class="month-col${m.mes === escolhido ? " on" : ""}" data-mes="${m.mes}" title="${mesLabel(m.mes)} ${grupo.year} · ${biFmt(m.value)}">
-            <em>${biFmt(m.value)}</em>
-            <span class="month-track"><i style="height:${Math.max(4, (m.value / maxM) * 100)}%"></i></span>
+            <span class="month-track"><i style="height:${Math.max(4, (m.value / maxM) * 100)}%"><em>${biFmt(m.value)}</em></i></span>
             <span class="month-name">${mesEixo(m.mes)}</span>
           </div>
         `).join("")}
