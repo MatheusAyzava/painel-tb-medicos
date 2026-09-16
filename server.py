@@ -299,8 +299,8 @@ def query_snowflake(override: dict | None = None) -> dict:
             """
         )
 
-        atualizado_gold = scalar_date("SELECT MAX(UPDATE_DATE) AS ULTIMA_ATUALIZACAO FROM GOLD.TB_MEDICOS")
-        atualizado_cfm = scalar_date("SELECT MAX(UPDATE_DATE) AS ULTIMA_ATUALIZACAO_CFM FROM SILVER.TB_CFM")
+        atualizado_gold = scalar_date("SELECT TO_CHAR(MAX(UPDATE_DATE), 'YYYY-MM-DD HH24:MI:SS') AS ULTIMA_ATUALIZACAO FROM GOLD.TB_MEDICOS")
+        atualizado_cfm = scalar_date("SELECT TO_CHAR(MAX(UPDATE_DATE), 'YYYY-MM-DD HH24:MI:SS') AS ULTIMA_ATUALIZACAO_CFM FROM SILVER.TB_CFM")
         atualizado_cnes = atualizado_gold
 
         especialidades = 0
@@ -430,7 +430,7 @@ def query_dadosfera_bi(override: dict | None = None) -> dict:
               (SELECT COUNT(DISTINCT UF_CRM) FROM GOLD.TB_MEDICOS WHERE UPPER(SITUACAO) = 'ATIVO') AS CRM,
               (SELECT COUNT(DISTINCT CPF) FROM GOLD.TB_MEDICOS WHERE UPPER(SITUACAO) = 'ATIVO') AS MEDICOS,
               (SELECT COUNT(DISTINCT ESPECIALIDADE) FROM GOLD.TB_ESPECIALIDADE_X_FONTES) AS ESPECIALIDADES,
-              (SELECT MAX(UPDATE_DATE) FROM GOLD.TB_MEDICOS) AS ATUALIZADO
+              (SELECT TO_CHAR(MAX(UPDATE_DATE), 'YYYY-MM-DD HH24:MI:SS') FROM GOLD.TB_MEDICOS) AS ATUALIZADO
             """
         )[0]
         genero = label_rows(q(

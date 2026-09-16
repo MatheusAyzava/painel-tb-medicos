@@ -14,6 +14,22 @@ function json(status, body) {
   };
 }
 
+function snowflakeStamp(value) {
+  if (value == null || value === "") return "";
+  if (typeof value === "number" || /^\d+(\.\d+)?$/.test(String(value).trim())) {
+    const n = Number(value);
+    if (Number.isFinite(n) && n >= 1e9) {
+      const ms = n >= 1e18 ? n / 1e6 : n >= 1e14 ? n / 1e3 : n >= 1e12 ? n : n * 1000;
+      const d = new Date(ms);
+      if (!Number.isNaN(d.getTime())) {
+        const p = (x) => String(x).padStart(2, "0");
+        return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
+      }
+    }
+  }
+  return String(value);
+}
+
 function toNumber(value) {
   if (value == null || value === "") return 0;
   if (typeof value === "number") return value;
@@ -146,8 +162,8 @@ async function querySnowflake() {
       (SELECT COUNT(DISTINCT CPF) FROM GOLD.TB_MEDICOS WHERE UPPER(SITUACAO) = 'ATIVO') AS CPF_UNICOS,
       (SELECT COUNT(*) FROM GOLD.TB_MEDICOS WHERE UPPER(SITUACAO) = 'ATIVO') AS TOTAL_MEDICOS,
       (SELECT COUNT(DISTINCT UF_CRM) FROM GOLD.TB_MEDICOS) AS TOTAL_REGISTROS,
-      (SELECT MAX(UPDATE_DATE) FROM GOLD.TB_MEDICOS) AS ATUALIZADO_GOLD,
-      (SELECT MAX(UPDATE_DATE) FROM SILVER.TB_CFM) AS ATUALIZADO_CFM,
+      (SELECT TO_CHAR(MAX(UPDATE_DATE), 'YYYY-MM-DD HH24:MI:SS') FROM GOLD.TB_MEDICOS) AS ATUALIZADO_GOLD,
+      (SELECT TO_CHAR(MAX(UPDATE_DATE), 'YYYY-MM-DD HH24:MI:SS') FROM SILVER.TB_CFM) AS ATUALIZADO_CFM,
       (SELECT COUNT(DISTINCT ESPECIALIDADE) FROM GOLD.TB_ESPECIALIDADE_X_FONTES) AS ESPECIALIDADES
   `))[0] || [];
 
@@ -199,9 +215,9 @@ async function querySnowflake() {
     genero: genero.map((r) => ({ label: String(r[0] || "Não informado"), value: toNumber(r[1]) })),
     tipo_inscricao: tipo.map((r) => ({ label: String(r[0] || "Other"), value: toNumber(r[1]) })),
     extras,
-    atualizado_em: kpis[4],
-    atualizado_cnes: kpis[4],
-    atualizado_cfm: kpis[5],
+    atualizado_em: snowflakeStamp(kpis[4]),
+    atualizado_cnes: snowflakeStamp(kpis[4]),
+    atualizado_cfm: snowflakeStamp(kpis[5]),
   };
 }
 
@@ -322,7 +338,7 @@ async function queryDadosferaBi() {
       (SELECT COUNT(DISTINCT UF_CRM) FROM GOLD.TB_MEDICOS WHERE UPPER(SITUACAO) = 'ATIVO'),
       (SELECT COUNT(DISTINCT CPF) FROM GOLD.TB_MEDICOS WHERE UPPER(SITUACAO) = 'ATIVO'),
       (SELECT COUNT(DISTINCT ESPECIALIDADE) FROM GOLD.TB_ESPECIALIDADE_X_FONTES),
-      (SELECT MAX(UPDATE_DATE) FROM GOLD.TB_MEDICOS)
+      (SELECT TO_CHAR(MAX(UPDATE_DATE), 'YYYY-MM-DD HH24:MI:SS') FROM GOLD.TB_MEDICOS)
   `))[0] || [];
 
   const [genero, faixa, especialidadeDs, especialidadeCfm, ufsRaw, mensal, cidadesRaw] = await Promise.all([
@@ -393,7 +409,7 @@ async function queryDadosferaBi() {
     crm: toNumber(kpis[0]),
     medicos: toNumber(kpis[1]),
     especialidades: toNumber(kpis[2]),
-    atualizado_em: kpis[3],
+    atualizado_em: snowflakeStamp(kpis[3]),
     genero: labelRows(genero),
     faixa: labelRows(faixa),
     especialidade_ds: labelRows(especialidadeDs),

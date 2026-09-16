@@ -88,7 +88,15 @@ function renderBi(data) {
   document.getElementById("bi-crm").textContent = biFmt(data.crm);
   document.getElementById("bi-medicos").textContent = biFmt(data.medicos);
   document.getElementById("bi-esp").textContent = biFmt(data.especialidades);
-  const upd = data.atualizado_em ? new Date(data.atualizado_em) : null;
+  const updRaw = data.atualizado_em;
+  let upd = null;
+  if (updRaw != null && /^\d+(\.\d+)?$/.test(String(updRaw).trim()) && Number(updRaw) >= 1e9) {
+    const n = Number(updRaw);
+    const ms = n >= 1e18 ? n / 1e6 : n >= 1e14 ? n / 1e3 : n >= 1e12 ? n : n * 1000;
+    upd = new Date(ms);
+  } else if (updRaw) {
+    upd = new Date(String(updRaw).includes("T") ? updRaw : String(updRaw).replace(" ", "T"));
+  }
   document.getElementById("bi-updated").textContent = upd && !Number.isNaN(upd.getTime())
     ? `Atualizado em: ${upd.toLocaleString("pt-BR")}`
     : `Atualizado em: ${data.atualizado_em || "—"}`;

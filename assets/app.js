@@ -18,8 +18,21 @@ function formatMi(n) {
 }
 
 function formatDate(raw) {
-  if (!raw) return "—";
+  if (raw == null || raw === "") return "—";
+  if (raw instanceof Date && !Number.isNaN(raw.getTime())) {
+    return `${raw.toLocaleDateString("pt-BR")} ${raw.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}`;
+  }
   const text = String(raw).trim().replace(/(\.\d+)(?=(Z|[+-]\d{2}:?\d{2})?$)/, "");
+  if (/^\d+(\.\d+)?$/.test(text)) {
+    const n = Number(text);
+    if (Number.isFinite(n) && n >= 1e9) {
+      const ms = n >= 1e18 ? n / 1e6 : n >= 1e14 ? n / 1e3 : n >= 1e12 ? n : n * 1000;
+      const epoch = new Date(ms);
+      if (!Number.isNaN(epoch.getTime()) && epoch.getFullYear() >= 2000 && epoch.getFullYear() < 2100) {
+        return `${epoch.toLocaleDateString("pt-BR")} ${epoch.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}`;
+      }
+    }
+  }
   const dayOnly = text.match(/^(\d{4})-(\d{2})-(\d{2})$/);
   if (dayOnly) return `${dayOnly[3]}/${dayOnly[2]}/${dayOnly[1]}`;
   const br = text.match(/^(\d{2})\/(\d{2})\/(\d{4})/);
