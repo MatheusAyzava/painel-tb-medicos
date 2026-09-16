@@ -555,14 +555,14 @@ def query_medicos_novos(override: dict | None = None) -> dict:
     ano, mo = mes.split("-")
     uf = re.sub(r"[^A-Za-z]", "", str(body.get("uf") or "")).upper()[:2]
     municipio = re.sub(r"[^A-Za-zÀ-ÿ0-9 .\-']", "", str(body.get("municipio") or ""))[:80]
-    ibge = re.sub(r"\D", "", str(body.get("ibge") or ""))
-    if ibge:
-        ibge = ibge.zfill(7)
+    ibge_digits = re.sub(r"\D", "", str(body.get("ibge") or ""))
+    ibge = ibge_digits
     if modo == "todos" and not uf and not municipio and not ibge:
         return {
             "modo": modo,
             "mes": mes,
             "total": 0,
+            "total_completo": 0,
             "linhas": [],
             "aviso": "Clique numa cidade no mapa para listar os médicos.",
         }
@@ -570,11 +570,31 @@ def query_medicos_novos(override: dict | None = None) -> dict:
     city_filter = ""
     if uf:
         city_filter += f" AND p.UF = '{uf}'"
-    if ibge:
-        city_filter += f" AND LPAD(REGEXP_REPLACE(TO_VARCHAR(p.IBGE), '[^0-9]', ''), 7, '0') = '{ibge}'"
-    elif municipio:
+    if municipio:
         safe_mun = municipio.replace("'", "''")
         city_filter += f" AND UPPER(p.MUNICIPIO) = UPPER('{safe_mun}')"
+    elif ibge_digits:
+        ibge7 = ibge_digits.zfill(7)
+        ibge6 = ibge_digits[:6] if len(ibge_digits) >= 6 else ibge_digits.zfill(6)
+        city_filter += f""" AND (
+          REGEXP_REPLACE(TO_VARCHAR(p.IBGE), '[^0-9]', '') IN ('{ibge_digits}', '{ibge6}', '{ibge7}')
+          OR LEFT(LPAD(REGEXP_REPLACE(TO_VARCHAR(p.IBGE), '[^0-9]', ''), 7, '0'), 6) = '{ibge6}'
+        )"""
+
+    like = re.sub(r"[%_\\']", "", str(body.get("q") or body.get("busca") or "")).strip()[:80].upper()
+    cidade_col = "COALESCE(c.MUNICIPIO, m.UF, '')" if city_filter else "COALESCE(m.UF, '')"
+    busca_filter = ""
+    if like:
+        busca_filter = f"""
+              AND (
+                UPPER(m.NOME) LIKE '%{like}%'
+                OR UPPER(m.UF_CRM) LIKE '%{like}%'
+                OR UPPER(COALESCE(b.ESPECIALIDADE, '')) LIKE '%{like}%'
+                OR UPPER(COALESCE(tel.TELEFONE, '')) LIKE '%{like}%'
+                OR UPPER(COALESCE(em.EMAIL, '')) LIKE '%{like}%'
+                OR UPPER({cidade_col}) LIKE '%{like}%'
+              )
+        """
 
     date_filter = ""
     if modo == "novos":
@@ -603,7 +623,7 @@ def query_medicos_novos(override: dict | None = None) -> dict:
               GROUP BY UF_CRM
             )
             SELECT m.UF_CRM, m.NOME, c.MUNICIPIO, COALESCE(c.UF, m.UF), tel.TELEFONE, em.EMAIL,
-                   TO_CHAR(b.DT_NOVO, 'YYYY-MM-DD'), b.ESPECIALIDADE
+                   TO_CHAR(b.DT_NOVO, 'YYYY-MM-DD'), b.ESPECIALIDADE, COUNT(*) OVER()
             FROM GOLD.TB_MEDICOS m
             JOIN cid c ON c.UF_CRM = m.UF_CRM
             {join_base} base b ON b.UF_CRM = m.UF_CRM
@@ -619,6 +639,7 @@ def query_medicos_novos(override: dict | None = None) -> dict:
             ) em ON em.UF_CRM = m.UF_CRM
             WHERE UPPER(m.SITUACAO) = 'ATIVO'
               {date_filter}
+              {busca_filter}
             ORDER BY m.NOME
             LIMIT 8000
         """
@@ -631,7 +652,7 @@ def query_medicos_novos(override: dict | None = None) -> dict:
               FROM GOLD.TB_ESPECIALIDADE_X_FONTES
               GROUP BY UF_CRM
             )
-            SELECT m.UF_CRM, m.NOME, NULL, m.UF, tel.TELEFONE, em.EMAIL, TO_CHAR(b.DT_NOVO, 'YYYY-MM-DD'), b.ESPECIALIDADE
+            SELECT m.UF_CRM, m.NOME, NULL, m.UF, tel.TELEFONE, em.EMAIL, TO_CHAR(b.DT_NOVO, 'YYYY-MM-DD'), b.ESPECIALIDADE, COUNT(*) OVER()
             FROM GOLD.TB_MEDICOS m
             JOIN base b ON b.UF_CRM = m.UF_CRM
             LEFT JOIN (
@@ -646,6 +667,7 @@ def query_medicos_novos(override: dict | None = None) -> dict:
             ) em ON em.UF_CRM = m.UF_CRM
             WHERE UPPER(m.SITUACAO) = 'ATIVO'
               {date_filter}
+              {busca_filter}
             ORDER BY m.NOME
             LIMIT 8000
         """
@@ -671,6 +693,7 @@ def query_medicos_novos(override: dict | None = None) -> dict:
             }
             for r in rows
         ]
+        total_completo = as_int([rows[0][8]]) if rows else 0
         return {
             "modo": modo,
             "mes": mes,
@@ -678,6 +701,7 @@ def query_medicos_novos(override: dict | None = None) -> dict:
             "municipio": municipio,
             "ibge": ibge,
             "total": len(lista),
+            "total_completo": total_completo or len(lista),
             "linhas": lista,
         }
     finally:

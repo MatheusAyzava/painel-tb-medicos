@@ -808,6 +808,12 @@ input, textarea {
 
 .map-toolbar .btn, .novos-toolbar .btn { width: auto; }
 
+#lista-busca {
+  width: min(340px, 100%);
+  margin: 0;
+  flex: 1 1 220px;
+}
+
 #map-br {
   height: 460px;
   border-radius: 10px;

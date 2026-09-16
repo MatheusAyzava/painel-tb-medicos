@@ -18,6 +18,8 @@ const biState = {
   cidade: null,
   mes: null,
   cidadesNovos: {},
+  busca: "",
+  totalCompleto: 0,
 };
 let mapaReq = 0;
 
@@ -330,11 +332,24 @@ function atualizarTitulo() {
   if (elMes) elMes.textContent = mes;
   document.getElementById("lista-titulo").textContent = biState.modo === "novos"
     ? `Médicos novos · ${mes}`
-    : `Todos os médicos · ${mes}`;
+    : "Todos os médicos";
   const cidade = biState.cidade
     ? `${biState.cidade.municipio} · ${biState.cidade.uf}`
     : "Brasil";
-  document.getElementById("lista-local").textContent = `${cidade} · ${mes}`;
+  const mapaN = biState.cidade && Number(biState.cidade.value);
+  const cadastroN = biState.totalCompleto;
+  let local = `${cidade} · ${mes}`;
+  if (biState.modo === "todos" && biState.cidade) {
+    local = cadastroN
+      ? `${cidade}: ${biFmt(cadastroN)} médicos ativos no cadastro`
+      : `${cidade}: médicos ativos no cadastro`;
+    if (mapaN && (!cadastroN || Math.abs(mapaN - cadastroN) > 5)) {
+      local += ` · ${biFmt(mapaN)} profissionais no mapa (CNES)`;
+    }
+  } else if (biState.cidade) {
+    local = `${cidade} · ${mes}`;
+  }
+  document.getElementById("lista-local").textContent = local;
   document.querySelectorAll(".month-col").forEach((col) => {
     col.classList.toggle("on", col.dataset.mes === mesValue());
   });
@@ -351,6 +366,9 @@ function setModo(modo) {
 
 function abrirCidade(cidade) {
   biState.cidade = cidade;
+  biState.busca = "";
+  const buscaEl = document.getElementById("lista-busca");
+  if (buscaEl) buscaEl.value = "";
   atualizarTitulo();
   document.getElementById("novos-body").scrollIntoView({ behavior: "smooth", block: "start" });
   buscarLista();
@@ -365,10 +383,54 @@ function escolherMes(mes) {
   buscarLista();
 }
 
+function textoLinha(r) {
+  return [r.uf_crm, r.nome, r.especialidade, r.cidade, r.uf, r.telefone, r.email].join(" ").toLowerCase();
+}
+
+function listaFiltrada() {
+  const q = (biState.busca || "").trim().toLowerCase();
+  if (!q) return biState.novos;
+  return biState.novos.filter((r) => textoLinha(r).includes(q));
+}
+
+function renderTabela() {
+  const bodyEl = document.getElementById("novos-body");
+  const rows = listaFiltrada();
+  const total = biState.totalCompleto || biState.novos.length;
+  const q = (biState.busca || "").trim();
+  if (q) {
+    document.getElementById("novos-count").textContent = `${biFmt(rows.length)} de ${biFmt(total)} registros`;
+  } else if (total > biState.novos.length) {
+    document.getElementById("novos-count").textContent = `${biFmt(biState.novos.length)} de ${biFmt(total)} registros`;
+  } else {
+    document.getElementById("novos-count").textContent = `${biFmt(total)} registros`;
+  }
+  if (!biState.novos.length) {
+    bodyEl.innerHTML = "<tr><td colspan='7'>Nenhum médico encontrado.</td></tr>";
+    return;
+  }
+  if (!rows.length) {
+    bodyEl.innerHTML = "<tr><td colspan='7'>Nenhum resultado para essa busca. Aperte Buscar para consultar no Snowflake.</td></tr>";
+    return;
+  }
+  bodyEl.innerHTML = rows.map((r) => `
+    <tr>
+      <td>${r.uf_crm}</td>
+      <td>${r.nome}</td>
+      <td>${r.especialidade || "—"}</td>
+      <td>${r.cidade || "—"}</td>
+      <td>${r.uf || "—"}</td>
+      <td>${r.telefone || "—"}</td>
+      <td>${r.email || "—"}</td>
+    </tr>
+  `).join("");
+}
+
 function downloadNovosCsv() {
-  if (!biState.novos.length) return;
+  const rows = listaFiltrada();
+  if (!rows.length) return;
   const header = "UF_CRM;NOME;ESPECIALIDADE;CIDADE;UF;TELEFONE;EMAIL";
-  const body = biState.novos.map((r) => [r.uf_crm, r.nome, r.especialidade, r.cidade, r.uf, r.telefone, r.email].map(csvEscape).join(";")).join("\n");
+  const body = rows.map((r) => [r.uf_crm, r.nome, r.especialidade, r.cidade, r.uf, r.telefone, r.email].map(csvEscape).join(";")).join("\n");
   const blob = new Blob(["\ufeff" + header + "\n" + body], { type: "text/csv;charset=utf-8" });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
@@ -381,7 +443,9 @@ function downloadNovosCsv() {
 async function buscarLista() {
   const mes = mesValue();
   const bodyEl = document.getElementById("novos-body");
-  const payload = { modo: biState.modo, mes };
+  const buscaEl = document.getElementById("lista-busca");
+  if (buscaEl) biState.busca = buscaEl.value || "";
+  const payload = { modo: biState.modo, mes, q: biState.busca };
   if (biState.cidade) {
     payload.uf = biState.cidade.uf;
     payload.municipio = biState.cidade.municipio;
@@ -403,26 +467,14 @@ async function buscarLista() {
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || "Falha ao buscar médicos");
     biState.novos = data.linhas || [];
-    document.getElementById("novos-count").textContent = `${biFmt(data.total)} registros`;
+    biState.totalCompleto = Number(data.total_completo || data.total || biState.novos.length);
+    atualizarTitulo();
     if (data.aviso && !biState.novos.length) {
+      document.getElementById("novos-count").textContent = "0 registros";
       bodyEl.innerHTML = `<tr><td colspan="7">${data.aviso}</td></tr>`;
       return;
     }
-    if (!biState.novos.length) {
-      bodyEl.innerHTML = "<tr><td colspan='7'>Nenhum médico encontrado.</td></tr>";
-      return;
-    }
-    bodyEl.innerHTML = biState.novos.map((r) => `
-      <tr>
-        <td>${r.uf_crm}</td>
-        <td>${r.nome}</td>
-        <td>${r.especialidade || "—"}</td>
-        <td>${r.cidade || "—"}</td>
-        <td>${r.uf || "—"}</td>
-        <td>${r.telefone || "—"}</td>
-        <td>${r.email || "—"}</td>
-      </tr>
-    `).join("");
+    renderTabela();
   } catch (err) {
     bodyEl.innerHTML = `<tr><td colspan="7">${err.message}</td></tr>`;
   }
@@ -455,6 +507,19 @@ async function initBi() {
   });
   document.getElementById("btn-novos").addEventListener("click", buscarLista);
   document.getElementById("btn-csv").addEventListener("click", downloadNovosCsv);
+  const buscaEl = document.getElementById("lista-busca");
+  if (buscaEl) {
+    buscaEl.addEventListener("input", () => {
+      biState.busca = buscaEl.value || "";
+      if (biState.novos.length) renderTabela();
+    });
+    buscaEl.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        buscarLista();
+      }
+    });
+  }
   document.getElementById("modo-todos").addEventListener("click", () => setModo("todos"));
   document.getElementById("modo-novos").addEventListener("click", () => setModo("novos"));
   document.getElementById("bi-mensal").addEventListener("click", (event) => {

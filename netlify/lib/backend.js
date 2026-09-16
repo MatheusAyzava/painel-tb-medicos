@@ -437,23 +437,51 @@ async function queryDadosferaBi() {
   };
 }
 
+function citySqlFilter(opts = {}) {
+  const uf = String(opts.uf || "").replace(/[^A-Za-z]/g, "").toUpperCase().slice(0, 2);
+  const municipio = String(opts.municipio || "").replace(/[^A-Za-zÀ-ÿ0-9 .\-']/g, "").slice(0, 80);
+  const ibgeDigits = String(opts.ibge || "").replace(/\D/g, "");
+  let sql = "";
+  if (uf) sql += ` AND p.UF = '${uf}'`;
+  if (municipio) {
+    sql += ` AND UPPER(p.MUNICIPIO) = UPPER('${municipio.replace(/'/g, "''")}')`;
+  } else if (ibgeDigits) {
+    const ibge7 = ibgeDigits.padStart(7, "0");
+    const ibge6 = ibgeDigits.length >= 6 ? ibgeDigits.slice(0, 6) : ibgeDigits.padStart(6, "0");
+    sql += ` AND (
+      REGEXP_REPLACE(TO_VARCHAR(p.IBGE), '[^0-9]', '') IN ('${ibgeDigits}', '${ibge6}', '${ibge7}')
+      OR LEFT(LPAD(REGEXP_REPLACE(TO_VARCHAR(p.IBGE), '[^0-9]', ''), 7, '0'), 6) = '${ibge6}'
+    )`;
+  }
+  return { uf, municipio, ibge: ibgeDigits, sql };
+}
+
+function buscaSqlFilter(q, hasCity) {
+  const like = String(q || "").replace(/[%_\\']/g, "").trim().slice(0, 80).toUpperCase();
+  if (!like) return "";
+  const cidadeCol = hasCity ? "COALESCE(c.MUNICIPIO, m.UF, '')" : "COALESCE(m.UF, '')";
+  return `AND (
+    UPPER(m.NOME) LIKE '%${like}%'
+    OR UPPER(m.UF_CRM) LIKE '%${like}%'
+    OR UPPER(COALESCE(b.ESPECIALIDADE, '')) LIKE '%${like}%'
+    OR UPPER(COALESCE(tel.TELEFONE, '')) LIKE '%${like}%'
+    OR UPPER(COALESCE(em.EMAIL, '')) LIKE '%${like}%'
+    OR UPPER(${cidadeCol}) LIKE '%${like}%'
+  )`;
+}
+
 async function queryMedicosNovos(opts = {}) {
   const modo = String(opts.modo || "").toLowerCase() === "todos" ? "todos" : "novos";
   const ok = /^\d{4}-\d{2}$/.test(String(opts.mes || ""));
   const stamp = ok ? String(opts.mes) : new Date().toISOString().slice(0, 7);
   const [ano, mo] = stamp.split("-").map(Number);
-  const uf = String(opts.uf || "").replace(/[^A-Za-z]/g, "").toUpperCase().slice(0, 2);
-  const municipio = String(opts.municipio || "").replace(/[^A-Za-zÀ-ÿ0-9 .\-']/g, "").slice(0, 80);
-  let ibge = String(opts.ibge || "").replace(/\D/g, "");
-  if (ibge) ibge = ibge.padStart(7, "0");
+  const city = citySqlFilter(opts);
+  const { uf, municipio, ibge, sql: cityFilter } = city;
   if (modo === "todos" && !uf && !municipio && !ibge) {
-    return { modo, mes: stamp, total: 0, linhas: [], aviso: "Clique numa cidade no mapa para listar os médicos." };
+    return { modo, mes: stamp, total: 0, total_completo: 0, linhas: [], aviso: "Clique numa cidade no mapa para listar os médicos." };
   }
 
-  let cityFilter = "";
-  if (uf) cityFilter += ` AND p.UF = '${uf}'`;
-  if (ibge) cityFilter += ` AND LPAD(REGEXP_REPLACE(TO_VARCHAR(p.IBGE), '[^0-9]', ''), 7, '0') = '${ibge}'`;
-  else if (municipio) cityFilter += ` AND UPPER(p.MUNICIPIO) = UPPER('${municipio.replace(/'/g, "''")}')`;
+  const buscaFilter = buscaSqlFilter(opts.q || opts.busca, Boolean(cityFilter));
 
   const dateFilter = modo === "novos"
     ? `AND b.DT_NOVO >= DATE_FROM_PARTS(${ano}, ${mo}, 1) AND b.DT_NOVO < DATEADD(MONTH, 1, DATE_FROM_PARTS(${ano}, ${mo}, 1))`
@@ -483,12 +511,12 @@ async function queryMedicosNovos(opts = {}) {
              MIN(COALESCE(NULLIF(ESPECIALIDADE, ''), NULLIF(ESPECIALIDADE_RQE, ''), 'SEM ESPECIALIDADE')) AS ESPECIALIDADE
       FROM GOLD.TB_ESPECIALIDADE_X_FONTES GROUP BY UF_CRM
     )
-    SELECT m.UF_CRM, m.NOME, c.MUNICIPIO, COALESCE(c.UF, m.UF), tel.TELEFONE, em.EMAIL, TO_CHAR(b.DT_NOVO, 'YYYY-MM-DD'), b.ESPECIALIDADE
+    SELECT m.UF_CRM, m.NOME, c.MUNICIPIO, COALESCE(c.UF, m.UF), tel.TELEFONE, em.EMAIL, TO_CHAR(b.DT_NOVO, 'YYYY-MM-DD'), b.ESPECIALIDADE, COUNT(*) OVER()
     FROM GOLD.TB_MEDICOS m
     JOIN cid c ON c.UF_CRM = m.UF_CRM
     ${joinBase} base b ON b.UF_CRM = m.UF_CRM
     ${telJoin}
-    WHERE UPPER(m.SITUACAO) = 'ATIVO' ${dateFilter}
+    WHERE UPPER(m.SITUACAO) = 'ATIVO' ${dateFilter} ${buscaFilter}
     ORDER BY m.NOME LIMIT 8000
   ` : `
     WITH base AS (
@@ -497,11 +525,11 @@ async function queryMedicosNovos(opts = {}) {
              MIN(COALESCE(NULLIF(ESPECIALIDADE, ''), NULLIF(ESPECIALIDADE_RQE, ''), 'SEM ESPECIALIDADE')) AS ESPECIALIDADE
       FROM GOLD.TB_ESPECIALIDADE_X_FONTES GROUP BY UF_CRM
     )
-    SELECT m.UF_CRM, m.NOME, NULL, m.UF, tel.TELEFONE, em.EMAIL, TO_CHAR(b.DT_NOVO, 'YYYY-MM-DD'), b.ESPECIALIDADE
+    SELECT m.UF_CRM, m.NOME, NULL, m.UF, tel.TELEFONE, em.EMAIL, TO_CHAR(b.DT_NOVO, 'YYYY-MM-DD'), b.ESPECIALIDADE, COUNT(*) OVER()
     FROM GOLD.TB_MEDICOS m
     JOIN base b ON b.UF_CRM = m.UF_CRM
     ${telJoin}
-    WHERE UPPER(m.SITUACAO) = 'ATIVO' ${dateFilter}
+    WHERE UPPER(m.SITUACAO) = 'ATIVO' ${dateFilter} ${buscaFilter}
     ORDER BY m.NOME LIMIT 8000
   `;
 
@@ -516,7 +544,8 @@ async function queryMedicosNovos(opts = {}) {
     data: String(r[6] || ""),
     especialidade: String(r[7] || ""),
   }));
-  return { modo, mes: stamp, uf, municipio, ibge, total: lista.length, linhas: lista };
+  const totalCompleto = rows && rows.length ? toNumber(rows[0][8]) : 0;
+  return { modo, mes: stamp, uf, municipio, ibge, total: lista.length, total_completo: totalCompleto || lista.length, linhas: lista };
 }
 
 async function queryCidadesNovos(opts = {}) {
