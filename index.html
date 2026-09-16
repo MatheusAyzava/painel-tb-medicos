@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/style.css?v=36" />
+  <link rel="stylesheet" href="assets/style.css?v=37" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 </head>
 <body>
@@ -62,6 +62,7 @@
         <div class="tab-bar">
           <button type="button" class="tab on" data-tab="comparativo">Comparativo</button>
           <button type="button" class="tab" data-tab="dadosfera">Dadosfera CFM</button>
+          <button type="button" class="tab" data-tab="cnes">CNES</button>
         </div>
       </nav>
       <div id="view-comparativo">
@@ -281,6 +282,71 @@
           </div>
         </section>
       </div>
+
+      <div id="view-cnes" hidden>
+        <header class="bi-head">
+          <div>
+            <p class="eyebrow">Ministério da Saúde · CNES</p>
+            <h1>Vínculos, horas e estabelecimentos</h1>
+          </div>
+        </header>
+        <section class="panel cnes-search-panel">
+          <div class="cnes-search-bar">
+            <input type="search" id="cnes-q" placeholder="Buscar médico: nome, CRM, CPF ou CNS — ex.: Tiago Szego" autocomplete="off" />
+            <select id="cnes-uf">
+              <option value="">Todos os estados</option>
+              <option>AC</option><option>AL</option><option>AM</option><option>AP</option><option>BA</option>
+              <option>CE</option><option>DF</option><option>ES</option><option>GO</option><option>MA</option>
+              <option>MG</option><option>MS</option><option>MT</option><option>PA</option><option>PB</option>
+              <option>PE</option><option>PI</option><option>PR</option><option>RJ</option><option>RN</option>
+              <option>RO</option><option>RR</option><option>RS</option><option>SC</option><option>SE</option>
+              <option>SP</option><option>TO</option>
+            </select>
+            <label class="cnes-check">
+              <input type="checkbox" id="cnes-novos" />
+              Só médicos novos
+            </label>
+            <strong id="cnes-mes">mês</strong>
+            <button type="button" class="btn" id="cnes-btn">Buscar no CNES</button>
+            <button type="button" class="btn ghost" id="cnes-csv">Baixar vínculos</button>
+          </div>
+          <p class="map-hint">Consulta a base GOLD do CNES: carga horária, hospital em que mais atende, setor público/privado, endereço e tipo de vínculo — no mesmo detalhe da consulta do Datasus.</p>
+        </section>
+        <section class="cnes-layout">
+          <article class="panel cnes-list-panel">
+            <h2>Médicos encontrados</h2>
+            <p class="map-hint" id="cnes-count">Digite um nome e busque.</p>
+            <div id="cnes-docs"></div>
+          </article>
+          <article class="panel cnes-detail-panel">
+            <h2 id="cnes-detail-title">Detalhe do profissional</h2>
+            <div class="cnes-kpis" id="cnes-kpis"></div>
+            <p class="map-hint" id="cnes-detail-local">Selecione um médico à esquerda para ver todos os estabelecimentos.</p>
+            <div class="table-wrap">
+              <table class="novos-table cnes-table">
+                <thead>
+                  <tr>
+                    <th>CNES</th>
+                    <th>Estabelecimento</th>
+                    <th>Cidade</th>
+                    <th>UF</th>
+                    <th>Setor</th>
+                    <th>Horas</th>
+                    <th>Amb</th>
+                    <th>Hosp</th>
+                    <th>CBO</th>
+                    <th>Vínculo</th>
+                    <th>Endereço</th>
+                  </tr>
+                </thead>
+                <tbody id="cnes-vinculos">
+                  <tr><td colspan="11">Nenhum vínculo carregado.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </article>
+        </section>
+      </div>
     </main>
   </div>
   <p class="toast" id="toast" hidden></p>
@@ -293,7 +359,8 @@
     });
   </script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="assets/app.js?v=36"></script>
-  <script src="assets/bi.js?v=36"></script>
+  <script src="assets/app.js?v=37"></script>
+  <script src="assets/bi.js?v=37"></script>
+  <script src="assets/cnes-tab.js?v=37"></script>
 </body>
 </html>

@@ -818,6 +818,160 @@ def query_cidades_novos(override: dict | None = None) -> dict:
         ctx.close()
 
 
+def _cnes_setor(natureza, grupo) -> str:
+    g = str(grupo or "").upper()
+    if g.startswith("1") or "ADMINISTRA" in g:
+        return "Público"
+    if g.startswith("2") or g.startswith("3") or "EMPRESAR" in g or "PRIVAD" in g:
+        return "Privado"
+    digits = re.sub(r"\D", "", str(natureza or ""))
+    if digits[:1] == "1":
+        return "Público"
+    if digits[:1] in {"2", "3"}:
+        return "Privado"
+    return "Não informado"
+
+
+def query_cnes_busca(override: dict | None = None) -> dict:
+    cfg = merge_cfg(override)
+    body = override or {}
+    q = str(body.get("q") or "").strip()
+    if len(re.sub(r"\s", "", q)) < 3:
+        return {"aviso": "Digite pelo menos 3 caracteres: nome, CRM, CPF ou CNS.", "profissionais": [], "vinculos": []}
+    like = re.sub(r"[%_\\']", "", q)[:80].upper()
+    digits = re.sub(r"\D", "", q)[:14]
+    uf = re.sub(r"[^A-Za-z]", "", str(body.get("uf") or "")).upper()[:2]
+    novos = str(body.get("novos") or "").lower() in {"1", "true", "sim"}
+    mes = str(body.get("mes") or "").strip()
+    if not re.fullmatch(r"\d{4}-\d{2}", mes):
+        mes = datetime.now().strftime("%Y-%m")
+    ano, mo = mes.split("-")
+    uf_filter = f"AND p.UF = '{uf}'" if uf else ""
+    novos_join = ""
+    if novos:
+        novos_join = f"""
+        JOIN (
+          SELECT UF_CRM FROM GOLD.TB_ESPECIALIDADE_X_FONTES
+          WHERE COALESCE(TRY_TO_DATE(DT_INSCRICAO, 'DD/MM/YYYY'), TRY_TO_DATE(DT_INSCRICAO))
+                  >= DATE_FROM_PARTS({int(ano)}, {int(mo)}, 1)
+            AND COALESCE(TRY_TO_DATE(DT_INSCRICAO, 'DD/MM/YYYY'), TRY_TO_DATE(DT_INSCRICAO))
+                  < DATEADD(MONTH, 1, DATE_FROM_PARTS({int(ano)}, {int(mo)}, 1))
+          GROUP BY UF_CRM
+        ) nv ON nv.UF_CRM = p.UF_CRM
+        """
+    doc_filter = ""
+    if len(digits) >= 5:
+        doc_filter = f"OR REGEXP_REPLACE(TO_VARCHAR(p.CPF), '[^0-9]', '') LIKE '%{digits}%' OR TO_VARCHAR(p.CNS) LIKE '%{digits}%'"
+    sql = f"""
+        WITH hits AS (
+          SELECT p.UF_CRM
+          FROM GOLD.TB_CNES_PROFISSIONAIS p
+          {novos_join}
+          WHERE NULLIF(p.UF_CRM, '') IS NOT NULL
+            {uf_filter}
+            AND (
+              UPPER(p.NOME) LIKE '%{like}%'
+              OR UPPER(p.UF_CRM) LIKE '%{like}%'
+              OR UPPER(TO_VARCHAR(p.CRM)) LIKE '%{like}%'
+              {doc_filter}
+            )
+          GROUP BY p.UF_CRM
+          LIMIT 25
+        )
+        SELECT
+          p.UF_CRM, p.NOME, p.CPF, p.CNS, p.CRM, p.CBO, p.CNES, p.ESTABELECIMENTO, p.CNPJ,
+          p.NATUREZA_JURIDICA, p.GESTAO, p.SUS, p.VINCULO_ESTABELECIMENTO, p.VINCULO_EMPREGADOR,
+          p.CH_OUTROS, p.CH_AMB_, p.CH_HOSP_, p.CH_TOTAL, p.MUNICIPIO, p.UF, p.IBGE, p.TURNO,
+          e.NOME_ESTABELECIMENTO, e.LOGRADOURO, e.NUMERO, e.COMPLEMENTO, e.BAIRRO,
+          e.MUNICIPIO_ESTABELECIMENTO, e.UF_ESTABELECIMENTO, e.CEP, e.TELEFONE, e.EMAIL,
+          e.GRUPO_NATUREZA_JURIDICA, e.TIPO_ESTABELECIMENTO, e.TIPO_UNIDADE, e.ANOMES
+        FROM GOLD.TB_CNES_PROFISSIONAIS p
+        JOIN hits h ON h.UF_CRM = p.UF_CRM
+        LEFT JOIN GOLD.TB_CNES_PROFISSIONAIS_ESTABELECIMENTOS e
+          ON e.UF_CRM = p.UF_CRM AND TO_VARCHAR(e.CNES) = TO_VARCHAR(p.CNES)
+        QUALIFY ROW_NUMBER() OVER (
+          PARTITION BY p.UF_CRM, COALESCE(TO_VARCHAR(p.CNES), p.ESTABELECIMENTO)
+          ORDER BY e.UPDATE_DATE DESC NULLS LAST, p.UPDATE_DATE DESC NULLS LAST
+        ) = 1
+        ORDER BY p.NOME, TRY_TO_DOUBLE(TO_VARCHAR(p.CH_TOTAL)) DESC NULLS LAST
+    """
+    ctx = connect_snowflake(cfg)
+    warehouse = (cfg.get("snowflake_warehouse") or "COMPUTE_WH").strip()
+    try:
+        cur = ctx.cursor()
+        cur.execute(f"USE WAREHOUSE {warehouse}")
+        cur.execute("USE DATABASE DADOSFERA_PRD_DIGITALSOLVERS")
+        cur.close()
+        rows = snowflake_fetch(ctx, sql)[1]
+        vinculos = []
+        by_doc = {}
+        for r in rows:
+            natureza = str(r[9] or "")
+            grupo = str(r[32] or "")
+            item = {
+                "uf_crm": str(r[0] or ""),
+                "nome": str(r[1] or ""),
+                "cpf": str(r[2] or ""),
+                "cns": str(r[3] or ""),
+                "crm": str(r[4] or ""),
+                "cbo": str(r[5] or ""),
+                "cnes": str(r[6] or ""),
+                "estabelecimento": str(r[22] or r[7] or ""),
+                "cnpj": str(r[8] or ""),
+                "natureza": natureza,
+                "gestao": str(r[10] or ""),
+                "sus": str(r[11] or ""),
+                "vinculo": str(r[12] or ""),
+                "empregador": str(r[13] or ""),
+                "horas_outros": as_int([r[14]]),
+                "horas_amb": as_int([r[15]]),
+                "horas_hosp": as_int([r[16]]),
+                "horas_total": as_int([r[17]]),
+                "municipio": str(r[27] or r[18] or ""),
+                "uf": str(r[28] or r[19] or ""),
+                "ibge": str(r[20] or ""),
+                "turno": str(r[21] or ""),
+                "endereco": ", ".join(str(x) for x in (r[23], r[24], r[25]) if x),
+                "bairro": str(r[26] or ""),
+                "cep": str(r[29] or ""),
+                "telefone": str(r[30] or ""),
+                "email": str(r[31] or ""),
+                "grupo": grupo,
+                "tipo": str(r[33] or ""),
+                "unidade": str(r[34] or ""),
+                "competencia": str(r[35] or ""),
+                "setor": _cnes_setor(natureza, grupo),
+            }
+            vinculos.append(item)
+            doc = by_doc.setdefault(item["uf_crm"], {
+                "uf_crm": item["uf_crm"], "nome": item["nome"], "cpf": item["cpf"], "cns": item["cns"],
+                "crm": item["crm"], "uf": item["uf"], "horas_total": 0, "vinculos": 0,
+                "estabelecimento": item["estabelecimento"], "setor": item["setor"],
+                "cidades": set(), "_max": -1,
+            })
+            doc["horas_total"] += item["horas_total"]
+            doc["vinculos"] += 1
+            if item["municipio"]:
+                doc["cidades"].add(f"{item['municipio']}/{item['uf']}")
+            if item["horas_total"] >= doc["_max"]:
+                doc["_max"] = item["horas_total"]
+                doc["estabelecimento"] = item["estabelecimento"]
+                doc["setor"] = item["setor"]
+                doc["principal_cnes"] = item["cnes"]
+        profissionais = []
+        for doc in by_doc.values():
+            profissionais.append({
+                "uf_crm": doc["uf_crm"], "nome": doc["nome"], "cpf": doc["cpf"], "cns": doc["cns"],
+                "crm": doc["crm"], "uf": doc["uf"], "horas_total": doc["horas_total"],
+                "vinculos": doc["vinculos"], "estabelecimento": doc["estabelecimento"],
+                "setor": doc["setor"], "cidades": sorted(doc["cidades"]),
+                "principal_cnes": doc.get("principal_cnes") or "",
+            })
+        return {"q": q, "mes": mes, "novos": novos, "total": len(profissionais), "profissionais": profissionais, "vinculos": vinculos}
+    finally:
+        ctx.close()
+
+
 def normalize_host(host: str) -> str:
     host = (host or "").strip().rstrip("/")
     host = host.replace("https://", "").replace("http://", "")
@@ -1428,6 +1582,9 @@ class Handler(SimpleHTTPRequestHandler):
                 return
             if parsed.path == "/api/cidades-novos":
                 send_json(self, query_cidades_novos(body))
+                return
+            if parsed.path == "/api/cnes-busca":
+                send_json(self, query_cnes_busca(body))
                 return
             if parsed.path == "/api/databricks":
                 send_json(self, query_databricks(body))

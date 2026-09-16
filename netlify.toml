@@ -21,6 +21,9 @@
 [functions.medicos-novos]
   timeout = 26
 
+[functions.cnes-busca]
+  timeout = 26
+
 [functions.status]
   timeout = 10
 

@@ -610,15 +610,17 @@ async function buscarLista() {
 function switchTab(tab) {
   const comparativo = document.getElementById("view-comparativo");
   const dadosfera = document.getElementById("view-dadosfera");
+  const cnes = document.getElementById("view-cnes");
   comparativo.hidden = tab !== "comparativo";
   dadosfera.hidden = tab !== "dadosfera";
+  if (cnes) cnes.hidden = tab !== "cnes";
   document.querySelectorAll("[data-tab]").forEach((btn) => btn.classList.toggle("on", btn.dataset.tab === tab));
-  if (tab === "dadosfera") {
-    location.hash = "dadosfera";
-    if (!biState.data) loadBi();
+  if (tab === "dadosfera" || tab === "cnes") {
+    location.hash = tab;
+    if (tab === "dadosfera" && !biState.data) loadBi();
     setTimeout(() => biState.map && biState.map.invalidateSize(), 120);
-  } else {
-    if (location.hash.replace("#", "") === "dadosfera") location.hash = "";
+  } else if (["dadosfera", "cnes"].includes(location.hash.replace("#", ""))) {
+    location.hash = "";
   }
 }
 
@@ -627,6 +629,7 @@ async function initBi() {
     btn.addEventListener("click", () => switchTab(btn.dataset.tab));
   });
   if (location.hash.replace("#", "") === "dadosfera") switchTab("dadosfera");
+  if (location.hash.replace("#", "") === "cnes") switchTab("cnes");
   document.getElementById("map-uf").addEventListener("change", () => atualizarMapa());
   document.getElementById("map-reset").addEventListener("click", () => {
     document.getElementById("map-uf").value = "BR";

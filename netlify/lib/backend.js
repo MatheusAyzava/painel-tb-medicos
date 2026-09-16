@@ -727,6 +727,162 @@ async function queryCidadesNovos(opts = {}) {
   return { mes: stamp, cidades, total: cidades.length, medicos };
 }
 
+function cnesSetor(natureza, grupo) {
+  const g = String(grupo || "").toUpperCase();
+  if (g.startsWith("1") || g.includes("ADMINISTRA")) return "Público";
+  if (g.startsWith("2") || g.startsWith("3") || g.includes("EMPRESAR") || g.includes("PRIVAD")) return "Privado";
+  const d = String(natureza || "").replace(/\D/g, "").slice(0, 1);
+  if (d === "1") return "Público";
+  if (d === "2" || d === "3") return "Privado";
+  return "Não informado";
+}
+
+async function queryCnesBusca(opts = {}) {
+  const q = String(opts.q || "").trim();
+  const compact = q.replace(/\s/g, "");
+  if (compact.length < 3) {
+    return { aviso: "Digite pelo menos 3 caracteres: nome, CRM, CPF ou CNS.", profissionais: [], vinculos: [] };
+  }
+  const like = q.replace(/[%_\\']/g, "").slice(0, 80).toUpperCase();
+  const digits = q.replace(/\D/g, "").slice(0, 14);
+  const uf = String(opts.uf || "").replace(/[^A-Za-z]/g, "").toUpperCase().slice(0, 2);
+  const novos = String(opts.novos || "").toLowerCase() === "true" || opts.novos === true;
+  const ok = /^\d{4}-\d{2}$/.test(String(opts.mes || ""));
+  const stamp = ok ? String(opts.mes) : new Date().toISOString().slice(0, 7);
+  const [ano, mo] = stamp.split("-").map(Number);
+  const ufFilter = uf ? `AND p.UF = '${uf}'` : "";
+  const novosJoin = novos ? `
+    JOIN (
+      SELECT UF_CRM
+      FROM GOLD.TB_ESPECIALIDADE_X_FONTES
+      WHERE COALESCE(TRY_TO_DATE(DT_INSCRICAO, 'DD/MM/YYYY'), TRY_TO_DATE(DT_INSCRICAO))
+              >= DATE_FROM_PARTS(${ano}, ${mo}, 1)
+        AND COALESCE(TRY_TO_DATE(DT_INSCRICAO, 'DD/MM/YYYY'), TRY_TO_DATE(DT_INSCRICAO))
+              < DATEADD(MONTH, 1, DATE_FROM_PARTS(${ano}, ${mo}, 1))
+      GROUP BY UF_CRM
+    ) nv ON nv.UF_CRM = p.UF_CRM
+  ` : "";
+  const docFilter = digits.length >= 5
+    ? `OR REGEXP_REPLACE(TO_VARCHAR(p.CPF), '[^0-9]', '') LIKE '%${digits}%' OR TO_VARCHAR(p.CNS) LIKE '%${digits}%'`
+    : "";
+  const rows = await snowflakeSql(`
+    WITH hits AS (
+      SELECT p.UF_CRM
+      FROM GOLD.TB_CNES_PROFISSIONAIS p
+      ${novosJoin}
+      WHERE NULLIF(p.UF_CRM, '') IS NOT NULL
+        ${ufFilter}
+        AND (
+          UPPER(p.NOME) LIKE '%${like}%'
+          OR UPPER(p.UF_CRM) LIKE '%${like}%'
+          OR UPPER(TO_VARCHAR(p.CRM)) LIKE '%${like}%'
+          ${docFilter}
+        )
+      GROUP BY p.UF_CRM
+      LIMIT 25
+    )
+    SELECT
+      p.UF_CRM, p.NOME, p.CPF, p.CNS, p.CRM, p.CBO, p.CNES, p.ESTABELECIMENTO, p.CNPJ,
+      p.NATUREZA_JURIDICA, p.GESTAO, p.SUS, p.VINCULO_ESTABELECIMENTO, p.VINCULO_EMPREGADOR,
+      p.CH_OUTROS, p.CH_AMB_, p.CH_HOSP_, p.CH_TOTAL, p.MUNICIPIO, p.UF, p.IBGE, p.TURNO,
+      e.NOME_ESTABELECIMENTO, e.LOGRADOURO, e.NUMERO, e.COMPLEMENTO, e.BAIRRO,
+      e.MUNICIPIO_ESTABELECIMENTO, e.UF_ESTABELECIMENTO, e.CEP, e.TELEFONE, e.EMAIL,
+      e.GRUPO_NATUREZA_JURIDICA, e.TIPO_ESTABELECIMENTO, e.TIPO_UNIDADE, e.ANOMES
+    FROM GOLD.TB_CNES_PROFISSIONAIS p
+    JOIN hits h ON h.UF_CRM = p.UF_CRM
+    LEFT JOIN GOLD.TB_CNES_PROFISSIONAIS_ESTABELECIMENTOS e
+      ON e.UF_CRM = p.UF_CRM AND TO_VARCHAR(e.CNES) = TO_VARCHAR(p.CNES)
+    QUALIFY ROW_NUMBER() OVER (
+      PARTITION BY p.UF_CRM, COALESCE(TO_VARCHAR(p.CNES), p.ESTABELECIMENTO)
+      ORDER BY e.UPDATE_DATE DESC NULLS LAST, p.UPDATE_DATE DESC NULLS LAST
+    ) = 1
+    ORDER BY p.NOME, TRY_TO_DOUBLE(TO_VARCHAR(p.CH_TOTAL)) DESC NULLS LAST
+  `);
+  const vinculos = (rows || []).map((r) => {
+    const horas = toNumber(r[17]);
+    const natureza = String(r[9] || "");
+    const grupo = String(r[32] || "");
+    const logradouro = [r[23], r[24], r[25]].filter(Boolean).join(", ");
+    return {
+      uf_crm: String(r[0] || ""),
+      nome: String(r[1] || ""),
+      cpf: String(r[2] || ""),
+      cns: String(r[3] || ""),
+      crm: String(r[4] || ""),
+      cbo: String(r[5] || ""),
+      cnes: String(r[6] || ""),
+      estabelecimento: String(r[22] || r[7] || ""),
+      cnpj: String(r[8] || ""),
+      natureza: natureza,
+      gestao: String(r[10] || ""),
+      sus: String(r[11] || ""),
+      vinculo: String(r[12] || ""),
+      empregador: String(r[13] || ""),
+      horas_outros: toNumber(r[14]),
+      horas_amb: toNumber(r[15]),
+      horas_hosp: toNumber(r[16]),
+      horas_total: horas,
+      municipio: String(r[27] || r[18] || ""),
+      uf: String(r[28] || r[19] || ""),
+      ibge: String(r[20] || ""),
+      turno: String(r[21] || ""),
+      endereco: logradouro,
+      bairro: String(r[26] || ""),
+      cep: String(r[29] || ""),
+      telefone: String(r[30] || ""),
+      email: String(r[31] || ""),
+      grupo: grupo,
+      tipo: String(r[33] || ""),
+      unidade: String(r[34] || ""),
+      competencia: String(r[35] || ""),
+      setor: cnesSetor(natureza, grupo),
+    };
+  });
+  const byDoc = new Map();
+  vinculos.forEach((v) => {
+    if (!byDoc.has(v.uf_crm)) {
+      byDoc.set(v.uf_crm, {
+        uf_crm: v.uf_crm,
+        nome: v.nome,
+        cpf: v.cpf,
+        cns: v.cns,
+        crm: v.crm,
+        uf: v.uf,
+        horas_total: 0,
+        vinculos: 0,
+        estabelecimento: v.estabelecimento,
+        setor: v.setor,
+        cidades: new Set(),
+      });
+    }
+    const doc = byDoc.get(v.uf_crm);
+    doc.horas_total += v.horas_total;
+    doc.vinculos += 1;
+    if (v.municipio) doc.cidades.add(`${v.municipio}/${v.uf}`);
+    if (v.horas_total >= (doc._max || 0)) {
+      doc._max = v.horas_total;
+      doc.estabelecimento = v.estabelecimento;
+      doc.setor = v.setor;
+      doc.principal_cnes = v.cnes;
+    }
+  });
+  const profissionais = [...byDoc.values()].map((d) => ({
+    uf_crm: d.uf_crm,
+    nome: d.nome,
+    cpf: d.cpf,
+    cns: d.cns,
+    crm: d.crm,
+    uf: d.uf,
+    horas_total: d.horas_total,
+    vinculos: d.vinculos,
+    estabelecimento: d.estabelecimento,
+    setor: d.setor,
+    cidades: [...d.cidades],
+    principal_cnes: d.principal_cnes || "",
+  }));
+  return { q, mes: stamp, novos, total: profissionais.length, profissionais, vinculos };
+}
+
 function queryCnes() {
   const snap = loadSnapshot();
   const manual = (snap.fontes || {}).manual || {};
@@ -773,5 +929,6 @@ module.exports = {
   queryDadosferaBi,
   queryMedicosNovos,
   queryCidadesNovos,
+  queryCnesBusca,
   statusPayload,
 };
