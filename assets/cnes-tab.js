@@ -102,7 +102,13 @@ async function buscarCnes() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ q, uf, novos, mes: cnesMesAtual() }),
     });
-    const data = await res.json();
+    const text = await res.text();
+    let data = {};
+    try {
+      data = text ? JSON.parse(text) : {};
+    } catch (err) {
+      throw new Error("A consulta passou do tempo no servidor. Tente de novo em alguns segundos.");
+    }
     if (!res.ok) throw new Error(data.error || "Falha na busca CNES");
     cnesState.data = data;
     cnesState.selecionado = null;

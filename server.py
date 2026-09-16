@@ -832,52 +832,78 @@ def _cnes_setor(natureza, grupo) -> str:
     return "Não informado"
 
 
-def _cnes_novos_join(alias: str, ano: int, mo: int) -> str:
-    return f"""
-        JOIN (
-          SELECT UF_CRM FROM GOLD.TB_ESPECIALIDADE_X_FONTES
-          WHERE COALESCE(TRY_TO_DATE(DT_INSCRICAO, 'DD/MM/YYYY'), TRY_TO_DATE(DT_INSCRICAO))
-                  >= DATE_FROM_PARTS({ano}, {mo}, 1)
-            AND COALESCE(TRY_TO_DATE(DT_INSCRICAO, 'DD/MM/YYYY'), TRY_TO_DATE(DT_INSCRICAO))
-                  < DATEADD(MONTH, 1, DATE_FROM_PARTS({ano}, {mo}, 1))
-          GROUP BY UF_CRM
-        ) nv ON nv.UF_CRM = {alias}.UF_CRM
-    """
-
-
-def _cnes_pessoa_key(uf_crm, nome) -> str:
-    return f"{str(uf_crm or '').strip()}::{str(nome or '').strip().upper()}"
-
-
-def _cnes_busca_filtro(q: str) -> tuple[str, str]:
+def _cnes_busca_parse(q: str) -> dict:
     like = re.sub(r"[%_\\']", "", q)[:80].upper()
     compact = re.sub(r"\s", "", like)
     digits = re.sub(r"\D", "", q)[:15]
     tokens = [t for t in re.split(r"[\s,;./-]+", like) if len(t) >= 2 and not t.isdigit()][:6]
     is_crm = bool(re.match(r"^[A-Z]{2}\d{3,}", compact)) or bool(re.fullmatch(r"\d{4,8}[A-Z]?", compact))
-    def name_sql(alias: str) -> str:
-        if not tokens:
-            return ""
-        return " AND ".join(f"UPPER({alias}.NOME) LIKE '%{t}%'" for t in tokens)
-    where_p, where_m = [], []
-    nome_p, nome_m = name_sql("p"), name_sql("m")
-    if nome_p:
-        where_p.append(f"({nome_p})")
-    if nome_m:
-        where_m.append(f"({nome_m})")
-    if is_crm:
-        crm_like = compact[:20]
-        crm_digits = (digits or compact)[:20]
-        where_p.append(f"(UPPER(p.UF_CRM) LIKE '%{crm_like}%' OR UPPER(TO_VARCHAR(p.CRM)) LIKE '%{crm_digits}%')")
-        where_m.append(f"UPPER(m.UF_CRM) LIKE '%{crm_like}%'")
-    if len(digits) >= 8:
-        where_p.append(
-            f"(REGEXP_REPLACE(TO_VARCHAR(p.CPF), '[^0-9]', '') LIKE '%{digits}%' OR TO_VARCHAR(p.CNS) LIKE '%{digits}%')"
+    return {"compact": compact, "digits": digits, "tokens": tokens, "is_crm": is_crm}
+
+
+def _cnes_name_sql(alias: str, tokens: list[str], col: str = "NOME") -> str:
+    if not tokens:
+        return "1=1"
+    return " AND ".join(f"UPPER({alias}.{col}) LIKE '%{t}%'" for t in tokens)
+
+
+def _cnes_cidade(value) -> str:
+    return re.sub(r"^\d+\s*[-–]\s*", "", str(value or "")).strip()
+
+
+def _cnes_busca_sql(parsed: dict, uf: str, novos: bool, ano: int, mo: int) -> str:
+    compact = parsed["compact"][:20]
+    digits = (parsed["digits"] or compact)[:20]
+    tokens = parsed["tokens"]
+    parts = []
+    if parsed["is_crm"]:
+        parts.append(f"(c.UF_CRM = '{compact}' OR c.UF_CRM ILIKE '%{digits}' OR TO_VARCHAR(c.CRM) = '{digits}')")
+    elif tokens:
+        parts.append(f"({_cnes_name_sql('c', tokens, 'NOME_PROFISSIONAL')})")
+    if len(parsed["digits"]) >= 8:
+        parts.append(f"(TO_VARCHAR(c.CPF) LIKE '%{parsed['digits']}%' OR TO_VARCHAR(c.CNS) LIKE '%{parsed['digits']}%')")
+    where = " OR ".join(parts) if parts else "1=0"
+    novos_sql = ""
+    if novos:
+        novos_sql = f"""
+        AND EXISTS (
+          SELECT 1 FROM GOLD.TB_ESPECIALIDADE_X_FONTES nv
+          WHERE nv.UF_CRM = c.UF_CRM
+            AND COALESCE(TRY_TO_DATE(nv.DT_INSCRICAO, 'DD/MM/YYYY'), TRY_TO_DATE(nv.DT_INSCRICAO))
+                  >= DATE_FROM_PARTS({ano}, {mo}, 1)
+            AND COALESCE(TRY_TO_DATE(nv.DT_INSCRICAO, 'DD/MM/YYYY'), TRY_TO_DATE(nv.DT_INSCRICAO))
+                  < DATEADD(MONTH, 1, DATE_FROM_PARTS({ano}, {mo}, 1))
         )
-    return (
-        " OR ".join(where_p) if where_p else "1=0",
-        " OR ".join(where_m) if where_m else "1=0",
-    )
+        """
+    uf_sql = f"AND (c.UF_ESTABELECIMENTO = '{uf}' OR c.UF_CRM ILIKE '{uf}%')" if uf else ""
+    return f"""
+        SELECT
+          c.UF_CRM, c.NOME_PROFISSIONAL, c.CPF, c.CNS, c.CRM, c.CBO, c.CNES,
+          COALESCE(c.NOME_ESTABELECIMENTO, c.ESTABELECIMENTO),
+          COALESCE(c.CNPJ_ESTABELECIMENTO, c.CNPJ_PROFISSIONAL),
+          COALESCE(c.NATUREZA_JURIDICA_PROFISSIONAL, c.NATUREZA_JURIDICA_ESTABELECIMENTO),
+          c.GESTAO_PROFISSIONAL, c.SUS, c.VINCULO_ESTABELECIMENTO, c.VINCULO_EMPREGADOR,
+          c.CH_OUTROS, c.CH_AMB_, c.CH_HOSP_, c.CH_TOTAL,
+          c.MUNICIPIO_ESTABELECIMENTO, c.UF_ESTABELECIMENTO, c.IBGE, c.TURNO_PROFISSIONAL,
+          c.NOME_ESTABELECIMENTO, c.LOGRADOURO, c.NUMERO, c.COMPLEMENTO, c.BAIRRO,
+          c.MUNICIPIO_ESTABELECIMENTO, c.UF_ESTABELECIMENTO, c.CEP, c.TELEFONE, c.EMAIL,
+          c.GRUPO_NATUREZA_JURIDICA, c.TIPO_ESTABELECIMENTO, c.TIPO_UNIDADE, c.ANOMES
+        FROM GOLD.TB_CNES_PROFISSIONAIS_ESTABELECIMENTOS c
+        WHERE NULLIF(c.UF_CRM, '') IS NOT NULL
+          AND ({where})
+          {uf_sql}
+          {novos_sql}
+        QUALIFY ROW_NUMBER() OVER (
+          PARTITION BY c.UF_CRM, c.NOME_PROFISSIONAL, COALESCE(TO_VARCHAR(c.CNES), c.ESTABELECIMENTO)
+          ORDER BY c.UPDATE_DATE DESC NULLS LAST, c.ANOMES DESC NULLS LAST
+        ) = 1
+        AND DENSE_RANK() OVER (ORDER BY c.NOME_PROFISSIONAL, c.UF_CRM) <= 25
+        ORDER BY c.NOME_PROFISSIONAL, TRY_TO_DOUBLE(TO_VARCHAR(c.CH_TOTAL)) DESC NULLS LAST
+    """
+
+
+def _cnes_pessoa_key(uf_crm, nome) -> str:
+    return f"{str(uf_crm or '').strip()}::{str(nome or '').strip().upper()}"
 
 
 def query_cnes_busca(override: dict | None = None) -> dict:
@@ -886,44 +912,13 @@ def query_cnes_busca(override: dict | None = None) -> dict:
     q = str(body.get("q") or "").strip()
     if len(re.sub(r"\s", "", q)) < 3:
         return {"aviso": "Digite pelo menos 3 caracteres: nome, CRM, CPF ou CNS.", "profissionais": [], "vinculos": []}
-    where_p, _where_m = _cnes_busca_filtro(q)
+    parsed = _cnes_busca_parse(q)
     uf = re.sub(r"[^A-Za-z]", "", str(body.get("uf") or "")).upper()[:2]
     novos = str(body.get("novos") or "").lower() in {"1", "true", "sim"}
     mes = str(body.get("mes") or "").strip()
     if not re.fullmatch(r"\d{4}-\d{2}", mes):
         mes = datetime.now().strftime("%Y-%m")
     ano, mo = (int(x) for x in mes.split("-"))
-    uf_filter_p = f"AND p.UF = '{uf}'" if uf else ""
-    novos_join_p = _cnes_novos_join("p", ano, mo) if novos else ""
-    sql = f"""
-        WITH hits AS (
-          SELECT p.UF_CRM, p.NOME
-          FROM GOLD.TB_CNES_PROFISSIONAIS p
-          {novos_join_p}
-          WHERE NULLIF(p.UF_CRM, '') IS NOT NULL
-            {uf_filter_p}
-            AND ({where_p})
-          GROUP BY p.UF_CRM, p.NOME
-          QUALIFY ROW_NUMBER() OVER (ORDER BY p.NOME) <= 25
-        )
-        SELECT
-          p.UF_CRM, p.NOME, p.CPF, p.CNS, p.CRM, p.CBO, p.CNES, p.ESTABELECIMENTO, p.CNPJ,
-          p.NATUREZA_JURIDICA, p.GESTAO, p.SUS, p.VINCULO_ESTABELECIMENTO, p.VINCULO_EMPREGADOR,
-          p.CH_OUTROS, p.CH_AMB_, p.CH_HOSP_, p.CH_TOTAL, p.MUNICIPIO, p.UF, p.IBGE, p.TURNO,
-          e.NOME_ESTABELECIMENTO, e.LOGRADOURO, e.NUMERO, e.COMPLEMENTO, e.BAIRRO,
-          e.MUNICIPIO_ESTABELECIMENTO, e.UF_ESTABELECIMENTO, e.CEP, e.TELEFONE, e.EMAIL,
-          e.GRUPO_NATUREZA_JURIDICA, e.TIPO_ESTABELECIMENTO, e.TIPO_UNIDADE, e.ANOMES
-        FROM hits h
-        JOIN GOLD.TB_CNES_PROFISSIONAIS p
-          ON p.UF_CRM = h.UF_CRM AND UPPER(TRIM(p.NOME)) = UPPER(TRIM(h.NOME))
-        LEFT JOIN GOLD.TB_CNES_PROFISSIONAIS_ESTABELECIMENTOS e
-          ON e.UF_CRM = p.UF_CRM AND TO_VARCHAR(e.CNES) = TO_VARCHAR(p.CNES)
-        QUALIFY ROW_NUMBER() OVER (
-          PARTITION BY p.UF_CRM, UPPER(TRIM(p.NOME)), COALESCE(TO_VARCHAR(p.CNES), p.ESTABELECIMENTO)
-          ORDER BY e.UPDATE_DATE DESC NULLS LAST, p.UPDATE_DATE DESC NULLS LAST
-        ) = 1
-        ORDER BY p.NOME, TRY_TO_DOUBLE(TO_VARCHAR(p.CH_TOTAL)) DESC NULLS LAST
-    """
     ctx = connect_snowflake(cfg)
     warehouse = (cfg.get("snowflake_warehouse") or "COMPUTE_WH").strip()
     try:
@@ -931,7 +926,7 @@ def query_cnes_busca(override: dict | None = None) -> dict:
         cur.execute(f"USE WAREHOUSE {warehouse}")
         cur.execute("USE DATABASE DADOSFERA_PRD_DIGITALSOLVERS")
         cur.close()
-        rows = snowflake_fetch(ctx, sql)[1]
+        rows = snowflake_fetch(ctx, _cnes_busca_sql(parsed, uf, novos, ano, mo))[1]
         vinculos = []
         by_doc = {}
         for r in rows:
@@ -956,7 +951,7 @@ def query_cnes_busca(override: dict | None = None) -> dict:
                 "horas_amb": as_int([r[15]]),
                 "horas_hosp": as_int([r[16]]),
                 "horas_total": as_int([r[17]]),
-                "municipio": str(r[27] or r[18] or ""),
+                "municipio": _cnes_cidade(r[27] or r[18] or ""),
                 "uf": str(r[28] or r[19] or ""),
                 "ibge": str(r[20] or ""),
                 "turno": str(r[21] or ""),
