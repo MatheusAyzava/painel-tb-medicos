@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/style.css?v=28" />
+  <link rel="stylesheet" href="assets/style.css?v=29" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 </head>
 <body>
@@ -180,13 +180,16 @@
             <ul class="legend" id="bi-legend"></ul>
           </article>
           <article class="panel">
-            <h2>Evolução mensal</h2>
-            <p class="map-hint">Clique em jan, fev, mar… para filtrar a lista. Vale para todos os médicos e para médicos novos.</p>
-            <div class="month-chart" id="bi-mensal"></div>
-          </article>
-          <article class="panel">
             <h2>Região</h2>
             <div class="bars" id="bi-regiao"></div>
+          </article>
+        </section>
+
+        <section class="bi-grid bi-month-row">
+          <article class="panel">
+            <h2>Evolução mensal</h2>
+            <p class="map-hint">Clique no mês para filtrar a lista. Vale para todos os médicos e para médicos novos.</p>
+            <div class="month-chart" id="bi-mensal"></div>
           </article>
         </section>
 
@@ -243,7 +246,7 @@
             <button type="button" class="btn ghost" id="btn-csv">Baixar CSV</button>
             <span id="novos-count">0 registros</span>
           </div>
-          <p class="map-hint" id="lista-local">Clique num mês na evolução mensal (jan, fev, mar…) e depois numa cidade.</p>
+          <p class="map-hint" id="lista-local">Clique num mês na evolução mensal e depois numa cidade.</p>
           <div class="table-wrap">
             <table class="novos-table">
               <thead>
@@ -257,7 +260,7 @@
                 </tr>
               </thead>
               <tbody id="novos-body">
-                <tr><td colspan="6">Clique em jan, fev ou mar na evolução mensal e depois em Buscar ou numa cidade.</td></tr>
+                <tr><td colspan="6">Clique num mês na evolução mensal e depois em Buscar ou numa cidade.</td></tr>
               </tbody>
             </table>
           </div>
@@ -275,7 +278,7 @@
     });
   </script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="assets/app.js?v=28"></script>
-  <script src="assets/bi.js?v=28"></script>
+  <script src="assets/app.js?v=29"></script>
+  <script src="assets/bi.js?v=29"></script>
 </body>
 </html>

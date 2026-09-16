@@ -682,21 +682,50 @@ input, textarea {
 .bi-grid .bar-row span { grid-column: 1; grid-row: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .bi-grid .bar-row em { grid-column: 2; grid-row: 1; }
 .bi-grid .bar-row i { grid-column: 1 / -1; grid-row: 2; }
-.bi-top { grid-template-columns: 0.8fr 1.4fr 0.9fr; }
+.bi-top { grid-template-columns: 0.9fr 1.1fr; }
 .bi-mid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-.bi-map-row { grid-template-columns: 1fr; }
+.bi-map-row, .bi-month-row { grid-template-columns: 1fr; }
 
 .month-chart {
   display: flex;
-  align-items: flex-end;
-  gap: 3px;
-  height: 190px;
+  align-items: stretch;
+  gap: 0;
+  height: 280px;
   overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.month-year {
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 auto;
+  min-width: 0;
+  border-left: 1px dashed rgba(215, 230, 220, 0.18);
+  padding: 0 8px;
+}
+
+.month-year:first-child { border-left: none; padding-left: 0; }
+
+.month-year-bars {
+  display: flex;
+  align-items: stretch;
+  gap: 5px;
+  flex: 1;
+  min-height: 0;
+}
+
+.month-year strong {
+  display: block;
+  text-align: center;
+  margin-top: 8px;
+  font: 500 12px "IBM Plex Sans", system-ui, sans-serif;
+  color: var(--muted);
 }
 
 .month-col {
-  flex: 1 0 22px;
-  height: 100%;
+  flex: 1 0 28px;
+  min-width: 28px;
+  height: auto;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
@@ -704,28 +733,47 @@ input, textarea {
   gap: 4px;
   cursor: pointer;
   border-radius: 4px;
-  padding: 0 1px;
+  padding: 0;
 }
 
-.month-col.on i { background: #f0c14a; }
-.month-col:hover i { background: #3dff9a; }
+.month-col em {
+  font: 600 10px "IBM Plex Sans", system-ui, sans-serif;
+  font-style: normal;
+  color: #d7e6dc;
+  line-height: 1.1;
+  text-align: center;
+  white-space: nowrap;
+}
 
-.month-col i {
+.month-track {
+  display: flex;
+  align-items: flex-end;
+  width: 78%;
+  flex: 1;
+  min-height: 110px;
+}
+
+.month-track i {
   display: block;
   width: 100%;
-  min-height: 2px;
+  min-height: 3px;
   background: var(--green);
   border-radius: 3px 3px 0 0;
 }
 
-.month-col span {
-  font-size: 10px;
+.month-col.on .month-track i,
+.month-col.on i { background: #f0c14a; }
+.month-col:hover .month-track i { background: #3dff9a; }
+
+.month-name {
+  font-size: 11px;
   color: var(--muted);
   writing-mode: horizontal-tb;
   transform: none;
-  text-transform: lowercase;
+  text-transform: none;
 }
 
+.month-col.on .month-name,
 .month-col.on span { color: #f0c14a; font-weight: 600; }
 
 #mes-escolhido {

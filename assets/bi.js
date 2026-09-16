@@ -11,7 +11,7 @@ const UF_CENTRO = {
 const biState = { data: null, munis: [], map: null, layer: null, novos: [], modo: "novos", cidade: null, mes: null };
 
 const MES_NOMES = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"];
-const MES_CURTO = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"];
+const MES_EIXO = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
 
 function mesIndex(mes) {
   const mo = Number(String(mes || "").split("-")[1]);
@@ -26,9 +26,17 @@ function mesValue() {
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
 }
 
-function mesCurto(mes) {
+function mesEixo(mes) {
   const idx = mesIndex(mes);
-  return idx < 0 ? "" : MES_CURTO[idx];
+  return idx < 0 ? "" : MES_EIXO[idx];
+}
+
+function mesAno(mes) {
+  return String(mes || "").slice(0, 4);
+}
+
+function mesCurto(mes) {
+  return mesEixo(mes).toLowerCase();
 }
 
 function mesLabel(mes) {
@@ -117,11 +125,26 @@ function renderBi(data) {
 
   if (!biState.mes && (data.mensal || []).length) biState.mes = data.mensal[data.mensal.length - 1].mes;
   const escolhido = mesValue();
-  const maxM = Math.max(...(data.mensal || []).map((m) => m.value), 1);
-  document.getElementById("bi-mensal").innerHTML = (data.mensal || []).map((m) => `
-    <div class="month-col${m.mes === escolhido ? " on" : ""}" data-mes="${m.mes}" title="${mesLabel(m.mes)} · ${biFmt(m.value)}">
-      <i style="height:${Math.max(4, (m.value / maxM) * 100)}%"></i>
-      <span>${mesCurto(m.mes)}</span>
+  const rows = [...(data.mensal || [])].sort((a, b) => String(b.mes).localeCompare(String(a.mes)));
+  const maxM = Math.max(...rows.map((m) => m.value), 1);
+  const grupos = [];
+  rows.forEach((m) => {
+    const year = mesAno(m.mes);
+    if (!grupos.length || grupos[grupos.length - 1].year !== year) grupos.push({ year, items: [] });
+    grupos[grupos.length - 1].items.push(m);
+  });
+  document.getElementById("bi-mensal").innerHTML = grupos.map((grupo) => `
+    <div class="month-year">
+      <div class="month-year-bars">
+        ${grupo.items.map((m) => `
+          <div class="month-col${m.mes === escolhido ? " on" : ""}" data-mes="${m.mes}" title="${mesLabel(m.mes)} ${grupo.year} · ${biFmt(m.value)}">
+            <em>${biFmt(m.value)}</em>
+            <span class="month-track"><i style="height:${Math.max(4, (m.value / maxM) * 100)}%"></i></span>
+            <span class="month-name">${mesEixo(m.mes)}</span>
+          </div>
+        `).join("")}
+      </div>
+      <strong>${grupo.year}</strong>
     </div>
   `).join("");
   atualizarTitulo();
