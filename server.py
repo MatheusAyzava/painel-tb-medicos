@@ -491,11 +491,18 @@ def query_dadosfera_bi(override: dict | None = None) -> dict:
                    )), 'YYYY-MM') AS M,
                    COUNT(DISTINCT UF_CRM) AS N
             FROM GOLD.TB_ESPECIALIDADE_X_FONTES
-            WHERE COALESCE(TRY_TO_DATE(DT_INSCRICAO, 'DD/MM/YYYY'), TRY_TO_DATE(DT_INSCRICAO)) >= DATEADD(MONTH, -35, DATE_TRUNC('MONTH', CURRENT_DATE()))
+            WHERE COALESCE(TRY_TO_DATE(DT_INSCRICAO, 'DD/MM/YYYY'), TRY_TO_DATE(DT_INSCRICAO))
+                    >= DATEADD(MONTH, -35, DATE_TRUNC('MONTH', CURRENT_DATE()))
+              AND COALESCE(TRY_TO_DATE(DT_INSCRICAO, 'DD/MM/YYYY'), TRY_TO_DATE(DT_INSCRICAO))
+                    < DATEADD(MONTH, 1, DATE_TRUNC('MONTH', CURRENT_DATE()))
+              AND YEAR(COALESCE(TRY_TO_DATE(DT_INSCRICAO, 'DD/MM/YYYY'), TRY_TO_DATE(DT_INSCRICAO)))
+                    BETWEEN 2000 AND YEAR(CURRENT_DATE())
             GROUP BY 1
             ORDER BY 1
             """
         ) if r and r[0]]
+        limite_mes = datetime.now().strftime("%Y-%m")
+        mensal = [item for item in mensal if re.fullmatch(r"\d{4}-\d{2}", item["mes"] or "") and "2000" <= item["mes"][:4] <= limite_mes[:4] and item["mes"] <= limite_mes]
         cidades = [
             {"uf": str(r[0] or ""), "municipio": str(r[1] or ""), "ibge": str(r[2] or ""), "value": as_int([r[3]])}
             for r in q(

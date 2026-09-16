@@ -35,6 +35,14 @@ function mesAno(mes) {
   return String(mes || "").slice(0, 4);
 }
 
+function mesValido(mes) {
+  if (!/^\d{4}-\d{2}$/.test(String(mes || ""))) return false;
+  const [ano, mo] = String(mes).split("-").map(Number);
+  if (ano < 2000 || ano > 2100 || mo < 1 || mo > 12) return false;
+  const agora = new Date();
+  return ano * 100 + mo <= agora.getFullYear() * 100 + (agora.getMonth() + 1);
+}
+
 function mesCurto(mes) {
   return mesEixo(mes).toLowerCase();
 }
@@ -123,9 +131,10 @@ function renderBi(data) {
     return `<li><i style="background:${g.color}"></i>${g.key} · ${biFmt(g.value)} (${pct}%)</li>`;
   }).join("");
 
-  if (!biState.mes && (data.mensal || []).length) biState.mes = data.mensal[data.mensal.length - 1].mes;
+  const mensalOk = (data.mensal || []).filter((m) => mesValido(m.mes));
+  if (!biState.mes || !mesValido(biState.mes)) biState.mes = mensalOk.length ? mensalOk[mensalOk.length - 1].mes : null;
   const escolhido = mesValue();
-  const rows = [...(data.mensal || [])].sort((a, b) => String(b.mes).localeCompare(String(a.mes)));
+  const rows = [...mensalOk].sort((a, b) => String(b.mes).localeCompare(String(a.mes)));
   const maxM = Math.max(...rows.map((m) => m.value), 1);
   const grupos = [];
   rows.forEach((m) => {

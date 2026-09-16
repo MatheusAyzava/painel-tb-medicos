@@ -428,14 +428,6 @@
     {
       "mes": "2026-09",
       "value": 152
-    },
-    {
-      "mes": "2027-06",
-      "value": 1
-    },
-    {
-      "mes": "2202-02",
-      "value": 1
     }
   ],
   "cidades": [
@@ -1190,15 +1182,15 @@
       "value": 1062
     },
     {
-      "uf": "MG",
-      "municipio": "Sete Lagoas",
-      "ibge": "316720",
-      "value": 1053
-    },
-    {
       "uf": "RN",
       "municipio": "Mossoró",
       "ibge": "240800",
+      "value": 1053
+    },
+    {
+      "uf": "MG",
+      "municipio": "Sete Lagoas",
+      "ibge": "316720",
       "value": 1053
     },
     {
@@ -1346,15 +1338,15 @@
       "value": 888
     },
     {
-      "uf": "ES",
-      "municipio": "Cachoeiro De Itapemirim",
-      "ibge": "320120",
-      "value": 885
-    },
-    {
       "uf": "SC",
       "municipio": "Lages",
       "ibge": "420930",
+      "value": 885
+    },
+    {
+      "uf": "ES",
+      "municipio": "Cachoeiro De Itapemirim",
+      "ibge": "320120",
       "value": 885
     },
     {
@@ -1412,15 +1404,15 @@
       "value": 824
     },
     {
-      "uf": "PR",
-      "municipio": "Toledo",
-      "ibge": "412770",
-      "value": 817
-    },
-    {
       "uf": "ES",
       "municipio": "Colatina",
       "ibge": "320150",
+      "value": 817
+    },
+    {
+      "uf": "PR",
+      "municipio": "Toledo",
+      "ibge": "412770",
       "value": 817
     },
     {
@@ -1610,15 +1602,15 @@
       "value": 714
     },
     {
-      "uf": "SP",
-      "municipio": "Votuporanga",
-      "ibge": "355710",
-      "value": 710
-    },
-    {
       "uf": "RJ",
       "municipio": "Angra Dos Reis",
       "ibge": "330010",
+      "value": 710
+    },
+    {
+      "uf": "SP",
+      "municipio": "Votuporanga",
+      "ibge": "355710",
       "value": 710
     },
     {
@@ -1659,14 +1651,14 @@
     },
     {
       "uf": "SP",
-      "municipio": "Itaquaquecetuba",
-      "ibge": "352310",
+      "municipio": "Santa Bárbara D'oeste",
+      "ibge": "354580",
       "value": 659
     },
     {
       "uf": "SP",
-      "municipio": "Santa Bárbara D'oeste",
-      "ibge": "354580",
+      "municipio": "Itaquaquecetuba",
+      "ibge": "352310",
       "value": 659
     },
     {
@@ -1772,15 +1764,15 @@
       "value": 625
     },
     {
-      "uf": "PB",
-      "municipio": "Santa Rita",
-      "ibge": "251370",
-      "value": 624
-    },
-    {
       "uf": "SP",
       "municipio": "Francisco Morato",
       "ibge": "351630",
+      "value": 624
+    },
+    {
+      "uf": "PB",
+      "municipio": "Santa Rita",
+      "ibge": "251370",
       "value": 624
     },
     {
@@ -1946,15 +1938,15 @@
       "value": 529
     },
     {
-      "uf": "SP",
-      "municipio": "São Joaquim Da Barra",
-      "ibge": "354940",
-      "value": 529
-    },
-    {
       "uf": "SE",
       "municipio": "Lagarto",
       "ibge": "280350",
+      "value": 529
+    },
+    {
+      "uf": "SP",
+      "municipio": "São Joaquim Da Barra",
+      "ibge": "354940",
       "value": 529
     },
     {
@@ -2222,9 +2214,9 @@
       "value": 448
     },
     {
-      "uf": "BA",
-      "municipio": "Teixeira De Freitas",
-      "ibge": "293135",
+      "uf": "PE",
+      "municipio": "Palmares",
+      "ibge": "261000",
       "value": 446
     },
     {
@@ -2234,9 +2226,9 @@
       "value": 446
     },
     {
-      "uf": "PE",
-      "municipio": "Palmares",
-      "ibge": "261000",
+      "uf": "BA",
+      "municipio": "Teixeira De Freitas",
+      "ibge": "293135",
       "value": 446
     },
     {
@@ -2270,15 +2262,15 @@
       "value": 439
     },
     {
-      "uf": "GO",
-      "municipio": "Trindade",
-      "ibge": "522140",
-      "value": 438
-    },
-    {
       "uf": "RJ",
       "municipio": "Magé",
       "ibge": "330250",
+      "value": 438
+    },
+    {
+      "uf": "GO",
+      "municipio": "Trindade",
+      "ibge": "522140",
       "value": 438
     },
     {
@@ -2336,15 +2328,15 @@
       "value": 419
     },
     {
-      "uf": "SP",
-      "municipio": "Salto",
-      "ibge": "354520",
-      "value": 418
-    },
-    {
       "uf": "SC",
       "municipio": "Araranguá",
       "ibge": "420140",
+      "value": 418
+    },
+    {
+      "uf": "SP",
+      "municipio": "Salto",
+      "ibge": "354520",
       "value": 418
     },
     {
@@ -2414,15 +2406,15 @@
       "value": 394
     },
     {
-      "uf": "GO",
-      "municipio": "Jataí",
-      "ibge": "521190",
-      "value": 392
-    },
-    {
       "uf": "SC",
       "municipio": "Biguaçu",
       "ibge": "420230",
+      "value": 392
+    },
+    {
+      "uf": "GO",
+      "municipio": "Jataí",
+      "ibge": "521190",
       "value": 392
     },
     {
@@ -2444,9 +2436,9 @@
       "value": 388
     },
     {
-      "uf": "ES",
-      "municipio": "São Mateus",
-      "ibge": "320490",
+      "uf": "GO",
+      "municipio": "Senador Canedo",
+      "ibge": "522045",
       "value": 384
     },
     {
@@ -2456,9 +2448,9 @@
       "value": 384
     },
     {
-      "uf": "GO",
-      "municipio": "Senador Canedo",
-      "ibge": "522045",
+      "uf": "ES",
+      "municipio": "São Mateus",
+      "ibge": "320490",
       "value": 384
     },
     {
@@ -2486,15 +2478,15 @@
       "value": 373
     },
     {
-      "uf": "PE",
-      "municipio": "Ipojuca",
-      "ibge": "260720",
-      "value": 371
-    },
-    {
       "uf": "BA",
       "municipio": "Porto Seguro",
       "ibge": "292530",
+      "value": 371
+    },
+    {
+      "uf": "PE",
+      "municipio": "Ipojuca",
+      "ibge": "260720",
       "value": 371
     },
     {
@@ -2517,14 +2509,14 @@
     },
     {
       "uf": "SC",
-      "municipio": "Navegantes",
-      "ibge": "421130",
+      "municipio": "Itapema",
+      "ibge": "420830",
       "value": 362
     },
     {
       "uf": "SC",
-      "municipio": "Itapema",
-      "ibge": "420830",
+      "municipio": "Navegantes",
+      "ibge": "421130",
       "value": 362
     },
     {
@@ -2546,22 +2538,16 @@
       "value": 356
     },
     {
-      "uf": "PA",
-      "municipio": "Barcarena",
-      "ibge": "150130",
-      "value": 354
-    },
-    {
       "uf": "CE",
       "municipio": "Cascavel",
       "ibge": "230350",
       "value": 354
     },
     {
-      "uf": "RO",
-      "municipio": "Vilhena",
-      "ibge": "110030",
-      "value": 351
+      "uf": "PA",
+      "municipio": "Barcarena",
+      "ibge": "150130",
+      "value": 354
     },
     {
       "uf": "RS",
@@ -2573,6 +2559,12 @@
       "uf": "SC",
       "municipio": "Indaial",
       "ibge": "420750",
+      "value": 351
+    },
+    {
+      "uf": "RO",
+      "municipio": "Vilhena",
+      "ibge": "110030",
       "value": 351
     },
     {
@@ -2600,15 +2592,15 @@
       "value": 344
     },
     {
-      "uf": "PE",
-      "municipio": "Goiana",
-      "ibge": "260620",
-      "value": 343
-    },
-    {
       "uf": "SC",
       "municipio": "Gaspar",
       "ibge": "420590",
+      "value": 343
+    },
+    {
+      "uf": "PE",
+      "municipio": "Goiana",
+      "ibge": "260620",
       "value": 343
     },
     {
@@ -2643,21 +2635,15 @@
     },
     {
       "uf": "SP",
-      "municipio": "Boituva",
-      "ibge": "350700",
-      "value": 336
-    },
-    {
-      "uf": "SP",
       "municipio": "Américo Brasiliense",
       "ibge": "350170",
       "value": 336
     },
     {
       "uf": "SP",
-      "municipio": "Pirassununga",
-      "ibge": "353930",
-      "value": 332
+      "municipio": "Boituva",
+      "ibge": "350700",
+      "value": 336
     },
     {
       "uf": "PB",
@@ -2666,15 +2652,21 @@
       "value": 332
     },
     {
-      "uf": "RS",
-      "municipio": "Sapiranga",
-      "ibge": "431990",
-      "value": 331
+      "uf": "SP",
+      "municipio": "Pirassununga",
+      "ibge": "353930",
+      "value": 332
     },
     {
       "uf": "SC",
       "municipio": "Canoinhas",
       "ibge": "420380",
+      "value": 331
+    },
+    {
+      "uf": "RS",
+      "municipio": "Sapiranga",
+      "ibge": "431990",
       "value": 331
     },
     {
@@ -2696,15 +2688,15 @@
       "value": 326
     },
     {
-      "uf": "RJ",
-      "municipio": "São João Da Barra",
-      "ibge": "330500",
-      "value": 323
-    },
-    {
       "uf": "CE",
       "municipio": "Eusébio",
       "ibge": "230428",
+      "value": 323
+    },
+    {
+      "uf": "RJ",
+      "municipio": "São João Da Barra",
+      "ibge": "330500",
       "value": 323
     },
     {
@@ -2738,15 +2730,15 @@
       "value": 315
     },
     {
-      "uf": "PR",
-      "municipio": "Cornélio Procópio",
-      "ibge": "410640",
-      "value": 314
-    },
-    {
       "uf": "SE",
       "municipio": "Estância",
       "ibge": "280210",
+      "value": 314
+    },
+    {
+      "uf": "PR",
+      "municipio": "Cornélio Procópio",
+      "ibge": "410640",
       "value": 314
     },
     {
@@ -2823,14 +2815,14 @@
     },
     {
       "uf": "SP",
-      "municipio": "Mairiporã",
-      "ibge": "352850",
+      "municipio": "Itapeva",
+      "ibge": "352240",
       "value": 297
     },
     {
       "uf": "SP",
-      "municipio": "Itapeva",
-      "ibge": "352240",
+      "municipio": "Mairiporã",
+      "ibge": "352850",
       "value": 297
     },
     {
@@ -2858,15 +2850,15 @@
       "value": 291
     },
     {
-      "uf": "PB",
-      "municipio": "Guarabira",
-      "ibge": "250630",
-      "value": 290
-    },
-    {
       "uf": "PE",
       "municipio": "Limoeiro",
       "ibge": "260890",
+      "value": 290
+    },
+    {
+      "uf": "PB",
+      "municipio": "Guarabira",
+      "ibge": "250630",
       "value": 290
     },
     {
@@ -2924,9 +2916,9 @@
       "value": 283
     },
     {
-      "uf": "SP",
-      "municipio": "Adamantina",
-      "ibge": "350010",
+      "uf": "SC",
+      "municipio": "Içara",
+      "ibge": "420700",
       "value": 282
     },
     {
@@ -2936,9 +2928,9 @@
       "value": 282
     },
     {
-      "uf": "SC",
-      "municipio": "Içara",
-      "ibge": "420700",
+      "uf": "SP",
+      "municipio": "Adamantina",
+      "ibge": "350010",
       "value": 282
     },
     {
@@ -2972,16 +2964,22 @@
       "value": 277
     },
     {
+      "uf": "RS",
+      "municipio": "Santa Rosa",
+      "ibge": "431720",
+      "value": 276
+    },
+    {
       "uf": "MA",
       "municipio": "Timon",
       "ibge": "211220",
       "value": 276
     },
     {
-      "uf": "RS",
-      "municipio": "Santa Rosa",
-      "ibge": "431720",
-      "value": 276
+      "uf": "PA",
+      "municipio": "Altamira",
+      "ibge": "150060",
+      "value": 275
     },
     {
       "uf": "MA",
@@ -2996,21 +2994,15 @@
       "value": 275
     },
     {
-      "uf": "PA",
-      "municipio": "Altamira",
-      "ibge": "150060",
-      "value": 275
+      "uf": "SP",
+      "municipio": "Capivari",
+      "ibge": "351040",
+      "value": 272
     },
     {
       "uf": "BA",
       "municipio": "Senhor Do Bonfim",
       "ibge": "293010",
-      "value": 272
-    },
-    {
-      "uf": "SP",
-      "municipio": "Capivari",
-      "ibge": "351040",
       "value": 272
     },
     {
@@ -3092,15 +3084,15 @@
       "value": 262
     },
     {
-      "uf": "PA",
-      "municipio": "Tucuruí",
-      "ibge": "150810",
-      "value": 261
-    },
-    {
       "uf": "RN",
       "municipio": "Caicó",
       "ibge": "240200",
+      "value": 261
+    },
+    {
+      "uf": "PA",
+      "municipio": "Tucuruí",
+      "ibge": "150810",
       "value": 261
     },
     {
@@ -3128,6 +3120,12 @@
       "value": 257
     },
     {
+      "uf": "SP",
+      "municipio": "Nova Odessa",
+      "ibge": "353340",
+      "value": 256
+    },
+    {
       "uf": "RS",
       "municipio": "Gramado",
       "ibge": "430910",
@@ -3137,12 +3135,6 @@
       "uf": "RS",
       "municipio": "Guaíba",
       "ibge": "430930",
-      "value": 256
-    },
-    {
-      "uf": "SP",
-      "municipio": "Nova Odessa",
-      "ibge": "353340",
       "value": 256
     },
     {
@@ -3170,15 +3162,15 @@
       "value": 253
     },
     {
-      "uf": "RS",
-      "municipio": "Uruguaiana",
-      "ibge": "432240",
-      "value": 253
-    },
-    {
       "uf": "AL",
       "municipio": "Rio Largo",
       "ibge": "270770",
+      "value": 253
+    },
+    {
+      "uf": "RS",
+      "municipio": "Uruguaiana",
+      "ibge": "432240",
       "value": 253
     },
     {
@@ -3188,15 +3180,9 @@
       "value": 252
     },
     {
-      "uf": "RJ",
-      "municipio": "Paraíba Do Sul",
-      "ibge": "330370",
-      "value": 251
-    },
-    {
-      "uf": "MS",
-      "municipio": "Corumbá",
-      "ibge": "500320",
+      "uf": "SP",
+      "municipio": "Cosmópolis",
+      "ibge": "351280",
       "value": 251
     },
     {
@@ -3206,9 +3192,15 @@
       "value": 251
     },
     {
-      "uf": "SP",
-      "municipio": "Cosmópolis",
-      "ibge": "351280",
+      "uf": "MS",
+      "municipio": "Corumbá",
+      "ibge": "500320",
+      "value": 251
+    },
+    {
+      "uf": "RJ",
+      "municipio": "Paraíba Do Sul",
+      "ibge": "330370",
       "value": 251
     },
     {
@@ -3254,6 +3246,12 @@
       "value": 243
     },
     {
+      "uf": "BA",
+      "municipio": "Serrinha",
+      "ibge": "293050",
+      "value": 242
+    },
+    {
       "uf": "GO",
       "municipio": "Mineiros",
       "ibge": "521310",
@@ -3263,12 +3261,6 @@
       "uf": "SC",
       "municipio": "Tijucas",
       "ibge": "421800",
-      "value": 242
-    },
-    {
-      "uf": "BA",
-      "municipio": "Serrinha",
-      "ibge": "293050",
       "value": 242
     },
     {
@@ -3350,12 +3342,6 @@
       "value": 227
     },
     {
-      "uf": "GO",
-      "municipio": "Santa Helena De Goiás",
-      "ibge": "521930",
-      "value": 225
-    },
-    {
       "uf": "BA",
       "municipio": "Luís Eduardo Magalhães",
       "ibge": "291955",
@@ -3368,15 +3354,21 @@
       "value": 225
     },
     {
-      "uf": "PR",
-      "municipio": "Telêmaco Borba",
-      "ibge": "412710",
-      "value": 224
+      "uf": "GO",
+      "municipio": "Santa Helena De Goiás",
+      "ibge": "521930",
+      "value": 225
     },
     {
       "uf": "SP",
       "municipio": "Ibitinga",
       "ibge": "351960",
+      "value": 224
+    },
+    {
+      "uf": "PR",
+      "municipio": "Telêmaco Borba",
+      "ibge": "412710",
       "value": 224
     },
     {
@@ -3404,15 +3396,15 @@
       "value": 214
     },
     {
-      "uf": "PB",
-      "municipio": "Cabedelo",
-      "ibge": "250320",
-      "value": 213
-    },
-    {
       "uf": "PI",
       "municipio": "Piripiri",
       "ibge": "220840",
+      "value": 213
+    },
+    {
+      "uf": "PB",
+      "municipio": "Cabedelo",
+      "ibge": "250320",
       "value": 213
     },
     {
@@ -3423,26 +3415,26 @@
     },
     {
       "uf": "SP",
-      "municipio": "Olímpia",
-      "ibge": "353390",
-      "value": 210
-    },
-    {
-      "uf": "SP",
       "municipio": "São José Do Rio Pardo",
       "ibge": "354970",
       "value": 210
     },
     {
-      "uf": "PA",
-      "municipio": "Bragança",
-      "ibge": "150170",
-      "value": 209
+      "uf": "SP",
+      "municipio": "Olímpia",
+      "ibge": "353390",
+      "value": 210
     },
     {
       "uf": "RN",
       "municipio": "Macaíba",
       "ibge": "240710",
+      "value": 209
+    },
+    {
+      "uf": "PA",
+      "municipio": "Bragança",
+      "ibge": "150170",
       "value": 209
     },
     {
@@ -3458,6 +3450,12 @@
       "value": 207
     },
     {
+      "uf": "PA",
+      "municipio": "Redenção",
+      "ibge": "150613",
+      "value": 206
+    },
+    {
       "uf": "SP",
       "municipio": "Pariquera-açu",
       "ibge": "353620",
@@ -3467,12 +3465,6 @@
       "uf": "RN",
       "municipio": "Currais Novos",
       "ibge": "240310",
-      "value": 206
-    },
-    {
-      "uf": "PA",
-      "municipio": "Redenção",
-      "ibge": "150613",
       "value": 206
     },
     {
@@ -3495,14 +3487,14 @@
     },
     {
       "uf": "SP",
-      "municipio": "Cabreúva",
-      "ibge": "350840",
+      "municipio": "Promissão",
+      "ibge": "354160",
       "value": 203
     },
     {
       "uf": "SP",
-      "municipio": "Promissão",
-      "ibge": "354160",
+      "municipio": "Cabreúva",
+      "ibge": "350840",
       "value": 203
     },
     {
@@ -3512,15 +3504,15 @@
       "value": 202
     },
     {
-      "uf": "MA",
-      "municipio": "Paço Do Lumiar",
-      "ibge": "210750",
+      "uf": "RN",
+      "municipio": "Pau Dos Ferros",
+      "ibge": "240940",
       "value": 201
     },
     {
-      "uf": "PA",
-      "municipio": "Itaituba",
-      "ibge": "150360",
+      "uf": "MA",
+      "municipio": "Paço Do Lumiar",
+      "ibge": "210750",
       "value": 201
     },
     {
@@ -3530,9 +3522,9 @@
       "value": 201
     },
     {
-      "uf": "RN",
-      "municipio": "Pau Dos Ferros",
-      "ibge": "240940",
+      "uf": "PA",
+      "municipio": "Itaituba",
+      "ibge": "150360",
       "value": 201
     },
     {
@@ -3542,15 +3534,15 @@
       "value": 201
     },
     {
-      "uf": "BA",
-      "municipio": "Brumado",
-      "ibge": "290460",
-      "value": 199
-    },
-    {
       "uf": "PA",
       "municipio": "Ourilândia Do Norte",
       "ibge": "150543",
+      "value": 199
+    },
+    {
+      "uf": "BA",
+      "municipio": "Brumado",
+      "ibge": "290460",
       "value": 199
     },
     {
@@ -3584,27 +3576,27 @@
       "value": 195
     },
     {
-      "uf": "MT",
-      "municipio": "Nova Mutum",
-      "ibge": "510622",
-      "value": 195
-    },
-    {
       "uf": "RN",
       "municipio": "São Gonçalo Do Amarante",
       "ibge": "241200",
       "value": 195
     },
     {
-      "uf": "CE",
-      "municipio": "Horizonte",
-      "ibge": "230523",
-      "value": 194
+      "uf": "MT",
+      "municipio": "Nova Mutum",
+      "ibge": "510622",
+      "value": 195
     },
     {
       "uf": "SC",
       "municipio": "Balneário Piçarras",
       "ibge": "421280",
+      "value": 194
+    },
+    {
+      "uf": "CE",
+      "municipio": "Horizonte",
+      "ibge": "230523",
       "value": 194
     },
     {
@@ -3620,15 +3612,15 @@
       "value": 193
     },
     {
-      "uf": "BA",
-      "municipio": "Valença",
-      "ibge": "293290",
-      "value": 193
-    },
-    {
       "uf": "MA",
       "municipio": "Balsas",
       "ibge": "210140",
+      "value": 193
+    },
+    {
+      "uf": "BA",
+      "municipio": "Valença",
+      "ibge": "293290",
       "value": 193
     },
     {
@@ -3650,12 +3642,6 @@
       "value": 192
     },
     {
-      "uf": "PR",
-      "municipio": "Jacarezinho",
-      "ibge": "411180",
-      "value": 191
-    },
-    {
       "uf": "SP",
       "municipio": "Novo Horizonte",
       "ibge": "353350",
@@ -3668,15 +3654,21 @@
       "value": 191
     },
     {
-      "uf": "SC",
-      "municipio": "Forquilhinha",
-      "ibge": "420545",
-      "value": 190
+      "uf": "PR",
+      "municipio": "Jacarezinho",
+      "ibge": "411180",
+      "value": 191
     },
     {
       "uf": "CE",
       "municipio": "Pacajus",
       "ibge": "230960",
+      "value": 190
+    },
+    {
+      "uf": "SC",
+      "municipio": "Forquilhinha",
+      "ibge": "420545",
       "value": 190
     },
     {
@@ -3716,18 +3708,6 @@
       "value": 184
     },
     {
-      "uf": "BA",
-      "municipio": "São Francisco Do Conde",
-      "ibge": "292920",
-      "value": 182
-    },
-    {
-      "uf": "PI",
-      "municipio": "Campo Maior",
-      "ibge": "220220",
-      "value": 182
-    },
-    {
       "uf": "PE",
       "municipio": "Ouricuri",
       "ibge": "260990",
@@ -3740,21 +3720,33 @@
       "value": 182
     },
     {
+      "uf": "BA",
+      "municipio": "São Francisco Do Conde",
+      "ibge": "292920",
+      "value": 182
+    },
+    {
+      "uf": "PI",
+      "municipio": "Campo Maior",
+      "ibge": "220220",
+      "value": 182
+    },
+    {
       "uf": "SP",
       "municipio": "Pederneiras",
       "ibge": "353670",
       "value": 181
     },
     {
-      "uf": "SP",
-      "municipio": "Orlândia",
-      "ibge": "353430",
-      "value": 180
-    },
-    {
       "uf": "PR",
       "municipio": "Rio Negro",
       "ibge": "412230",
+      "value": 180
+    },
+    {
+      "uf": "SP",
+      "municipio": "Orlândia",
+      "ibge": "353430",
       "value": 180
     },
     {
@@ -3776,15 +3768,15 @@
       "value": 175
     },
     {
-      "uf": "PE",
-      "municipio": "Moreno",
-      "ibge": "260940",
-      "value": 174
-    },
-    {
       "uf": "SP",
       "municipio": "Pontal",
       "ibge": "354020",
+      "value": 174
+    },
+    {
+      "uf": "PE",
+      "municipio": "Moreno",
+      "ibge": "260940",
       "value": 174
     },
     {
@@ -3800,27 +3792,27 @@
       "value": 171
     },
     {
-      "uf": "PE",
-      "municipio": "Bezerros",
-      "ibge": "260190",
-      "value": 170
-    },
-    {
       "uf": "GO",
       "municipio": "Nerópolis",
       "ibge": "521450",
       "value": 170
     },
     {
-      "uf": "GO",
-      "municipio": "São Luís De Montes Belos",
-      "ibge": "522010",
+      "uf": "PE",
+      "municipio": "Bezerros",
+      "ibge": "260190",
       "value": 170
     },
     {
       "uf": "CE",
       "municipio": "Acaraú",
       "ibge": "230020",
+      "value": 170
+    },
+    {
+      "uf": "GO",
+      "municipio": "São Luís De Montes Belos",
+      "ibge": "522010",
       "value": 170
     },
     {
@@ -3848,9 +3840,9 @@
       "value": 167
     },
     {
-      "uf": "GO",
-      "municipio": "Inhumas",
-      "ibge": "521000",
+      "uf": "PE",
+      "municipio": "Gravatá",
+      "ibge": "260640",
       "value": 166
     },
     {
@@ -3860,9 +3852,9 @@
       "value": 166
     },
     {
-      "uf": "PE",
-      "municipio": "Gravatá",
-      "ibge": "260640",
+      "uf": "GO",
+      "municipio": "Inhumas",
+      "ibge": "521000",
       "value": 166
     },
     {
@@ -3870,18 +3862,6 @@
       "municipio": "Casa Branca",
       "ibge": "351080",
       "value": 166
-    },
-    {
-      "uf": "SP",
-      "municipio": "Monte Mor",
-      "ibge": "353180",
-      "value": 164
-    },
-    {
-      "uf": "BA",
-      "municipio": "Catu",
-      "ibge": "290750",
-      "value": 164
     },
     {
       "uf": "SP",
@@ -3893,6 +3873,18 @@
       "uf": "RN",
       "municipio": "Santa Cruz",
       "ibge": "241120",
+      "value": 164
+    },
+    {
+      "uf": "BA",
+      "municipio": "Catu",
+      "ibge": "290750",
+      "value": 164
+    },
+    {
+      "uf": "SP",
+      "municipio": "Monte Mor",
+      "ibge": "353180",
       "value": 164
     },
     {
@@ -3926,6 +3918,12 @@
       "value": 159
     },
     {
+      "uf": "SP",
+      "municipio": "Mirandópolis",
+      "ibge": "353010",
+      "value": 158
+    },
+    {
       "uf": "BA",
       "municipio": "Campo Formoso",
       "ibge": "290600",
@@ -3933,9 +3931,15 @@
     },
     {
       "uf": "SP",
-      "municipio": "Mirandópolis",
-      "ibge": "353010",
-      "value": 158
+      "municipio": "Mairinque",
+      "ibge": "352840",
+      "value": 157
+    },
+    {
+      "uf": "SP",
+      "municipio": "Pitangueiras",
+      "ibge": "353950",
+      "value": 157
     },
     {
       "uf": "ES",
@@ -3951,20 +3955,14 @@
     },
     {
       "uf": "SP",
-      "municipio": "Pitangueiras",
-      "ibge": "353950",
-      "value": 157
+      "municipio": "Ibaté",
+      "ibge": "351930",
+      "value": 156
     },
     {
       "uf": "SP",
-      "municipio": "Mairinque",
-      "ibge": "352840",
-      "value": 157
-    },
-    {
-      "uf": "SP",
-      "municipio": "Campo Limpo Paulista",
-      "ibge": "350960",
+      "municipio": "Peruíbe",
+      "ibge": "353760",
       "value": 156
     },
     {
@@ -3975,14 +3973,8 @@
     },
     {
       "uf": "SP",
-      "municipio": "Ibaté",
-      "ibge": "351930",
-      "value": 156
-    },
-    {
-      "uf": "SP",
-      "municipio": "Peruíbe",
-      "ibge": "353760",
+      "municipio": "Campo Limpo Paulista",
+      "ibge": "350960",
       "value": 156
     },
     {
@@ -4004,6 +3996,12 @@
       "value": 154
     },
     {
+      "uf": "ES",
+      "municipio": "Barra De São Francisco",
+      "ibge": "320090",
+      "value": 152
+    },
+    {
       "uf": "SP",
       "municipio": "Agudos",
       "ibge": "350070",
@@ -4016,28 +4014,16 @@
       "value": 152
     },
     {
-      "uf": "ES",
-      "municipio": "Barra De São Francisco",
-      "ibge": "320090",
-      "value": 152
-    },
-    {
-      "uf": "RN",
-      "municipio": "São José De Mipibu",
-      "ibge": "241220",
-      "value": 151
-    },
-    {
       "uf": "RN",
       "municipio": "Açu",
       "ibge": "240020",
       "value": 151
     },
     {
-      "uf": "BA",
-      "municipio": "Bom Jesus Da Lapa",
-      "ibge": "290390",
-      "value": 150
+      "uf": "RN",
+      "municipio": "São José De Mipibu",
+      "ibge": "241220",
+      "value": 151
     },
     {
       "uf": "SP",
@@ -4049,6 +4035,12 @@
       "uf": "CE",
       "municipio": "Russas",
       "ibge": "231180",
+      "value": 150
+    },
+    {
+      "uf": "BA",
+      "municipio": "Bom Jesus Da Lapa",
+      "ibge": "290390",
       "value": 150
     },
     {
@@ -4076,16 +4068,22 @@
       "value": 146
     },
     {
+      "uf": "MA",
+      "municipio": "Presidente Dutra",
+      "ibge": "210910",
+      "value": 145
+    },
+    {
       "uf": "SP",
       "municipio": "Mongaguá",
       "ibge": "353110",
       "value": 145
     },
     {
-      "uf": "MA",
-      "municipio": "Presidente Dutra",
-      "ibge": "210910",
-      "value": 145
+      "uf": "PB",
+      "municipio": "Queimadas",
+      "ibge": "251250",
+      "value": 144
     },
     {
       "uf": "GO",
@@ -4100,10 +4098,10 @@
       "value": 144
     },
     {
-      "uf": "PB",
-      "municipio": "Queimadas",
-      "ibge": "251250",
-      "value": 144
+      "uf": "SP",
+      "municipio": "Guararema",
+      "ibge": "351830",
+      "value": 143
     },
     {
       "uf": "MA",
@@ -4115,12 +4113,6 @@
       "uf": "CE",
       "municipio": "Maranguape",
       "ibge": "230770",
-      "value": 143
-    },
-    {
-      "uf": "SP",
-      "municipio": "Guararema",
-      "ibge": "351830",
       "value": 143
     },
     {
@@ -4148,16 +4140,22 @@
       "value": 140
     },
     {
+      "uf": "SP",
+      "municipio": "Divinolândia",
+      "ibge": "351390",
+      "value": 139
+    },
+    {
       "uf": "MS",
       "municipio": "Costa Rica",
       "ibge": "500325",
       "value": 139
     },
     {
-      "uf": "SP",
-      "municipio": "Divinolândia",
-      "ibge": "351390",
-      "value": 139
+      "uf": "MA",
+      "municipio": "Coroatá",
+      "ibge": "210360",
+      "value": 138
     },
     {
       "uf": "SP",
@@ -4169,12 +4167,6 @@
       "uf": "RO",
       "municipio": "Ouro Preto Do Oeste",
       "ibge": "110015",
-      "value": 138
-    },
-    {
-      "uf": "MA",
-      "municipio": "Coroatá",
-      "ibge": "210360",
       "value": 138
     },
     {
@@ -4202,16 +4194,22 @@
       "value": 136
     },
     {
+      "uf": "AM",
+      "municipio": "Parintins",
+      "ibge": "130340",
+      "value": 136
+    },
+    {
       "uf": "SP",
       "municipio": "Paraíso",
       "ibge": "353570",
       "value": 136
     },
     {
-      "uf": "AM",
-      "municipio": "Parintins",
-      "ibge": "130340",
-      "value": 136
+      "uf": "SP",
+      "municipio": "Capão Bonito",
+      "ibge": "351020",
+      "value": 135
     },
     {
       "uf": "PA",
@@ -4224,18 +4222,6 @@
       "municipio": "Tietê",
       "ibge": "355450",
       "value": 135
-    },
-    {
-      "uf": "SP",
-      "municipio": "Capão Bonito",
-      "ibge": "351020",
-      "value": 135
-    },
-    {
-      "uf": "SP",
-      "municipio": "Salto De Pirapora",
-      "ibge": "354530",
-      "value": 134
     },
     {
       "uf": "SP",
@@ -4256,21 +4242,27 @@
       "value": 134
     },
     {
+      "uf": "SP",
+      "municipio": "Salto De Pirapora",
+      "ibge": "354530",
+      "value": 134
+    },
+    {
       "uf": "MA",
       "municipio": "Codó",
       "ibge": "210330",
       "value": 133
     },
     {
-      "uf": "MT",
-      "municipio": "Jaciara",
-      "ibge": "510480",
-      "value": 132
-    },
-    {
       "uf": "SP",
       "municipio": "Presidente Venceslau",
       "ibge": "354150",
+      "value": 132
+    },
+    {
+      "uf": "MT",
+      "municipio": "Jaciara",
+      "ibge": "510480",
       "value": 132
     },
     {
@@ -4328,15 +4320,15 @@
       "value": 124
     },
     {
-      "uf": "SE",
-      "municipio": "São Cristóvão",
-      "ibge": "280670",
-      "value": 124
-    },
-    {
       "uf": "CE",
       "municipio": "Tauá",
       "ibge": "231330",
+      "value": 124
+    },
+    {
+      "uf": "SE",
+      "municipio": "São Cristóvão",
+      "ibge": "280670",
       "value": 124
     },
     {
@@ -4346,39 +4338,9 @@
       "value": 123
     },
     {
-      "uf": "AL",
-      "municipio": "Pilar",
-      "ibge": "270690",
-      "value": 122
-    },
-    {
       "uf": "SP",
       "municipio": "Jardinópolis",
       "ibge": "352510",
-      "value": 122
-    },
-    {
-      "uf": "GO",
-      "municipio": "Goiás",
-      "ibge": "520890",
-      "value": 122
-    },
-    {
-      "uf": "GO",
-      "municipio": "Morrinhos",
-      "ibge": "521380",
-      "value": 122
-    },
-    {
-      "uf": "RO",
-      "municipio": "Rolim De Moura",
-      "ibge": "110028",
-      "value": 122
-    },
-    {
-      "uf": "SE",
-      "municipio": "Nossa Senhora Da Glória",
-      "ibge": "280450",
       "value": 122
     },
     {
@@ -4388,10 +4350,34 @@
       "value": 122
     },
     {
-      "uf": "SP",
-      "municipio": "Ilha Solteira",
-      "ibge": "352044",
-      "value": 121
+      "uf": "SE",
+      "municipio": "Nossa Senhora Da Glória",
+      "ibge": "280450",
+      "value": 122
+    },
+    {
+      "uf": "AL",
+      "municipio": "Pilar",
+      "ibge": "270690",
+      "value": 122
+    },
+    {
+      "uf": "GO",
+      "municipio": "Morrinhos",
+      "ibge": "521380",
+      "value": 122
+    },
+    {
+      "uf": "GO",
+      "municipio": "Goiás",
+      "ibge": "520890",
+      "value": 122
+    },
+    {
+      "uf": "RO",
+      "municipio": "Rolim De Moura",
+      "ibge": "110028",
+      "value": 122
     },
     {
       "uf": "GO",
@@ -4400,9 +4386,15 @@
       "value": 121
     },
     {
-      "uf": "GO",
-      "municipio": "Itaberaí",
-      "ibge": "521040",
+      "uf": "SP",
+      "municipio": "Ilha Solteira",
+      "ibge": "352044",
+      "value": 121
+    },
+    {
+      "uf": "CE",
+      "municipio": "Camocim",
+      "ibge": "230260",
       "value": 120
     },
     {
@@ -4412,15 +4404,15 @@
       "value": 120
     },
     {
-      "uf": "MS",
-      "municipio": "Maracaju",
-      "ibge": "500540",
+      "uf": "GO",
+      "municipio": "Itaberaí",
+      "ibge": "521040",
       "value": 120
     },
     {
-      "uf": "CE",
-      "municipio": "Camocim",
-      "ibge": "230260",
+      "uf": "MS",
+      "municipio": "Maracaju",
+      "ibge": "500540",
       "value": 120
     },
     {
@@ -4428,12 +4420,6 @@
       "municipio": "Chapadinha",
       "ibge": "210320",
       "value": 119
-    },
-    {
-      "uf": "PE",
-      "municipio": "Barreiros",
-      "ibge": "260140",
-      "value": 117
     },
     {
       "uf": "SP",
@@ -4448,10 +4434,10 @@
       "value": 117
     },
     {
-      "uf": "SP",
-      "municipio": "Rio Das Pedras",
-      "ibge": "354400",
-      "value": 116
+      "uf": "PE",
+      "municipio": "Barreiros",
+      "ibge": "260140",
+      "value": 117
     },
     {
       "uf": "ES",
@@ -4460,9 +4446,15 @@
       "value": 116
     },
     {
-      "uf": "PE",
-      "municipio": "Belo Jardim",
-      "ibge": "260170",
+      "uf": "PB",
+      "municipio": "Monteiro",
+      "ibge": "250970",
+      "value": 116
+    },
+    {
+      "uf": "SP",
+      "municipio": "Rio Das Pedras",
+      "ibge": "354400",
       "value": 116
     },
     {
@@ -4472,9 +4464,9 @@
       "value": 116
     },
     {
-      "uf": "PB",
-      "municipio": "Monteiro",
-      "ibge": "250970",
+      "uf": "PE",
+      "municipio": "Belo Jardim",
+      "ibge": "260170",
       "value": 116
     },
     {
@@ -4490,9 +4482,9 @@
       "value": 115
     },
     {
-      "uf": "SP",
-      "municipio": "Guariba",
-      "ibge": "351860",
+      "uf": "AL",
+      "municipio": "Marechal Deodoro",
+      "ibge": "270470",
       "value": 114
     },
     {
@@ -4508,9 +4500,9 @@
       "value": 114
     },
     {
-      "uf": "AL",
-      "municipio": "Marechal Deodoro",
-      "ibge": "270470",
+      "uf": "SP",
+      "municipio": "Guariba",
+      "ibge": "351860",
       "value": 114
     },
     {
@@ -4521,8 +4513,8 @@
     },
     {
       "uf": "SP",
-      "municipio": "Socorro",
-      "ibge": "355210",
+      "municipio": "Colina",
+      "ibge": "351200",
       "value": 113
     },
     {
@@ -4533,8 +4525,8 @@
     },
     {
       "uf": "SP",
-      "municipio": "Colina",
-      "ibge": "351200",
+      "municipio": "Socorro",
+      "ibge": "355210",
       "value": 113
     },
     {
@@ -4544,16 +4536,22 @@
       "value": 112
     },
     {
+      "uf": "PA",
+      "municipio": "Tailândia",
+      "ibge": "150795",
+      "value": 112
+    },
+    {
       "uf": "SP",
       "municipio": "Bernardino De Campos",
       "ibge": "350630",
       "value": 112
     },
     {
-      "uf": "PA",
-      "municipio": "Tailândia",
-      "ibge": "150795",
-      "value": 112
+      "uf": "ES",
+      "municipio": "Nova Venécia",
+      "ibge": "320390",
+      "value": 111
     },
     {
       "uf": "GO",
@@ -4568,21 +4566,15 @@
       "value": 111
     },
     {
-      "uf": "ES",
-      "municipio": "Nova Venécia",
-      "ibge": "320390",
-      "value": 111
+      "uf": "SP",
+      "municipio": "Tambaú",
+      "ibge": "355330",
+      "value": 110
     },
     {
       "uf": "PE",
       "municipio": "Timbaúba",
       "ibge": "261530",
-      "value": 110
-    },
-    {
-      "uf": "SP",
-      "municipio": "Tambaú",
-      "ibge": "355330",
       "value": 110
     },
     {
@@ -4598,28 +4590,16 @@
       "value": 110
     },
     {
-      "uf": "AM",
-      "municipio": "Itacoatiara",
-      "ibge": "130190",
-      "value": 109
-    },
-    {
       "uf": "SP",
       "municipio": "Santa Rita Do Passa Quatro",
       "ibge": "354750",
       "value": 109
     },
     {
-      "uf": "ES",
-      "municipio": "São Gabriel Da Palha",
-      "ibge": "320470",
-      "value": 108
-    },
-    {
-      "uf": "MS",
-      "municipio": "Paranaíba",
-      "ibge": "500630",
-      "value": 108
+      "uf": "AM",
+      "municipio": "Itacoatiara",
+      "ibge": "130190",
+      "value": 109
     },
     {
       "uf": "PE",
@@ -4634,9 +4614,39 @@
       "value": 108
     },
     {
+      "uf": "MS",
+      "municipio": "Paranaíba",
+      "ibge": "500630",
+      "value": 108
+    },
+    {
+      "uf": "ES",
+      "municipio": "São Gabriel Da Palha",
+      "ibge": "320470",
+      "value": 108
+    },
+    {
+      "uf": "ES",
+      "municipio": "São José Do Calçado",
+      "ibge": "320480",
+      "value": 107
+    },
+    {
+      "uf": "PE",
+      "municipio": "Paudalho",
+      "ibge": "261060",
+      "value": 107
+    },
+    {
       "uf": "SP",
       "municipio": "Nazaré Paulista",
       "ibge": "353240",
+      "value": 107
+    },
+    {
+      "uf": "ES",
+      "municipio": "Domingos Martins",
+      "ibge": "320190",
       "value": 107
     },
     {
@@ -4652,33 +4662,15 @@
       "value": 107
     },
     {
-      "uf": "ES",
-      "municipio": "São José Do Calçado",
-      "ibge": "320480",
-      "value": 107
-    },
-    {
-      "uf": "MT",
-      "municipio": "Campo Verde",
-      "ibge": "510267",
-      "value": 107
-    },
-    {
-      "uf": "ES",
-      "municipio": "Domingos Martins",
-      "ibge": "320190",
-      "value": 107
-    },
-    {
       "uf": "PE",
       "municipio": "Nazaré Da Mata",
       "ibge": "260950",
       "value": 107
     },
     {
-      "uf": "PE",
-      "municipio": "Paudalho",
-      "ibge": "261060",
+      "uf": "MT",
+      "municipio": "Campo Verde",
+      "ibge": "510267",
       "value": 107
     },
     {
@@ -4707,20 +4699,20 @@
     },
     {
       "uf": "SP",
-      "municipio": "Bady Bassitt",
-      "ibge": "350460",
-      "value": 104
-    },
-    {
-      "uf": "SP",
       "municipio": "Guararapes",
       "ibge": "351820",
       "value": 104
     },
     {
       "uf": "SP",
-      "municipio": "Embu-guaçu",
-      "ibge": "351510",
+      "municipio": "Bady Bassitt",
+      "ibge": "350460",
+      "value": 104
+    },
+    {
+      "uf": "SP",
+      "municipio": "Presidente Epitácio",
+      "ibge": "354130",
       "value": 103
     },
     {
@@ -4731,15 +4723,9 @@
     },
     {
       "uf": "SP",
-      "municipio": "Presidente Epitácio",
-      "ibge": "354130",
+      "municipio": "Embu-guaçu",
+      "ibge": "351510",
       "value": 103
-    },
-    {
-      "uf": "SP",
-      "municipio": "Morro Agudo",
-      "ibge": "353190",
-      "value": 102
     },
     {
       "uf": "MS",
@@ -4755,14 +4741,14 @@
     },
     {
       "uf": "SP",
-      "municipio": "Cândido Mota",
-      "ibge": "351000",
-      "value": 101
+      "municipio": "Morro Agudo",
+      "ibge": "353190",
+      "value": 102
     },
     {
       "uf": "SP",
-      "municipio": "Cajuru",
-      "ibge": "350940",
+      "municipio": "Cândido Mota",
+      "ibge": "351000",
       "value": 101
     },
     {
@@ -4772,15 +4758,15 @@
       "value": 101
     },
     {
-      "uf": "PE",
-      "municipio": "Surubim",
-      "ibge": "261450",
-      "value": 100
+      "uf": "SP",
+      "municipio": "Cajuru",
+      "ibge": "350940",
+      "value": 101
     },
     {
-      "uf": "PB",
-      "municipio": "Picuí",
-      "ibge": "251140",
+      "uf": "ES",
+      "municipio": "Marataízes",
+      "ibge": "320332",
       "value": 100
     },
     {
@@ -4790,21 +4776,27 @@
       "value": 100
     },
     {
-      "uf": "ES",
-      "municipio": "Marataízes",
-      "ibge": "320332",
-      "value": 100
-    },
-    {
       "uf": "SP",
       "municipio": "Cordeirópolis",
       "ibge": "351240",
       "value": 100
     },
     {
-      "uf": "GO",
-      "municipio": "Planaltina",
-      "ibge": "521760",
+      "uf": "PB",
+      "municipio": "Picuí",
+      "ibge": "251140",
+      "value": 100
+    },
+    {
+      "uf": "PE",
+      "municipio": "Surubim",
+      "ibge": "261450",
+      "value": 100
+    },
+    {
+      "uf": "SP",
+      "municipio": "Martinópolis",
+      "ibge": "352920",
       "value": 99
     },
     {
@@ -4814,9 +4806,9 @@
       "value": 99
     },
     {
-      "uf": "SP",
-      "municipio": "Martinópolis",
-      "ibge": "352920",
+      "uf": "GO",
+      "municipio": "Planaltina",
+      "ibge": "521760",
       "value": 99
     },
     {
@@ -4833,21 +4825,15 @@
     },
     {
       "uf": "SP",
-      "municipio": "Ibiúna",
-      "ibge": "351970",
-      "value": 98
-    },
-    {
-      "uf": "SP",
       "municipio": "Rancharia",
       "ibge": "354220",
       "value": 98
     },
     {
       "uf": "SP",
-      "municipio": "Tanabi",
-      "ibge": "355340",
-      "value": 97
+      "municipio": "Ibiúna",
+      "ibge": "351970",
+      "value": 98
     },
     {
       "uf": "GO",
@@ -4857,20 +4843,20 @@
     },
     {
       "uf": "SP",
-      "municipio": "Santa Rosa De Viterbo",
-      "ibge": "354760",
-      "value": 96
+      "municipio": "Tanabi",
+      "ibge": "355340",
+      "value": 97
     },
     {
-      "uf": "PA",
-      "municipio": "Cametá",
-      "ibge": "150210",
+      "uf": "MT",
+      "municipio": "Campo Novo Do Parecis",
+      "ibge": "510263",
       "value": 96
     },
     {
       "uf": "SP",
-      "municipio": "Igarapava",
-      "ibge": "352010",
+      "municipio": "Santa Rosa De Viterbo",
+      "ibge": "354760",
       "value": 96
     },
     {
@@ -4880,15 +4866,21 @@
       "value": 96
     },
     {
-      "uf": "AM",
-      "municipio": "Tabatinga",
-      "ibge": "130406",
+      "uf": "SP",
+      "municipio": "Igarapava",
+      "ibge": "352010",
       "value": 96
     },
     {
-      "uf": "MT",
-      "municipio": "Campo Novo Do Parecis",
-      "ibge": "510263",
+      "uf": "PA",
+      "municipio": "Cametá",
+      "ibge": "150210",
+      "value": 96
+    },
+    {
+      "uf": "AM",
+      "municipio": "Tabatinga",
+      "ibge": "130406",
       "value": 96
     },
     {
@@ -4910,15 +4902,15 @@
       "value": 95
     },
     {
-      "uf": "AM",
-      "municipio": "São Gabriel Da Cachoeira",
-      "ibge": "130380",
-      "value": 94
-    },
-    {
       "uf": "SP",
       "municipio": "Piratininga",
       "ibge": "353940",
+      "value": 94
+    },
+    {
+      "uf": "AM",
+      "municipio": "São Gabriel Da Cachoeira",
+      "ibge": "130380",
       "value": 94
     },
     {
@@ -4928,15 +4920,15 @@
       "value": 93
     },
     {
-      "uf": "GO",
-      "municipio": "Goianira",
-      "ibge": "520880",
-      "value": 92
-    },
-    {
       "uf": "CE",
       "municipio": "Mauriti",
       "ibge": "230810",
+      "value": 92
+    },
+    {
+      "uf": "GO",
+      "municipio": "Goianira",
+      "ibge": "520880",
       "value": 92
     },
     {
@@ -4946,22 +4938,16 @@
       "value": 91
     },
     {
-      "uf": "SP",
-      "municipio": "Tarumã",
-      "ibge": "355395",
-      "value": 90
-    },
-    {
       "uf": "PB",
       "municipio": "Itabaiana",
       "ibge": "250690",
       "value": 90
     },
     {
-      "uf": "MS",
-      "municipio": "Itaporã",
-      "ibge": "500450",
-      "value": 89
+      "uf": "SP",
+      "municipio": "Tarumã",
+      "ibge": "355395",
+      "value": 90
     },
     {
       "uf": "SP",
@@ -4976,10 +4962,10 @@
       "value": 89
     },
     {
-      "uf": "SP",
-      "municipio": "Igaraçu Do Tietê",
-      "ibge": "352000",
-      "value": 88
+      "uf": "MS",
+      "municipio": "Itaporã",
+      "ibge": "500450",
+      "value": 89
     },
     {
       "uf": "SP",
@@ -4988,16 +4974,16 @@
       "value": 88
     },
     {
+      "uf": "SP",
+      "municipio": "Igaraçu Do Tietê",
+      "ibge": "352000",
+      "value": 88
+    },
+    {
       "uf": "PB",
       "municipio": "Esperança",
       "ibge": "250600",
       "value": 88
-    },
-    {
-      "uf": "PA",
-      "municipio": "Santa Izabel Do Pará",
-      "ibge": "150650",
-      "value": 87
     },
     {
       "uf": "SP",
@@ -5012,15 +4998,15 @@
       "value": 87
     },
     {
+      "uf": "PA",
+      "municipio": "Santa Izabel Do Pará",
+      "ibge": "150650",
+      "value": 87
+    },
+    {
       "uf": "MA",
       "municipio": "Lago Da Pedra",
       "ibge": "210570",
-      "value": 86
-    },
-    {
-      "uf": "PE",
-      "municipio": "Vertentes",
-      "ibge": "261620",
       "value": 86
     },
     {
@@ -5030,10 +5016,10 @@
       "value": 86
     },
     {
-      "uf": "MA",
-      "municipio": "Barreirinhas",
-      "ibge": "210170",
-      "value": 85
+      "uf": "PE",
+      "municipio": "Vertentes",
+      "ibge": "261620",
+      "value": 86
     },
     {
       "uf": "MT",
@@ -5042,15 +5028,21 @@
       "value": 85
     },
     {
-      "uf": "PB",
-      "municipio": "Solânea",
-      "ibge": "251600",
+      "uf": "MA",
+      "municipio": "Barreirinhas",
+      "ibge": "210170",
       "value": 85
     },
     {
       "uf": "CE",
       "municipio": "Jaguaribe",
       "ibge": "230690",
+      "value": 85
+    },
+    {
+      "uf": "PB",
+      "municipio": "Solânea",
+      "ibge": "251600",
       "value": 85
     },
     {
@@ -5066,16 +5058,22 @@
       "value": 84
     },
     {
+      "uf": "MT",
+      "municipio": "Peixoto De Azevedo",
+      "ibge": "510642",
+      "value": 84
+    },
+    {
       "uf": "PI",
       "municipio": "São Raimundo Nonato",
       "ibge": "221060",
       "value": 84
     },
     {
-      "uf": "MT",
-      "municipio": "Peixoto De Azevedo",
-      "ibge": "510642",
-      "value": 84
+      "uf": "PA",
+      "municipio": "Conceição Do Araguaia",
+      "ibge": "150270",
+      "value": 83
     },
     {
       "uf": "MT",
@@ -5091,14 +5089,14 @@
     },
     {
       "uf": "SP",
-      "municipio": "Pradópolis",
-      "ibge": "354090",
+      "municipio": "Guará",
+      "ibge": "351770",
       "value": 83
     },
     {
       "uf": "SP",
-      "municipio": "Guará",
-      "ibge": "351770",
+      "municipio": "Pradópolis",
+      "ibge": "354090",
       "value": 83
     },
     {
@@ -5108,21 +5106,15 @@
       "value": 83
     },
     {
-      "uf": "PA",
-      "municipio": "Conceição Do Araguaia",
-      "ibge": "150270",
-      "value": 83
+      "uf": "GO",
+      "municipio": "Palmeiras De Goiás",
+      "ibge": "521570",
+      "value": 82
     },
     {
       "uf": "PB",
       "municipio": "Santa Luzia",
       "ibge": "251340",
-      "value": 82
-    },
-    {
-      "uf": "GO",
-      "municipio": "Palmeiras De Goiás",
-      "ibge": "521570",
       "value": 82
     },
     {
@@ -5144,21 +5136,9 @@
       "value": 81
     },
     {
-      "uf": "ES",
-      "municipio": "Pinheiros",
-      "ibge": "320410",
-      "value": 80
-    },
-    {
       "uf": "SP",
       "municipio": "Lucélia",
       "ibge": "352740",
-      "value": 80
-    },
-    {
-      "uf": "SP",
-      "municipio": "Bastos",
-      "ibge": "350580",
       "value": 80
     },
     {
@@ -5168,16 +5148,22 @@
       "value": 80
     },
     {
+      "uf": "SP",
+      "municipio": "Bastos",
+      "ibge": "350580",
+      "value": 80
+    },
+    {
       "uf": "CE",
       "municipio": "São Benedito",
       "ibge": "231230",
       "value": 80
     },
     {
-      "uf": "GO",
-      "municipio": "Piracanjuba",
-      "ibge": "521710",
-      "value": 79
+      "uf": "ES",
+      "municipio": "Pinheiros",
+      "ibge": "320410",
+      "value": 80
     },
     {
       "uf": "CE",
@@ -5186,9 +5172,15 @@
       "value": 79
     },
     {
-      "uf": "SP",
-      "municipio": "Cravinhos",
-      "ibge": "351310",
+      "uf": "GO",
+      "municipio": "Piracanjuba",
+      "ibge": "521710",
+      "value": 79
+    },
+    {
+      "uf": "MS",
+      "municipio": "Ribas Do Rio Pardo",
+      "ibge": "500710",
       "value": 78
     },
     {
@@ -5198,10 +5190,28 @@
       "value": 78
     },
     {
-      "uf": "MS",
-      "municipio": "Ribas Do Rio Pardo",
-      "ibge": "500710",
+      "uf": "SP",
+      "municipio": "Cravinhos",
+      "ibge": "351310",
       "value": 78
+    },
+    {
+      "uf": "MS",
+      "municipio": "Bataguassu",
+      "ibge": "500190",
+      "value": 77
+    },
+    {
+      "uf": "CE",
+      "municipio": "Missão Velha",
+      "ibge": "230840",
+      "value": 77
+    },
+    {
+      "uf": "MS",
+      "municipio": "Ivinhema",
+      "ibge": "500470",
+      "value": 77
     },
     {
       "uf": "CE",
@@ -5216,22 +5226,34 @@
       "value": 77
     },
     {
-      "uf": "MS",
-      "municipio": "Bataguassu",
-      "ibge": "500190",
-      "value": 77
+      "uf": "SP",
+      "municipio": "Brodowski",
+      "ibge": "350780",
+      "value": 76
     },
     {
-      "uf": "MS",
-      "municipio": "Ivinhema",
-      "ibge": "500470",
-      "value": 77
+      "uf": "SP",
+      "municipio": "Macatuba",
+      "ibge": "352800",
+      "value": 76
     },
     {
-      "uf": "CE",
-      "municipio": "Missão Velha",
-      "ibge": "230840",
-      "value": 77
+      "uf": "SP",
+      "municipio": "José Bonifácio",
+      "ibge": "352570",
+      "value": 76
+    },
+    {
+      "uf": "PI",
+      "municipio": "Esperantina",
+      "ibge": "220370",
+      "value": 76
+    },
+    {
+      "uf": "SP",
+      "municipio": "Pirangi",
+      "ibge": "353900",
+      "value": 76
     },
     {
       "uf": "ES",
@@ -5247,50 +5269,14 @@
     },
     {
       "uf": "SP",
-      "municipio": "Pirangi",
-      "ibge": "353900",
-      "value": 76
-    },
-    {
-      "uf": "SP",
-      "municipio": "José Bonifácio",
-      "ibge": "352570",
-      "value": 76
-    },
-    {
-      "uf": "SP",
-      "municipio": "Macatuba",
-      "ibge": "352800",
-      "value": 76
-    },
-    {
-      "uf": "SP",
       "municipio": "Iperó",
       "ibge": "352100",
       "value": 76
     },
     {
       "uf": "SP",
-      "municipio": "Brodowski",
-      "ibge": "350780",
-      "value": 76
-    },
-    {
-      "uf": "PI",
-      "municipio": "Esperantina",
-      "ibge": "220370",
-      "value": 76
-    },
-    {
-      "uf": "ES",
-      "municipio": "Ibatiba",
-      "ibge": "320245",
-      "value": 75
-    },
-    {
-      "uf": "RN",
-      "municipio": "João Câmara",
-      "ibge": "240580",
+      "municipio": "Elias Fausto",
+      "ibge": "351490",
       "value": 75
     },
     {
@@ -5300,21 +5286,21 @@
       "value": 75
     },
     {
-      "uf": "SP",
-      "municipio": "Elias Fausto",
-      "ibge": "351490",
+      "uf": "RN",
+      "municipio": "João Câmara",
+      "ibge": "240580",
+      "value": 75
+    },
+    {
+      "uf": "ES",
+      "municipio": "Ibatiba",
+      "ibge": "320245",
       "value": 75
     },
     {
       "uf": "AM",
       "municipio": "Presidente Figueiredo",
       "ibge": "130353",
-      "value": 74
-    },
-    {
-      "uf": "MT",
-      "municipio": "Sapezal",
-      "ibge": "510787",
       "value": 74
     },
     {
@@ -5330,28 +5316,16 @@
       "value": 74
     },
     {
+      "uf": "MT",
+      "municipio": "Sapezal",
+      "ibge": "510787",
+      "value": 74
+    },
+    {
       "uf": "SP",
       "municipio": "Junqueirópolis",
       "ibge": "352600",
       "value": 74
-    },
-    {
-      "uf": "ES",
-      "municipio": "Mimoso Do Sul",
-      "ibge": "320340",
-      "value": 73
-    },
-    {
-      "uf": "ES",
-      "municipio": "Jaguaré",
-      "ibge": "320305",
-      "value": 73
-    },
-    {
-      "uf": "SP",
-      "municipio": "Monte Azul Paulista",
-      "ibge": "353150",
-      "value": 73
     },
     {
       "uf": "PB",
@@ -5366,9 +5340,27 @@
       "value": 73
     },
     {
-      "uf": "AM",
-      "municipio": "Coari",
-      "ibge": "130120",
+      "uf": "SP",
+      "municipio": "Monte Azul Paulista",
+      "ibge": "353150",
+      "value": 73
+    },
+    {
+      "uf": "ES",
+      "municipio": "Mimoso Do Sul",
+      "ibge": "320340",
+      "value": 73
+    },
+    {
+      "uf": "ES",
+      "municipio": "Jaguaré",
+      "ibge": "320305",
+      "value": 73
+    },
+    {
+      "uf": "ES",
+      "municipio": "Jerônimo Monteiro",
+      "ibge": "320310",
       "value": 72
     },
     {
@@ -5384,21 +5376,9 @@
       "value": 72
     },
     {
-      "uf": "ES",
-      "municipio": "Jerônimo Monteiro",
-      "ibge": "320310",
-      "value": 72
-    },
-    {
-      "uf": "MS",
-      "municipio": "Caarapó",
-      "ibge": "500240",
-      "value": 72
-    },
-    {
-      "uf": "PI",
-      "municipio": "Barras",
-      "ibge": "220120",
+      "uf": "SP",
+      "municipio": "Oriente",
+      "ibge": "353410",
       "value": 72
     },
     {
@@ -5408,9 +5388,21 @@
       "value": 72
     },
     {
-      "uf": "SP",
-      "municipio": "Oriente",
-      "ibge": "353410",
+      "uf": "PI",
+      "municipio": "Barras",
+      "ibge": "220120",
+      "value": 72
+    },
+    {
+      "uf": "AM",
+      "municipio": "Coari",
+      "ibge": "130120",
+      "value": 72
+    },
+    {
+      "uf": "MS",
+      "municipio": "Caarapó",
+      "ibge": "500240",
       "value": 72
     },
     {
@@ -5421,14 +5413,14 @@
     },
     {
       "uf": "SP",
-      "municipio": "Ubarana",
-      "ibge": "355535",
+      "municipio": "Lindóia",
+      "ibge": "352700",
       "value": 71
     },
     {
-      "uf": "MS",
-      "municipio": "Nova Alvorada Do Sul",
-      "ibge": "500600",
+      "uf": "SP",
+      "municipio": "Ubarana",
+      "ibge": "355535",
       "value": 71
     },
     {
@@ -5438,27 +5430,21 @@
       "value": 71
     },
     {
-      "uf": "SP",
-      "municipio": "Lindóia",
-      "ibge": "352700",
-      "value": 71
-    },
-    {
       "uf": "MS",
       "municipio": "Fátima Do Sul",
       "ibge": "500380",
       "value": 71
     },
     {
-      "uf": "SP",
-      "municipio": "Joanópolis",
-      "ibge": "352550",
-      "value": 70
+      "uf": "MS",
+      "municipio": "Nova Alvorada Do Sul",
+      "ibge": "500600",
+      "value": 71
     },
     {
-      "uf": "MT",
-      "municipio": "Confresa",
-      "ibge": "510335",
+      "uf": "PA",
+      "municipio": "Salinópolis",
+      "ibge": "150620",
       "value": 70
     },
     {
@@ -5468,27 +5454,15 @@
       "value": 70
     },
     {
-      "uf": "SP",
-      "municipio": "Iracemápolis",
-      "ibge": "352140",
+      "uf": "AL",
+      "municipio": "Atalaia",
+      "ibge": "270040",
       "value": 70
     },
     {
-      "uf": "SE",
-      "municipio": "Tobias Barreto",
-      "ibge": "280740",
-      "value": 70
-    },
-    {
-      "uf": "MS",
-      "municipio": "Aparecida Do Taboado",
-      "ibge": "500100",
-      "value": 70
-    },
-    {
-      "uf": "PA",
-      "municipio": "Salinópolis",
-      "ibge": "150620",
+      "uf": "MT",
+      "municipio": "Confresa",
+      "ibge": "510335",
       "value": 70
     },
     {
@@ -5498,10 +5472,46 @@
       "value": 70
     },
     {
-      "uf": "AL",
-      "municipio": "Atalaia",
-      "ibge": "270040",
+      "uf": "SP",
+      "municipio": "Joanópolis",
+      "ibge": "352550",
       "value": 70
+    },
+    {
+      "uf": "MS",
+      "municipio": "Aparecida Do Taboado",
+      "ibge": "500100",
+      "value": 70
+    },
+    {
+      "uf": "SE",
+      "municipio": "Tobias Barreto",
+      "ibge": "280740",
+      "value": 70
+    },
+    {
+      "uf": "SP",
+      "municipio": "Iracemápolis",
+      "ibge": "352140",
+      "value": 70
+    },
+    {
+      "uf": "ES",
+      "municipio": "Piúma",
+      "ibge": "320420",
+      "value": 69
+    },
+    {
+      "uf": "SE",
+      "municipio": "Barra Dos Coqueiros",
+      "ibge": "280060",
+      "value": 69
+    },
+    {
+      "uf": "AC",
+      "municipio": "Brasiléia",
+      "ibge": "120010",
+      "value": 69
     },
     {
       "uf": "PB",
@@ -5510,9 +5520,9 @@
       "value": 69
     },
     {
-      "uf": "SE",
-      "municipio": "Barra Dos Coqueiros",
-      "ibge": "280060",
+      "uf": "PI",
+      "municipio": "Bom Jesus",
+      "ibge": "220190",
       "value": 69
     },
     {
@@ -5523,32 +5533,14 @@
     },
     {
       "uf": "ES",
-      "municipio": "Piúma",
-      "ibge": "320420",
-      "value": 69
-    },
-    {
-      "uf": "PI",
-      "municipio": "Bom Jesus",
-      "ibge": "220190",
-      "value": 69
-    },
-    {
-      "uf": "AC",
-      "municipio": "Brasiléia",
-      "ibge": "120010",
-      "value": 69
+      "municipio": "Iúna",
+      "ibge": "320300",
+      "value": 68
     },
     {
       "uf": "MT",
       "municipio": "Barra Do Bugres",
       "ibge": "510170",
-      "value": 68
-    },
-    {
-      "uf": "ES",
-      "municipio": "Iúna",
-      "ibge": "320300",
       "value": 68
     },
     {
@@ -5559,14 +5551,20 @@
     },
     {
       "uf": "TO",
+      "municipio": "Colinas Do Tocantins",
+      "ibge": "170550",
+      "value": 68
+    },
+    {
+      "uf": "TO",
       "municipio": "Miracema Do Tocantins",
       "ibge": "171320",
       "value": 68
     },
     {
-      "uf": "TO",
-      "municipio": "Colinas Do Tocantins",
-      "ibge": "170550",
+      "uf": "SP",
+      "municipio": "Ipiguá",
+      "ibge": "352115",
       "value": 68
     },
     {
@@ -5582,12 +5580,6 @@
       "value": 68
     },
     {
-      "uf": "SP",
-      "municipio": "Ipiguá",
-      "ibge": "352115",
-      "value": 68
-    },
-    {
       "uf": "MA",
       "municipio": "Grajaú",
       "ibge": "210480",
@@ -5600,45 +5592,9 @@
       "value": 68
     },
     {
-      "uf": "MA",
-      "municipio": "Estreito",
-      "ibge": "210405",
-      "value": 67
-    },
-    {
-      "uf": "PB",
-      "municipio": "Sapé",
-      "ibge": "251530",
-      "value": 67
-    },
-    {
       "uf": "ES",
       "municipio": "Fundão",
       "ibge": "320220",
-      "value": 67
-    },
-    {
-      "uf": "AL",
-      "municipio": "Teotônio Vilela",
-      "ibge": "270915",
-      "value": 67
-    },
-    {
-      "uf": "TO",
-      "municipio": "Dianópolis",
-      "ibge": "170700",
-      "value": 67
-    },
-    {
-      "uf": "AM",
-      "municipio": "Humaitá",
-      "ibge": "130170",
-      "value": 67
-    },
-    {
-      "uf": "SP",
-      "municipio": "Cerqueira César",
-      "ibge": "351140",
       "value": 67
     },
     {
@@ -5648,10 +5604,52 @@
       "value": 67
     },
     {
+      "uf": "AM",
+      "municipio": "Humaitá",
+      "ibge": "130170",
+      "value": 67
+    },
+    {
+      "uf": "TO",
+      "municipio": "Dianópolis",
+      "ibge": "170700",
+      "value": 67
+    },
+    {
+      "uf": "PB",
+      "municipio": "Sapé",
+      "ibge": "251530",
+      "value": 67
+    },
+    {
+      "uf": "AL",
+      "municipio": "Teotônio Vilela",
+      "ibge": "270915",
+      "value": 67
+    },
+    {
       "uf": "SP",
       "municipio": "Itaí",
       "ibge": "352180",
       "value": 67
+    },
+    {
+      "uf": "SP",
+      "municipio": "Cerqueira César",
+      "ibge": "351140",
+      "value": 67
+    },
+    {
+      "uf": "MA",
+      "municipio": "Estreito",
+      "ibge": "210405",
+      "value": 67
+    },
+    {
+      "uf": "PA",
+      "municipio": "Benevides",
+      "ibge": "150150",
+      "value": 66
     },
     {
       "uf": "ES",
@@ -5672,15 +5670,9 @@
       "value": 66
     },
     {
-      "uf": "PA",
-      "municipio": "Benevides",
-      "ibge": "150150",
-      "value": 66
-    },
-    {
-      "uf": "MA",
-      "municipio": "Rosário",
-      "ibge": "210960",
+      "uf": "SP",
+      "municipio": "Santo Antônio Da Alegria",
+      "ibge": "354790",
       "value": 65
     },
     {
@@ -5690,28 +5682,10 @@
       "value": 65
     },
     {
-      "uf": "SP",
-      "municipio": "Santo Antônio Da Alegria",
-      "ibge": "354790",
+      "uf": "MA",
+      "municipio": "Rosário",
+      "ibge": "210960",
       "value": 65
-    },
-    {
-      "uf": "SP",
-      "municipio": "Pacaembu",
-      "ibge": "353490",
-      "value": 64
-    },
-    {
-      "uf": "SP",
-      "municipio": "Brotas",
-      "ibge": "350790",
-      "value": 64
-    },
-    {
-      "uf": "SP",
-      "municipio": "Santa Adélia",
-      "ibge": "354560",
-      "value": 64
     },
     {
       "uf": "MA",
@@ -5723,6 +5697,24 @@
       "uf": "PI",
       "municipio": "Pedro Ii",
       "ibge": "220790",
+      "value": 64
+    },
+    {
+      "uf": "SP",
+      "municipio": "Santa Adélia",
+      "ibge": "354560",
+      "value": 64
+    },
+    {
+      "uf": "SP",
+      "municipio": "Pacaembu",
+      "ibge": "353490",
+      "value": 64
+    },
+    {
+      "uf": "SP",
+      "municipio": "Brotas",
+      "ibge": "350790",
       "value": 64
     },
     {
@@ -5738,15 +5730,15 @@
       "value": 63
     },
     {
-      "uf": "SP",
-      "municipio": "Teodoro Sampaio",
-      "ibge": "355430",
-      "value": 63
-    },
-    {
       "uf": "RR",
       "municipio": "Rorainópolis",
       "ibge": "140047",
+      "value": 63
+    },
+    {
+      "uf": "SP",
+      "municipio": "Teodoro Sampaio",
+      "ibge": "355430",
       "value": 63
     },
     {
@@ -5762,21 +5754,15 @@
       "value": 63
     },
     {
-      "uf": "PA",
-      "municipio": "Rio Maria",
-      "ibge": "150616",
-      "value": 62
-    },
-    {
-      "uf": "SP",
-      "municipio": "Maracaí",
-      "ibge": "352880",
-      "value": 62
-    },
-    {
       "uf": "SP",
       "municipio": "Castilho",
       "ibge": "351100",
+      "value": 62
+    },
+    {
+      "uf": "PA",
+      "municipio": "Rio Maria",
+      "ibge": "150616",
       "value": 62
     },
     {
@@ -5798,15 +5784,15 @@
       "value": 62
     },
     {
+      "uf": "SP",
+      "municipio": "Maracaí",
+      "ibge": "352880",
+      "value": 62
+    },
+    {
       "uf": "RN",
       "municipio": "Goianinha",
       "ibge": "240420",
-      "value": 61
-    },
-    {
-      "uf": "PI",
-      "municipio": "Altos",
-      "ibge": "220040",
       "value": 61
     },
     {
@@ -5816,9 +5802,15 @@
       "value": 61
     },
     {
-      "uf": "PB",
-      "municipio": "Princesa Isabel",
-      "ibge": "251230",
+      "uf": "PI",
+      "municipio": "Altos",
+      "ibge": "220040",
+      "value": 61
+    },
+    {
+      "uf": "RN",
+      "municipio": "Nova Cruz",
+      "ibge": "240830",
       "value": 60
     },
     {
@@ -5828,9 +5820,9 @@
       "value": 60
     },
     {
-      "uf": "SP",
-      "municipio": "Tabapuã",
-      "ibge": "355260",
+      "uf": "PB",
+      "municipio": "Princesa Isabel",
+      "ibge": "251230",
       "value": 60
     },
     {
@@ -5840,9 +5832,15 @@
       "value": 60
     },
     {
-      "uf": "RN",
-      "municipio": "Nova Cruz",
-      "ibge": "240830",
+      "uf": "AM",
+      "municipio": "Iranduba",
+      "ibge": "130185",
+      "value": 60
+    },
+    {
+      "uf": "SP",
+      "municipio": "Tabapuã",
+      "ibge": "355260",
       "value": 60
     },
     {
@@ -5852,15 +5850,9 @@
       "value": 60
     },
     {
-      "uf": "AM",
-      "municipio": "Iranduba",
-      "ibge": "130185",
-      "value": 60
-    },
-    {
-      "uf": "PB",
-      "municipio": "Alhandra",
-      "ibge": "250060",
+      "uf": "RO",
+      "municipio": "São Francisco Do Guaporé",
+      "ibge": "110149",
       "value": 59
     },
     {
@@ -5882,22 +5874,16 @@
       "value": 59
     },
     {
+      "uf": "PB",
+      "municipio": "Alhandra",
+      "ibge": "250060",
+      "value": 59
+    },
+    {
       "uf": "MT",
       "municipio": "Rosário Oeste",
       "ibge": "510770",
       "value": 59
-    },
-    {
-      "uf": "RO",
-      "municipio": "São Francisco Do Guaporé",
-      "ibge": "110149",
-      "value": 59
-    },
-    {
-      "uf": "SP",
-      "municipio": "Tupi Paulista",
-      "ibge": "355510",
-      "value": 58
     },
     {
       "uf": "PA",
@@ -5906,21 +5892,21 @@
       "value": 58
     },
     {
-      "uf": "AP",
-      "municipio": "Laranjal Do Jari",
-      "ibge": "160027",
-      "value": 57
+      "uf": "SP",
+      "municipio": "Tupi Paulista",
+      "ibge": "355510",
+      "value": 58
     },
     {
       "uf": "SP",
-      "municipio": "Apiaí",
-      "ibge": "350270",
+      "municipio": "Itajobi",
+      "ibge": "352190",
       "value": 57
     },
     {
-      "uf": "PB",
-      "municipio": "Pedras De Fogo",
-      "ibge": "251120",
+      "uf": "MA",
+      "municipio": "Tuntum",
+      "ibge": "211230",
       "value": 57
     },
     {
@@ -5936,33 +5922,39 @@
       "value": 57
     },
     {
+      "uf": "PB",
+      "municipio": "Pedras De Fogo",
+      "ibge": "251120",
+      "value": 57
+    },
+    {
+      "uf": "AP",
+      "municipio": "Laranjal Do Jari",
+      "ibge": "160027",
+      "value": 57
+    },
+    {
+      "uf": "SP",
+      "municipio": "Apiaí",
+      "ibge": "350270",
+      "value": 57
+    },
+    {
       "uf": "SP",
       "municipio": "Nova Granada",
       "ibge": "353300",
       "value": 57
     },
     {
-      "uf": "SP",
-      "municipio": "Itajobi",
-      "ibge": "352190",
-      "value": 57
-    },
-    {
-      "uf": "MA",
-      "municipio": "Tuntum",
-      "ibge": "211230",
-      "value": 57
-    },
-    {
-      "uf": "SP",
-      "municipio": "Holambra",
-      "ibge": "351905",
+      "uf": "PA",
+      "municipio": "Ulianópolis",
+      "ibge": "150812",
       "value": 56
     },
     {
-      "uf": "SP",
-      "municipio": "São Sebastião Da Grama",
-      "ibge": "355080",
+      "uf": "PE",
+      "municipio": "Buíque",
+      "ibge": "260280",
       "value": 56
     },
     {
@@ -5973,14 +5965,14 @@
     },
     {
       "uf": "SP",
-      "municipio": "Cunha",
-      "ibge": "351360",
+      "municipio": "São Sebastião Da Grama",
+      "ibge": "355080",
       "value": 56
     },
     {
-      "uf": "PE",
-      "municipio": "Buíque",
-      "ibge": "260280",
+      "uf": "SP",
+      "municipio": "Holambra",
+      "ibge": "351905",
       "value": 56
     },
     {
@@ -5990,45 +5982,15 @@
       "value": 56
     },
     {
-      "uf": "PA",
-      "municipio": "Ulianópolis",
-      "ibge": "150812",
+      "uf": "SP",
+      "municipio": "Cunha",
+      "ibge": "351360",
       "value": 56
-    },
-    {
-      "uf": "ES",
-      "municipio": "Brejetuba",
-      "ibge": "320115",
-      "value": 55
-    },
-    {
-      "uf": "AL",
-      "municipio": "Girau Do Ponciano",
-      "ibge": "270290",
-      "value": 55
-    },
-    {
-      "uf": "PB",
-      "municipio": "São Bento",
-      "ibge": "251390",
-      "value": 55
-    },
-    {
-      "uf": "MS",
-      "municipio": "Amambai",
-      "ibge": "500060",
-      "value": 55
     },
     {
       "uf": "MS",
       "municipio": "Bonito",
       "ibge": "500220",
-      "value": 55
-    },
-    {
-      "uf": "RO",
-      "municipio": "Machadinho D'oeste",
-      "ibge": "110013",
       "value": 55
     },
     {
@@ -6038,9 +6000,39 @@
       "value": 55
     },
     {
-      "uf": "MA",
-      "municipio": "Peritoró",
-      "ibge": "210845",
+      "uf": "RO",
+      "municipio": "Machadinho D'oeste",
+      "ibge": "110013",
+      "value": 55
+    },
+    {
+      "uf": "ES",
+      "municipio": "Brejetuba",
+      "ibge": "320115",
+      "value": 55
+    },
+    {
+      "uf": "PB",
+      "municipio": "São Bento",
+      "ibge": "251390",
+      "value": 55
+    },
+    {
+      "uf": "AL",
+      "municipio": "Girau Do Ponciano",
+      "ibge": "270290",
+      "value": 55
+    },
+    {
+      "uf": "MS",
+      "municipio": "Amambai",
+      "ibge": "500060",
+      "value": 55
+    },
+    {
+      "uf": "SP",
+      "municipio": "Guapiaçu",
+      "ibge": "351750",
       "value": 54
     },
     {
@@ -6053,6 +6045,18 @@
       "uf": "SP",
       "municipio": "Pilar Do Sul",
       "ibge": "353790",
+      "value": 54
+    },
+    {
+      "uf": "PA",
+      "municipio": "São Miguel Do Guamá",
+      "ibge": "150760",
+      "value": 54
+    },
+    {
+      "uf": "PA",
+      "municipio": "Tucumã",
+      "ibge": "150808",
       "value": 54
     },
     {
@@ -6074,22 +6078,28 @@
       "value": 54
     },
     {
-      "uf": "PA",
-      "municipio": "São Miguel Do Guamá",
-      "ibge": "150760",
+      "uf": "MA",
+      "municipio": "Peritoró",
+      "ibge": "210845",
       "value": 54
     },
     {
-      "uf": "SP",
-      "municipio": "Guapiaçu",
-      "ibge": "351750",
-      "value": 54
+      "uf": "AL",
+      "municipio": "Viçosa",
+      "ibge": "270940",
+      "value": 53
     },
     {
-      "uf": "PA",
-      "municipio": "Tucumã",
-      "ibge": "150808",
-      "value": 54
+      "uf": "ES",
+      "municipio": "João Neiva",
+      "ibge": "320313",
+      "value": 53
+    },
+    {
+      "uf": "AM",
+      "municipio": "Manicoré",
+      "ibge": "130270",
+      "value": 53
     },
     {
       "uf": "SP",
@@ -6104,33 +6114,45 @@
       "value": 53
     },
     {
-      "uf": "ES",
-      "municipio": "João Neiva",
-      "ibge": "320313",
-      "value": 53
-    },
-    {
       "uf": "SP",
       "municipio": "Rafard",
       "ibge": "354210",
       "value": 53
     },
     {
+      "uf": "MS",
+      "municipio": "Brasilândia",
+      "ibge": "500230",
+      "value": 52
+    },
+    {
+      "uf": "MS",
+      "municipio": "Inocência",
+      "ibge": "500440",
+      "value": 52
+    },
+    {
       "uf": "AL",
-      "municipio": "Viçosa",
-      "ibge": "270940",
-      "value": 53
+      "municipio": "Campo Alegre",
+      "ibge": "270140",
+      "value": 52
     },
     {
-      "uf": "AM",
-      "municipio": "Manicoré",
-      "ibge": "130270",
-      "value": 53
+      "uf": "MA",
+      "municipio": "São Mateus Do Maranhão",
+      "ibge": "211150",
+      "value": 52
     },
     {
-      "uf": "SP",
-      "municipio": "Altinópolis",
-      "ibge": "350100",
+      "uf": "PA",
+      "municipio": "Tomé-açu",
+      "ibge": "150800",
+      "value": 52
+    },
+    {
+      "uf": "PB",
+      "municipio": "Uiraúna",
+      "ibge": "251690",
       "value": 52
     },
     {
@@ -6140,9 +6162,9 @@
       "value": 52
     },
     {
-      "uf": "MA",
-      "municipio": "São Mateus Do Maranhão",
-      "ibge": "211150",
+      "uf": "PA",
+      "municipio": "Jacundá",
+      "ibge": "150380",
       "value": 52
     },
     {
@@ -6153,26 +6175,20 @@
     },
     {
       "uf": "SP",
-      "municipio": "Tabatinga",
-      "ibge": "355270",
+      "municipio": "Morungaba",
+      "ibge": "353200",
       "value": 52
     },
     {
-      "uf": "PB",
-      "municipio": "Uiraúna",
-      "ibge": "251690",
+      "uf": "SP",
+      "municipio": "Pirajuí",
+      "ibge": "353890",
       "value": 52
     },
     {
-      "uf": "MS",
-      "municipio": "Brasilândia",
-      "ibge": "500230",
-      "value": 52
-    },
-    {
-      "uf": "MT",
-      "municipio": "Chapada Dos Guimarães",
-      "ibge": "510300",
+      "uf": "SP",
+      "municipio": "Altinópolis",
+      "ibge": "350100",
       "value": 52
     },
     {
@@ -6183,39 +6199,45 @@
     },
     {
       "uf": "SP",
-      "municipio": "Pirajuí",
-      "ibge": "353890",
+      "municipio": "Tabatinga",
+      "ibge": "355270",
       "value": 52
     },
     {
-      "uf": "MS",
-      "municipio": "Inocência",
-      "ibge": "500440",
+      "uf": "MT",
+      "municipio": "Chapada Dos Guimarães",
+      "ibge": "510300",
       "value": 52
+    },
+    {
+      "uf": "RN",
+      "municipio": "Nísia Floresta",
+      "ibge": "240820",
+      "value": 51
     },
     {
       "uf": "SP",
-      "municipio": "Morungaba",
-      "ibge": "353200",
-      "value": 52
+      "municipio": "Cafelândia",
+      "ibge": "350880",
+      "value": 51
     },
     {
-      "uf": "PA",
-      "municipio": "Jacundá",
-      "ibge": "150380",
-      "value": 52
+      "uf": "SP",
+      "municipio": "São Bento Do Sapucaí",
+      "ibge": "354860",
+      "value": 51
     },
     {
-      "uf": "AL",
-      "municipio": "Campo Alegre",
-      "ibge": "270140",
-      "value": 52
+      "uf": "MT",
+      "municipio": "São José Dos Quatro Marcos",
+      "ibge": "510710",
+      "value": 51
     },
     {
-      "uf": "PA",
-      "municipio": "Tomé-açu",
-      "ibge": "150800",
-      "value": 52
+      "uf": "SE",
+      "municipio": "Itaporanga D'ajuda",
+      "ibge": "280320",
+      "value": 51
     },
     {
       "uf": "PA",
@@ -6230,33 +6252,9 @@
       "value": 51
     },
     {
-      "uf": "MT",
-      "municipio": "São José Dos Quatro Marcos",
-      "ibge": "510710",
-      "value": 51
-    },
-    {
-      "uf": "SP",
-      "municipio": "Rosana",
-      "ibge": "354425",
-      "value": 51
-    },
-    {
-      "uf": "SP",
-      "municipio": "São Bento Do Sapucaí",
-      "ibge": "354860",
-      "value": 51
-    },
-    {
       "uf": "RN",
       "municipio": "Extremoz",
       "ibge": "240360",
-      "value": 51
-    },
-    {
-      "uf": "RN",
-      "municipio": "Nísia Floresta",
-      "ibge": "240820",
       "value": 51
     },
     {
@@ -6266,21 +6264,9 @@
       "value": 51
     },
     {
-      "uf": "SP",
-      "municipio": "Cafelândia",
-      "ibge": "350880",
-      "value": 51
-    },
-    {
       "uf": "PB",
       "municipio": "Belém",
       "ibge": "250190",
-      "value": 51
-    },
-    {
-      "uf": "SE",
-      "municipio": "Itaporanga D'ajuda",
-      "ibge": "280320",
       "value": 51
     },
     {
@@ -6291,44 +6277,20 @@
     },
     {
       "uf": "SP",
+      "municipio": "Rosana",
+      "ibge": "354425",
+      "value": 51
+    },
+    {
+      "uf": "SP",
+      "municipio": "Pereira Barreto",
+      "ibge": "353740",
+      "value": 50
+    },
+    {
+      "uf": "SP",
       "municipio": "Urupês",
       "ibge": "355600",
-      "value": 50
-    },
-    {
-      "uf": "SP",
-      "municipio": "Ipuã",
-      "ibge": "352130",
-      "value": 50
-    },
-    {
-      "uf": "SP",
-      "municipio": "Alumínio",
-      "ibge": "350115",
-      "value": 50
-    },
-    {
-      "uf": "MA",
-      "municipio": "Santa Rita",
-      "ibge": "211020",
-      "value": 50
-    },
-    {
-      "uf": "AL",
-      "municipio": "Junqueiro",
-      "ibge": "270400",
-      "value": 50
-    },
-    {
-      "uf": "MS",
-      "municipio": "Jardim",
-      "ibge": "500500",
-      "value": 50
-    },
-    {
-      "uf": "PA",
-      "municipio": "Santo Antônio Do Tauá",
-      "ibge": "150700",
       "value": 50
     },
     {
@@ -6344,9 +6306,9 @@
       "value": 50
     },
     {
-      "uf": "SP",
-      "municipio": "Pereira Barreto",
-      "ibge": "353740",
+      "uf": "MS",
+      "municipio": "Jardim",
+      "ibge": "500500",
       "value": 50
     },
     {
@@ -6356,10 +6318,34 @@
       "value": 50
     },
     {
+      "uf": "AL",
+      "municipio": "Junqueiro",
+      "ibge": "270400",
+      "value": 50
+    },
+    {
       "uf": "SP",
-      "municipio": "Cristais Paulista",
-      "ibge": "351320",
-      "value": 49
+      "municipio": "Ipuã",
+      "ibge": "352130",
+      "value": 50
+    },
+    {
+      "uf": "MA",
+      "municipio": "Santa Rita",
+      "ibge": "211020",
+      "value": 50
+    },
+    {
+      "uf": "PA",
+      "municipio": "Santo Antônio Do Tauá",
+      "ibge": "150700",
+      "value": 50
+    },
+    {
+      "uf": "SP",
+      "municipio": "Alumínio",
+      "ibge": "350115",
+      "value": 50
     },
     {
       "uf": "MT",
@@ -6368,9 +6354,9 @@
       "value": 49
     },
     {
-      "uf": "SP",
-      "municipio": "Buri",
-      "ibge": "350800",
+      "uf": "PB",
+      "municipio": "Bananeiras",
+      "ibge": "250150",
       "value": 49
     },
     {
@@ -6381,8 +6367,26 @@
     },
     {
       "uf": "SP",
+      "municipio": "Buri",
+      "ibge": "350800",
+      "value": 49
+    },
+    {
+      "uf": "SP",
       "municipio": "Palestina",
       "ibge": "353500",
+      "value": 49
+    },
+    {
+      "uf": "AL",
+      "municipio": "Craíbas",
+      "ibge": "270235",
+      "value": 49
+    },
+    {
+      "uf": "SP",
+      "municipio": "Cristais Paulista",
+      "ibge": "351320",
       "value": 49
     },
     {
@@ -6393,27 +6397,9 @@
     },
     {
       "uf": "AL",
-      "municipio": "Craíbas",
-      "ibge": "270235",
-      "value": 49
-    },
-    {
-      "uf": "AL",
       "municipio": "São José Da Tapera",
       "ibge": "270840",
       "value": 49
-    },
-    {
-      "uf": "PB",
-      "municipio": "Bananeiras",
-      "ibge": "250150",
-      "value": 49
-    },
-    {
-      "uf": "MA",
-      "municipio": "Viana",
-      "ibge": "211280",
-      "value": 48
     },
     {
       "uf": "MT",
@@ -6422,21 +6408,21 @@
       "value": 48
     },
     {
-      "uf": "SP",
-      "municipio": "Canitar",
-      "ibge": "351015",
+      "uf": "MS",
+      "municipio": "Anastácio",
+      "ibge": "500070",
+      "value": 48
+    },
+    {
+      "uf": "MS",
+      "municipio": "Camapuã",
+      "ibge": "500260",
       "value": 48
     },
     {
       "uf": "SP",
-      "municipio": "Ribeirão Branco",
-      "ibge": "354300",
-      "value": 48
-    },
-    {
-      "uf": "SP",
-      "municipio": "Palmares Paulista",
-      "ibge": "353510",
+      "municipio": "Uchoa",
+      "ibge": "355560",
       "value": 48
     },
     {
@@ -6447,39 +6433,27 @@
     },
     {
       "uf": "SP",
-      "municipio": "Uchoa",
-      "ibge": "355560",
+      "municipio": "Ribeirão Branco",
+      "ibge": "354300",
       "value": 48
     },
     {
-      "uf": "MS",
-      "municipio": "Camapuã",
-      "ibge": "500260",
+      "uf": "MA",
+      "municipio": "Viana",
+      "ibge": "211280",
       "value": 48
     },
     {
-      "uf": "MS",
-      "municipio": "Anastácio",
-      "ibge": "500070",
+      "uf": "SP",
+      "municipio": "Canitar",
+      "ibge": "351015",
       "value": 48
     },
     {
-      "uf": "RN",
-      "municipio": "Areia Branca",
-      "ibge": "240110",
-      "value": 47
-    },
-    {
-      "uf": "MS",
-      "municipio": "Rio Verde De Mato Grosso",
-      "ibge": "500740",
-      "value": 47
-    },
-    {
-      "uf": "MS",
-      "municipio": "Miranda",
-      "ibge": "500560",
-      "value": 47
+      "uf": "SP",
+      "municipio": "Palmares Paulista",
+      "ibge": "353510",
+      "value": 48
     },
     {
       "uf": "PI",
@@ -6500,28 +6474,28 @@
       "value": 47
     },
     {
+      "uf": "MS",
+      "municipio": "Miranda",
+      "ibge": "500560",
+      "value": 47
+    },
+    {
+      "uf": "MS",
+      "municipio": "Rio Verde De Mato Grosso",
+      "ibge": "500740",
+      "value": 47
+    },
+    {
+      "uf": "RN",
+      "municipio": "Areia Branca",
+      "ibge": "240110",
+      "value": 47
+    },
+    {
       "uf": "SE",
       "municipio": "Itabaianinha",
       "ibge": "280300",
       "value": 47
-    },
-    {
-      "uf": "MA",
-      "municipio": "Vargem Grande",
-      "ibge": "211270",
-      "value": 46
-    },
-    {
-      "uf": "MA",
-      "municipio": "Amarante Do Maranhão",
-      "ibge": "210060",
-      "value": 46
-    },
-    {
-      "uf": "SP",
-      "municipio": "Capela Do Alto",
-      "ibge": "351030",
-      "value": 46
     },
     {
       "uf": "MT",
@@ -6530,9 +6504,9 @@
       "value": 46
     },
     {
-      "uf": "AL",
-      "municipio": "Boca Da Mata",
-      "ibge": "270100",
+      "uf": "MA",
+      "municipio": "Vargem Grande",
+      "ibge": "211270",
       "value": 46
     },
     {
@@ -6543,15 +6517,21 @@
     },
     {
       "uf": "MA",
-      "municipio": "Governador Edison Lobão",
-      "ibge": "210455",
-      "value": 45
+      "municipio": "Amarante Do Maranhão",
+      "ibge": "210060",
+      "value": 46
     },
     {
-      "uf": "MA",
-      "municipio": "Zé Doca",
-      "ibge": "211400",
-      "value": 45
+      "uf": "AL",
+      "municipio": "Boca Da Mata",
+      "ibge": "270100",
+      "value": 46
+    },
+    {
+      "uf": "SP",
+      "municipio": "Capela Do Alto",
+      "ibge": "351030",
+      "value": 46
     },
     {
       "uf": "MT",
@@ -6563,18 +6543,6 @@
       "uf": "SP",
       "municipio": "Pirapozinho",
       "ibge": "353920",
-      "value": 45
-    },
-    {
-      "uf": "AL",
-      "municipio": "São José Da Laje",
-      "ibge": "270830",
-      "value": 45
-    },
-    {
-      "uf": "AL",
-      "municipio": "Limoeiro De Anadia",
-      "ibge": "270420",
       "value": 45
     },
     {
@@ -6591,9 +6559,27 @@
     },
     {
       "uf": "MA",
-      "municipio": "São Bento",
-      "ibge": "211050",
-      "value": 44
+      "municipio": "Zé Doca",
+      "ibge": "211400",
+      "value": 45
+    },
+    {
+      "uf": "MA",
+      "municipio": "Governador Edison Lobão",
+      "ibge": "210455",
+      "value": 45
+    },
+    {
+      "uf": "AL",
+      "municipio": "Limoeiro De Anadia",
+      "ibge": "270420",
+      "value": 45
+    },
+    {
+      "uf": "AL",
+      "municipio": "São José Da Laje",
+      "ibge": "270830",
+      "value": 45
     },
     {
       "uf": "MA",
@@ -6602,9 +6588,9 @@
       "value": 44
     },
     {
-      "uf": "RN",
-      "municipio": "Apodi",
-      "ibge": "240100",
+      "uf": "SP",
+      "municipio": "Vargem",
+      "ibge": "355635",
       "value": 44
     },
     {
@@ -6620,9 +6606,9 @@
       "value": 44
     },
     {
-      "uf": "SP",
-      "municipio": "Vargem",
-      "ibge": "355635",
+      "uf": "RN",
+      "municipio": "Apodi",
+      "ibge": "240100",
       "value": 44
     },
     {
@@ -6632,27 +6618,21 @@
       "value": 44
     },
     {
-      "uf": "AM",
-      "municipio": "Careiro",
-      "ibge": "130110",
+      "uf": "MA",
+      "municipio": "São Bento",
+      "ibge": "211050",
+      "value": 44
+    },
+    {
+      "uf": "RO",
+      "municipio": "Nova Mamoré",
+      "ibge": "110033",
       "value": 43
     },
     {
-      "uf": "SP",
-      "municipio": "Guaraci",
-      "ibge": "351790",
-      "value": 43
-    },
-    {
-      "uf": "SP",
-      "municipio": "Queluz",
-      "ibge": "354190",
-      "value": 43
-    },
-    {
-      "uf": "SP",
-      "municipio": "Santa Branca",
-      "ibge": "354600",
+      "uf": "AL",
+      "municipio": "Murici",
+      "ibge": "270550",
       "value": 43
     },
     {
@@ -6668,15 +6648,15 @@
       "value": 43
     },
     {
-      "uf": "SP",
-      "municipio": "Luiziânia",
-      "ibge": "352770",
+      "uf": "PI",
+      "municipio": "José De Freitas",
+      "ibge": "220550",
       "value": 43
     },
     {
       "uf": "SP",
-      "municipio": "Vista Alegre Do Alto",
-      "ibge": "355690",
+      "municipio": "Santa Branca",
+      "ibge": "354600",
       "value": 43
     },
     {
@@ -6686,9 +6666,21 @@
       "value": 43
     },
     {
-      "uf": "AL",
-      "municipio": "Murici",
-      "ibge": "270550",
+      "uf": "SP",
+      "municipio": "Vista Alegre Do Alto",
+      "ibge": "355690",
+      "value": 43
+    },
+    {
+      "uf": "AM",
+      "municipio": "Careiro",
+      "ibge": "130110",
+      "value": 43
+    },
+    {
+      "uf": "SP",
+      "municipio": "Charqueada",
+      "ibge": "351170",
       "value": 43
     },
     {
@@ -6699,33 +6691,21 @@
     },
     {
       "uf": "SP",
-      "municipio": "Charqueada",
-      "ibge": "351170",
+      "municipio": "Queluz",
+      "ibge": "354190",
       "value": 43
     },
     {
-      "uf": "PI",
-      "municipio": "José De Freitas",
-      "ibge": "220550",
+      "uf": "SP",
+      "municipio": "Guaraci",
+      "ibge": "351790",
       "value": 43
     },
     {
-      "uf": "RO",
-      "municipio": "Nova Mamoré",
-      "ibge": "110033",
+      "uf": "SP",
+      "municipio": "Luiziânia",
+      "ibge": "352770",
       "value": 43
-    },
-    {
-      "uf": "PI",
-      "municipio": "Uruçuí",
-      "ibge": "221120",
-      "value": 42
-    },
-    {
-      "uf": "RN",
-      "municipio": "Caraúbas",
-      "ibge": "240230",
-      "value": 42
     },
     {
       "uf": "MT",
@@ -6740,9 +6720,9 @@
       "value": 42
     },
     {
-      "uf": "SP",
-      "municipio": "Bananal",
-      "ibge": "350490",
+      "uf": "PI",
+      "municipio": "Luzilândia",
+      "ibge": "220580",
       "value": 42
     },
     {
@@ -6752,15 +6732,27 @@
       "value": 42
     },
     {
-      "uf": "PI",
-      "municipio": "Luzilândia",
-      "ibge": "220580",
+      "uf": "SP",
+      "municipio": "Bananal",
+      "ibge": "350490",
       "value": 42
     },
     {
-      "uf": "SP",
-      "municipio": "Nova Europa",
-      "ibge": "353290",
+      "uf": "RN",
+      "municipio": "Caraúbas",
+      "ibge": "240230",
+      "value": 42
+    },
+    {
+      "uf": "PI",
+      "municipio": "Uruçuí",
+      "ibge": "221120",
+      "value": 42
+    },
+    {
+      "uf": "RO",
+      "municipio": "Colorado Do Oeste",
+      "ibge": "110006",
       "value": 41
     },
     {
@@ -6771,20 +6763,8 @@
     },
     {
       "uf": "SP",
-      "municipio": "Santo Antônio Do Aracanguá",
-      "ibge": "354805",
-      "value": 41
-    },
-    {
-      "uf": "SP",
       "municipio": "Guatapará",
       "ibge": "351885",
-      "value": 41
-    },
-    {
-      "uf": "RO",
-      "municipio": "Colorado Do Oeste",
-      "ibge": "110006",
       "value": 41
     },
     {
@@ -6795,8 +6775,20 @@
     },
     {
       "uf": "SP",
+      "municipio": "Nova Europa",
+      "ibge": "353290",
+      "value": 41
+    },
+    {
+      "uf": "SP",
       "municipio": "Arandu",
       "ibge": "350310",
+      "value": 41
+    },
+    {
+      "uf": "SP",
+      "municipio": "Santo Antônio Do Aracanguá",
+      "ibge": "354805",
       "value": 41
     },
     {
@@ -6806,27 +6798,9 @@
       "value": 41
     },
     {
-      "uf": "MT",
-      "municipio": "Cláudia",
-      "ibge": "510305",
-      "value": 40
-    },
-    {
-      "uf": "TO",
-      "municipio": "Araguatins",
-      "ibge": "170220",
-      "value": 40
-    },
-    {
-      "uf": "RO",
-      "municipio": "Buritis",
-      "ibge": "110045",
-      "value": 40
-    },
-    {
-      "uf": "MT",
-      "municipio": "Vila Bela Da Santíssima Trindade",
-      "ibge": "510550",
+      "uf": "SP",
+      "municipio": "Juquitiba",
+      "ibge": "352620",
       "value": 40
     },
     {
@@ -6842,10 +6816,58 @@
       "value": 40
     },
     {
-      "uf": "SP",
-      "municipio": "Juquitiba",
-      "ibge": "352620",
+      "uf": "MT",
+      "municipio": "Vila Bela Da Santíssima Trindade",
+      "ibge": "510550",
       "value": 40
+    },
+    {
+      "uf": "RO",
+      "municipio": "Buritis",
+      "ibge": "110045",
+      "value": 40
+    },
+    {
+      "uf": "MT",
+      "municipio": "Cláudia",
+      "ibge": "510305",
+      "value": 40
+    },
+    {
+      "uf": "TO",
+      "municipio": "Araguatins",
+      "ibge": "170220",
+      "value": 40
+    },
+    {
+      "uf": "SE",
+      "municipio": "Canindé De São Francisco",
+      "ibge": "280120",
+      "value": 39
+    },
+    {
+      "uf": "SP",
+      "municipio": "Itaberá",
+      "ibge": "352170",
+      "value": 39
+    },
+    {
+      "uf": "SP",
+      "municipio": "Itaporanga",
+      "ibge": "352280",
+      "value": 39
+    },
+    {
+      "uf": "RO",
+      "municipio": "Candeias Do Jamari",
+      "ibge": "110080",
+      "value": 39
+    },
+    {
+      "uf": "RO",
+      "municipio": "Alta Floresta D'oeste",
+      "ibge": "110001",
+      "value": 39
     },
     {
       "uf": "MT",
@@ -6854,15 +6876,21 @@
       "value": 39
     },
     {
-      "uf": "RN",
-      "municipio": "Baraúna",
-      "ibge": "240145",
+      "uf": "PB",
+      "municipio": "São João Do Rio Do Peixe",
+      "ibge": "250070",
       "value": 39
     },
     {
-      "uf": "RO",
-      "municipio": "Candeias Do Jamari",
-      "ibge": "110080",
+      "uf": "PB",
+      "municipio": "Alagoa Grande",
+      "ibge": "250030",
+      "value": 39
+    },
+    {
+      "uf": "RN",
+      "municipio": "Baraúna",
+      "ibge": "240145",
       "value": 39
     },
     {
@@ -6878,99 +6906,9 @@
       "value": 39
     },
     {
-      "uf": "RO",
-      "municipio": "Alta Floresta D'oeste",
-      "ibge": "110001",
-      "value": 39
-    },
-    {
-      "uf": "PB",
-      "municipio": "Alagoa Grande",
-      "ibge": "250030",
-      "value": 39
-    },
-    {
-      "uf": "PB",
-      "municipio": "São João Do Rio Do Peixe",
-      "ibge": "250070",
-      "value": 39
-    },
-    {
-      "uf": "SP",
-      "municipio": "Itaberá",
-      "ibge": "352170",
-      "value": 39
-    },
-    {
-      "uf": "SE",
-      "municipio": "Canindé De São Francisco",
-      "ibge": "280120",
-      "value": 39
-    },
-    {
-      "uf": "SP",
-      "municipio": "Itaporanga",
-      "ibge": "352280",
-      "value": 39
-    },
-    {
-      "uf": "AP",
-      "municipio": "Oiapoque",
-      "ibge": "160050",
-      "value": 38
-    },
-    {
       "uf": "SP",
       "municipio": "Auriflama",
       "ibge": "350420",
-      "value": 38
-    },
-    {
-      "uf": "MT",
-      "municipio": "Canarana",
-      "ibge": "510270",
-      "value": 38
-    },
-    {
-      "uf": "PI",
-      "municipio": "Corrente",
-      "ibge": "220290",
-      "value": 38
-    },
-    {
-      "uf": "RN",
-      "municipio": "Parelhas",
-      "ibge": "240890",
-      "value": 38
-    },
-    {
-      "uf": "AL",
-      "municipio": "Barra De São Miguel",
-      "ibge": "270060",
-      "value": 38
-    },
-    {
-      "uf": "AL",
-      "municipio": "São Luís Do Quitunde",
-      "ibge": "270850",
-      "value": 38
-    },
-    {
-      "uf": "PB",
-      "municipio": "Boqueirão",
-      "ibge": "250250",
-      "value": 38
-    },
-    {
-      "uf": "PB",
-      "municipio": "Conceição",
-      "ibge": "250440",
-      "value": 38
-    },
-    {
-      "uf": "SP",
-      "municipio": "Nova Aliança",
-      "ibge": "353280",
       "value": 38
     },
     {
@@ -6981,14 +6919,104 @@
     },
     {
       "uf": "SP",
+      "municipio": "Nova Aliança",
+      "ibge": "353280",
+      "value": 38
+    },
+    {
+      "uf": "PB",
+      "municipio": "Boqueirão",
+      "ibge": "250250",
+      "value": 38
+    },
+    {
+      "uf": "AL",
+      "municipio": "São Luís Do Quitunde",
+      "ibge": "270850",
+      "value": 38
+    },
+    {
+      "uf": "SP",
       "municipio": "Fernando Prestes",
       "ibge": "351560",
       "value": 38
     },
     {
+      "uf": "AL",
+      "municipio": "Barra De São Miguel",
+      "ibge": "270060",
+      "value": 38
+    },
+    {
+      "uf": "PB",
+      "municipio": "Conceição",
+      "ibge": "250440",
+      "value": 38
+    },
+    {
+      "uf": "MT",
+      "municipio": "Canarana",
+      "ibge": "510270",
+      "value": 38
+    },
+    {
+      "uf": "RN",
+      "municipio": "Parelhas",
+      "ibge": "240890",
+      "value": 38
+    },
+    {
+      "uf": "PI",
+      "municipio": "Corrente",
+      "ibge": "220290",
+      "value": 38
+    },
+    {
+      "uf": "AP",
+      "municipio": "Oiapoque",
+      "ibge": "160050",
+      "value": 38
+    },
+    {
+      "uf": "RO",
+      "municipio": "Espigão D'oeste",
+      "ibge": "110009",
+      "value": 37
+    },
+    {
+      "uf": "SP",
+      "municipio": "Pontes Gestal",
+      "ibge": "354030",
+      "value": 37
+    },
+    {
+      "uf": "PB",
+      "municipio": "São José De Piranhas",
+      "ibge": "251450",
+      "value": 37
+    },
+    {
+      "uf": "AC",
+      "municipio": "Senador Guiomard",
+      "ibge": "120045",
+      "value": 37
+    },
+    {
+      "uf": "SP",
+      "municipio": "Caconde",
+      "ibge": "350870",
+      "value": 37
+    },
+    {
       "uf": "AM",
       "municipio": "Rio Preto Da Eva",
       "ibge": "130356",
+      "value": 37
+    },
+    {
+      "uf": "SP",
+      "municipio": "Araçariguama",
+      "ibge": "350275",
       "value": 37
     },
     {
@@ -6999,26 +7027,14 @@
     },
     {
       "uf": "SP",
-      "municipio": "Araçariguama",
-      "ibge": "350275",
-      "value": 37
-    },
-    {
-      "uf": "SP",
-      "municipio": "Pontes Gestal",
-      "ibge": "354030",
-      "value": 37
-    },
-    {
-      "uf": "SP",
       "municipio": "Nhandeara",
       "ibge": "353260",
       "value": 37
     },
     {
       "uf": "SP",
-      "municipio": "Caconde",
-      "ibge": "350870",
+      "municipio": "São Lourenço Da Serra",
+      "ibge": "354995",
       "value": 37
     },
     {
@@ -7029,27 +7045,9 @@
     },
     {
       "uf": "SP",
-      "municipio": "São Lourenço Da Serra",
-      "ibge": "354995",
-      "value": 37
-    },
-    {
-      "uf": "RO",
-      "municipio": "Espigão D'oeste",
-      "ibge": "110009",
-      "value": 37
-    },
-    {
-      "uf": "AC",
-      "municipio": "Senador Guiomard",
-      "ibge": "120045",
-      "value": 37
-    },
-    {
-      "uf": "PB",
-      "municipio": "São José De Piranhas",
-      "ibge": "251450",
-      "value": 37
+      "municipio": "Cardoso",
+      "ibge": "351070",
+      "value": 36
     },
     {
       "uf": "SE",
@@ -7064,15 +7062,9 @@
       "value": 36
     },
     {
-      "uf": "AM",
-      "municipio": "Autazes",
-      "ibge": "130030",
-      "value": 36
-    },
-    {
-      "uf": "TO",
-      "municipio": "Pedro Afonso",
-      "ibge": "171650",
+      "uf": "SP",
+      "municipio": "Ouroeste",
+      "ibge": "353475",
       "value": 36
     },
     {
@@ -7089,14 +7081,8 @@
     },
     {
       "uf": "SP",
-      "municipio": "Ouroeste",
-      "ibge": "353475",
-      "value": 36
-    },
-    {
-      "uf": "SP",
-      "municipio": "Cardoso",
-      "ibge": "351070",
+      "municipio": "Getulina",
+      "ibge": "351700",
       "value": 36
     },
     {
@@ -7106,39 +7092,21 @@
       "value": 36
     },
     {
-      "uf": "SP",
-      "municipio": "Getulina",
-      "ibge": "351700",
+      "uf": "TO",
+      "municipio": "Pedro Afonso",
+      "ibge": "171650",
       "value": 36
     },
     {
-      "uf": "SP",
-      "municipio": "Colômbia",
-      "ibge": "351210",
-      "value": 35
+      "uf": "AM",
+      "municipio": "Autazes",
+      "ibge": "130030",
+      "value": 36
     },
     {
-      "uf": "SP",
-      "municipio": "Herculândia",
-      "ibge": "351900",
-      "value": 35
-    },
-    {
-      "uf": "SP",
-      "municipio": "Rinópolis",
-      "ibge": "354380",
-      "value": 35
-    },
-    {
-      "uf": "SP",
-      "municipio": "Luís Antônio",
-      "ibge": "352760",
-      "value": 35
-    },
-    {
-      "uf": "SP",
-      "municipio": "Tapiratiba",
-      "ibge": "355360",
+      "uf": "RO",
+      "municipio": "Presidente Médici",
+      "ibge": "110025",
       "value": 35
     },
     {
@@ -7149,20 +7117,20 @@
     },
     {
       "uf": "SP",
+      "municipio": "Colômbia",
+      "ibge": "351210",
+      "value": 35
+    },
+    {
+      "uf": "SP",
+      "municipio": "Rinópolis",
+      "ibge": "354380",
+      "value": 35
+    },
+    {
+      "uf": "SP",
       "municipio": "Jacupiranga",
       "ibge": "352460",
-      "value": 35
-    },
-    {
-      "uf": "TO",
-      "municipio": "Alvorada",
-      "ibge": "170070",
-      "value": 35
-    },
-    {
-      "uf": "SE",
-      "municipio": "Boquim",
-      "ibge": "280067",
       "value": 35
     },
     {
@@ -7172,9 +7140,9 @@
       "value": 35
     },
     {
-      "uf": "RO",
-      "municipio": "Presidente Médici",
-      "ibge": "110025",
+      "uf": "SP",
+      "municipio": "Luís Antônio",
+      "ibge": "352760",
       "value": 35
     },
     {
@@ -7184,28 +7152,28 @@
       "value": 35
     },
     {
-      "uf": "AL",
-      "municipio": "Pão De Açúcar",
-      "ibge": "270640",
-      "value": 34
+      "uf": "SP",
+      "municipio": "Herculândia",
+      "ibge": "351900",
+      "value": 35
     },
     {
-      "uf": "TO",
-      "municipio": "Arapoema",
-      "ibge": "170230",
-      "value": 34
+      "uf": "SP",
+      "municipio": "Tapiratiba",
+      "ibge": "355360",
+      "value": 35
     },
     {
       "uf": "SE",
-      "municipio": "Porto Da Folha",
-      "ibge": "280560",
-      "value": 34
+      "municipio": "Boquim",
+      "ibge": "280067",
+      "value": 35
     },
     {
-      "uf": "MS",
-      "municipio": "Anaurilândia",
-      "ibge": "500080",
-      "value": 34
+      "uf": "TO",
+      "municipio": "Alvorada",
+      "ibge": "170070",
+      "value": 35
     },
     {
       "uf": "RN",
@@ -7221,20 +7189,44 @@
     },
     {
       "uf": "AL",
-      "municipio": "Água Branca",
-      "ibge": "270010",
-      "value": 34
-    },
-    {
-      "uf": "AL",
       "municipio": "São Sebastião",
       "ibge": "270880",
       "value": 34
     },
     {
+      "uf": "MS",
+      "municipio": "Anaurilândia",
+      "ibge": "500080",
+      "value": 34
+    },
+    {
+      "uf": "SE",
+      "municipio": "Porto Da Folha",
+      "ibge": "280560",
+      "value": 34
+    },
+    {
+      "uf": "AL",
+      "municipio": "Pão De Açúcar",
+      "ibge": "270640",
+      "value": 34
+    },
+    {
+      "uf": "AL",
+      "municipio": "Água Branca",
+      "ibge": "270010",
+      "value": 34
+    },
+    {
+      "uf": "TO",
+      "municipio": "Arapoema",
+      "ibge": "170230",
+      "value": 34
+    },
+    {
       "uf": "SP",
-      "municipio": "Pinhalzinho",
-      "ibge": "353820",
+      "municipio": "Vera Cruz",
+      "ibge": "355660",
       "value": 33
     },
     {
@@ -7244,45 +7236,21 @@
       "value": 33
     },
     {
-      "uf": "SP",
-      "municipio": "Vera Cruz",
-      "ibge": "355660",
-      "value": 33
-    },
-    {
-      "uf": "SP",
-      "municipio": "Américo De Campos",
-      "ibge": "350180",
-      "value": 33
-    },
-    {
-      "uf": "AM",
-      "municipio": "Maués",
-      "ibge": "130290",
-      "value": 33
-    },
-    {
       "uf": "AM",
       "municipio": "Lábrea",
       "ibge": "130240",
       "value": 33
     },
     {
-      "uf": "PI",
-      "municipio": "Amarante",
-      "ibge": "220050",
+      "uf": "SP",
+      "municipio": "Pinhalzinho",
+      "ibge": "353820",
       "value": 33
     },
     {
-      "uf": "TO",
-      "municipio": "Arraias",
-      "ibge": "170240",
-      "value": 33
-    },
-    {
-      "uf": "TO",
-      "municipio": "Tocantinópolis",
-      "ibge": "172120",
+      "uf": "AM",
+      "municipio": "Maués",
+      "ibge": "130290",
       "value": 33
     },
     {
@@ -7298,15 +7266,15 @@
       "value": 33
     },
     {
-      "uf": "TO",
-      "municipio": "Xambioá",
-      "ibge": "172210",
+      "uf": "PI",
+      "municipio": "Amarante",
+      "ibge": "220050",
       "value": 33
     },
     {
       "uf": "SP",
-      "municipio": "Embaúba",
-      "ibge": "351495",
+      "municipio": "Américo De Campos",
+      "ibge": "350180",
       "value": 33
     },
     {
@@ -7316,9 +7284,33 @@
       "value": 33
     },
     {
-      "uf": "RN",
-      "municipio": "Jardim Do Seridó",
-      "ibge": "240570",
+      "uf": "SP",
+      "municipio": "Embaúba",
+      "ibge": "351495",
+      "value": 33
+    },
+    {
+      "uf": "TO",
+      "municipio": "Arraias",
+      "ibge": "170240",
+      "value": 33
+    },
+    {
+      "uf": "TO",
+      "municipio": "Xambioá",
+      "ibge": "172210",
+      "value": 33
+    },
+    {
+      "uf": "TO",
+      "municipio": "Tocantinópolis",
+      "ibge": "172120",
+      "value": 33
+    },
+    {
+      "uf": "AL",
+      "municipio": "Igaci",
+      "ibge": "270310",
       "value": 32
     },
     {
@@ -7328,15 +7320,15 @@
       "value": 32
     },
     {
-      "uf": "SP",
-      "municipio": "Mineiros Do Tietê",
-      "ibge": "352980",
+      "uf": "PI",
+      "municipio": "Luís Correia",
+      "ibge": "220570",
       "value": 32
     },
     {
-      "uf": "SP",
-      "municipio": "Santópolis Do Aguapeí",
-      "ibge": "354840",
+      "uf": "RN",
+      "municipio": "Passa E Fica",
+      "ibge": "240910",
       "value": 32
     },
     {
@@ -7346,15 +7338,9 @@
       "value": 32
     },
     {
-      "uf": "SP",
-      "municipio": "Arealva",
-      "ibge": "350340",
-      "value": 32
-    },
-    {
-      "uf": "PI",
-      "municipio": "Luís Correia",
-      "ibge": "220570",
+      "uf": "RN",
+      "municipio": "Jardim Do Seridó",
+      "ibge": "240570",
       "value": 32
     },
     {
@@ -7376,21 +7362,9 @@
       "value": 32
     },
     {
-      "uf": "AL",
-      "municipio": "Igaci",
-      "ibge": "270310",
-      "value": 32
-    },
-    {
-      "uf": "RN",
-      "municipio": "Passa E Fica",
-      "ibge": "240910",
-      "value": 32
-    },
-    {
-      "uf": "AC",
-      "municipio": "Sena Madureira",
-      "ibge": "120050",
+      "uf": "SP",
+      "municipio": "Mineiros Do Tietê",
+      "ibge": "352980",
       "value": 32
     },
     {
@@ -7400,15 +7374,39 @@
       "value": 32
     },
     {
-      "uf": "RN",
-      "municipio": "São Miguel",
-      "ibge": "241250",
+      "uf": "SP",
+      "municipio": "Santópolis Do Aguapeí",
+      "ibge": "354840",
+      "value": 32
+    },
+    {
+      "uf": "SP",
+      "municipio": "Arealva",
+      "ibge": "350340",
+      "value": 32
+    },
+    {
+      "uf": "AC",
+      "municipio": "Sena Madureira",
+      "ibge": "120050",
+      "value": 32
+    },
+    {
+      "uf": "MS",
+      "municipio": "Itaquiraí",
+      "ibge": "500460",
       "value": 31
     },
     {
-      "uf": "RN",
-      "municipio": "São José Do Campestre",
-      "ibge": "241230",
+      "uf": "AL",
+      "municipio": "Mata Grande",
+      "ibge": "270500",
+      "value": 31
+    },
+    {
+      "uf": "AM",
+      "municipio": "Nova Olinda Do Norte",
+      "ibge": "130310",
       "value": 31
     },
     {
@@ -7424,12 +7422,6 @@
       "value": 31
     },
     {
-      "uf": "AM",
-      "municipio": "Nova Olinda Do Norte",
-      "ibge": "130310",
-      "value": 31
-    },
-    {
       "uf": "SP",
       "municipio": "Buritizal",
       "ibge": "350820",
@@ -7442,21 +7434,21 @@
       "value": 31
     },
     {
-      "uf": "MS",
-      "municipio": "Itaquiraí",
-      "ibge": "500460",
+      "uf": "RN",
+      "municipio": "São José Do Campestre",
+      "ibge": "241230",
+      "value": 31
+    },
+    {
+      "uf": "RN",
+      "municipio": "São Miguel",
+      "ibge": "241250",
       "value": 31
     },
     {
       "uf": "AL",
-      "municipio": "Mata Grande",
-      "ibge": "270500",
-      "value": 31
-    },
-    {
-      "uf": "SP",
-      "municipio": "Ribeirão Bonito",
-      "ibge": "354290",
+      "municipio": "Igreja Nova",
+      "ibge": "270320",
       "value": 30
     },
     {
@@ -7466,9 +7458,39 @@
       "value": 30
     },
     {
+      "uf": "MS",
+      "municipio": "Guia Lopes Da Laguna",
+      "ibge": "500410",
+      "value": 30
+    },
+    {
+      "uf": "AL",
+      "municipio": "Piranhas",
+      "ibge": "270710",
+      "value": 30
+    },
+    {
+      "uf": "AC",
+      "municipio": "Plácido De Castro",
+      "ibge": "120038",
+      "value": 30
+    },
+    {
+      "uf": "SP",
+      "municipio": "Ribeirão Bonito",
+      "ibge": "354290",
+      "value": 30
+    },
+    {
       "uf": "SP",
       "municipio": "Flórida Paulista",
       "ibge": "351600",
+      "value": 30
+    },
+    {
+      "uf": "SP",
+      "municipio": "Conchas",
+      "ibge": "351230",
       "value": 30
     },
     {
@@ -7485,63 +7507,15 @@
     },
     {
       "uf": "SP",
-      "municipio": "Clementina",
-      "ibge": "351190",
-      "value": 30
-    },
-    {
-      "uf": "SP",
-      "municipio": "Conchas",
-      "ibge": "351230",
-      "value": 30
-    },
-    {
-      "uf": "AC",
-      "municipio": "Plácido De Castro",
-      "ibge": "120038",
-      "value": 30
-    },
-    {
-      "uf": "MS",
-      "municipio": "Guia Lopes Da Laguna",
-      "ibge": "500410",
-      "value": 30
-    },
-    {
-      "uf": "AL",
-      "municipio": "Igreja Nova",
-      "ibge": "270320",
-      "value": 30
-    },
-    {
-      "uf": "SP",
       "municipio": "Indiaporã",
       "ibge": "352070",
       "value": 30
     },
     {
-      "uf": "AL",
-      "municipio": "Piranhas",
-      "ibge": "270710",
+      "uf": "SP",
+      "municipio": "Clementina",
+      "ibge": "351190",
       "value": 30
-    },
-    {
-      "uf": "SP",
-      "municipio": "Orindiúva",
-      "ibge": "353420",
-      "value": 29
-    },
-    {
-      "uf": "SP",
-      "municipio": "Igaratá",
-      "ibge": "352020",
-      "value": 29
-    },
-    {
-      "uf": "SE",
-      "municipio": "Frei Paulo",
-      "ibge": "280230",
-      "value": 29
     },
     {
       "uf": "AM",
@@ -7556,27 +7530,15 @@
       "value": 29
     },
     {
-      "uf": "RN",
-      "municipio": "Canguaretama",
-      "ibge": "240220",
-      "value": 29
-    },
-    {
-      "uf": "AL",
-      "municipio": "Batalha",
-      "ibge": "270070",
-      "value": 29
-    },
-    {
-      "uf": "AL",
-      "municipio": "Feira Grande",
-      "ibge": "270260",
+      "uf": "SE",
+      "municipio": "Frei Paulo",
+      "ibge": "280230",
       "value": 29
     },
     {
       "uf": "SP",
-      "municipio": "Salesópolis",
-      "ibge": "354500",
+      "municipio": "Orindiúva",
+      "ibge": "353420",
       "value": 29
     },
     {
@@ -7587,14 +7549,56 @@
     },
     {
       "uf": "SP",
-      "municipio": "Iepê",
-      "ibge": "351990",
+      "municipio": "Igaratá",
+      "ibge": "352020",
+      "value": 29
+    },
+    {
+      "uf": "SP",
+      "municipio": "Salesópolis",
+      "ibge": "354500",
+      "value": 29
+    },
+    {
+      "uf": "AL",
+      "municipio": "Feira Grande",
+      "ibge": "270260",
+      "value": 29
+    },
+    {
+      "uf": "AL",
+      "municipio": "Colônia Leopoldina",
+      "ibge": "270210",
+      "value": 29
+    },
+    {
+      "uf": "RN",
+      "municipio": "Canguaretama",
+      "ibge": "240220",
+      "value": 29
+    },
+    {
+      "uf": "SP",
+      "municipio": "Barbosa",
+      "ibge": "350510",
       "value": 28
     },
     {
       "uf": "SP",
-      "municipio": "Bofete",
-      "ibge": "350690",
+      "municipio": "Salto Grande",
+      "ibge": "354540",
+      "value": 28
+    },
+    {
+      "uf": "SP",
+      "municipio": "Águas De São Pedro",
+      "ibge": "350060",
+      "value": 28
+    },
+    {
+      "uf": "SP",
+      "municipio": "Itariri",
+      "ibge": "352330",
       "value": 28
     },
     {
@@ -7605,20 +7609,8 @@
     },
     {
       "uf": "SP",
-      "municipio": "Itariri",
-      "ibge": "352330",
-      "value": 28
-    },
-    {
-      "uf": "SP",
-      "municipio": "Ibirá",
-      "ibge": "351940",
-      "value": 28
-    },
-    {
-      "uf": "SP",
-      "municipio": "Barbosa",
-      "ibge": "350510",
+      "municipio": "Bofete",
+      "ibge": "350690",
       "value": 28
     },
     {
@@ -7629,14 +7621,20 @@
     },
     {
       "uf": "SP",
+      "municipio": "Iepê",
+      "ibge": "351990",
+      "value": 28
+    },
+    {
+      "uf": "SP",
       "municipio": "Gália",
       "ibge": "351660",
       "value": 28
     },
     {
       "uf": "SP",
-      "municipio": "Águas De São Pedro",
-      "ibge": "350060",
+      "municipio": "Ibirá",
+      "ibge": "351940",
       "value": 28
     },
     {
@@ -7646,27 +7644,15 @@
       "value": 28
     },
     {
-      "uf": "SP",
-      "municipio": "Salto Grande",
-      "ibge": "354540",
-      "value": 28
-    },
-    {
-      "uf": "RO",
-      "municipio": "Alvorada D'oeste",
-      "ibge": "110034",
-      "value": 27
-    },
-    {
-      "uf": "RO",
-      "municipio": "Cujubim",
-      "ibge": "110094",
-      "value": 27
-    },
-    {
       "uf": "AM",
       "municipio": "Benjamin Constant",
       "ibge": "130060",
+      "value": 27
+    },
+    {
+      "uf": "SP",
+      "municipio": "Restinga",
+      "ibge": "354270",
       "value": 27
     },
     {
@@ -7677,32 +7663,8 @@
     },
     {
       "uf": "SP",
-      "municipio": "Sud Mennucci",
-      "ibge": "355230",
-      "value": 27
-    },
-    {
-      "uf": "SP",
-      "municipio": "Nuporanga",
-      "ibge": "353360",
-      "value": 27
-    },
-    {
-      "uf": "SP",
       "municipio": "Areiópolis",
       "ibge": "350360",
-      "value": 27
-    },
-    {
-      "uf": "RN",
-      "municipio": "Pedro Velho",
-      "ibge": "240980",
-      "value": 27
-    },
-    {
-      "uf": "SP",
-      "municipio": "Santo Antônio Do Pinhal",
-      "ibge": "354820",
       "value": 27
     },
     {
@@ -7713,8 +7675,14 @@
     },
     {
       "uf": "SP",
-      "municipio": "Restinga",
-      "ibge": "354270",
+      "municipio": "Santo Antônio Do Pinhal",
+      "ibge": "354820",
+      "value": 27
+    },
+    {
+      "uf": "SP",
+      "municipio": "Nuporanga",
+      "ibge": "353360",
       "value": 27
     },
     {
@@ -7724,15 +7692,51 @@
       "value": 27
     },
     {
+      "uf": "RO",
+      "municipio": "Alvorada D'oeste",
+      "ibge": "110034",
+      "value": 27
+    },
+    {
+      "uf": "SP",
+      "municipio": "Sud Mennucci",
+      "ibge": "355230",
+      "value": 27
+    },
+    {
+      "uf": "RO",
+      "municipio": "Cujubim",
+      "ibge": "110094",
+      "value": 27
+    },
+    {
+      "uf": "RN",
+      "municipio": "Pedro Velho",
+      "ibge": "240980",
+      "value": 27
+    },
+    {
       "uf": "SP",
       "municipio": "Itobi",
       "ibge": "352380",
       "value": 26
     },
     {
+      "uf": "RN",
+      "municipio": "Serra Do Mel",
+      "ibge": "241335",
+      "value": 26
+    },
+    {
       "uf": "SP",
       "municipio": "São Luiz Do Paraitinga",
       "ibge": "355000",
+      "value": 26
+    },
+    {
+      "uf": "TO",
+      "municipio": "Araguaçu",
+      "ibge": "170200",
       "value": 26
     },
     {
@@ -7748,27 +7752,9 @@
       "value": 26
     },
     {
-      "uf": "TO",
-      "municipio": "Araguaçu",
-      "ibge": "170200",
-      "value": 26
-    },
-    {
-      "uf": "RN",
-      "municipio": "Serra Do Mel",
-      "ibge": "241335",
-      "value": 26
-    },
-    {
       "uf": "RR",
       "municipio": "Alto Alegre",
       "ibge": "140005",
-      "value": 25
-    },
-    {
-      "uf": "RO",
-      "municipio": "Seringueiras",
-      "ibge": "110150",
       "value": 25
     },
     {
@@ -7778,15 +7764,15 @@
       "value": 25
     },
     {
-      "uf": "SE",
-      "municipio": "Areia Branca",
-      "ibge": "280050",
+      "uf": "AM",
+      "municipio": "Eirunepé",
+      "ibge": "130140",
       "value": 25
     },
     {
-      "uf": "SP",
-      "municipio": "Bálsamo",
-      "ibge": "350480",
+      "uf": "SE",
+      "municipio": "Areia Branca",
+      "ibge": "280050",
       "value": 25
     },
     {
@@ -7797,32 +7783,14 @@
     },
     {
       "uf": "AM",
-      "municipio": "Eirunepé",
-      "ibge": "130140",
-      "value": 25
-    },
-    {
-      "uf": "SP",
-      "municipio": "Ipaussu",
-      "ibge": "352090",
-      "value": 25
-    },
-    {
-      "uf": "SP",
-      "municipio": "Motuca",
-      "ibge": "353205",
+      "municipio": "Codajás",
+      "ibge": "130130",
       "value": 25
     },
     {
       "uf": "AM",
       "municipio": "Nhamundá",
       "ibge": "130300",
-      "value": 25
-    },
-    {
-      "uf": "AM",
-      "municipio": "Codajás",
-      "ibge": "130130",
       "value": 25
     },
     {
@@ -7833,15 +7801,27 @@
     },
     {
       "uf": "SP",
-      "municipio": "Anhembi",
-      "ibge": "350230",
-      "value": 24
+      "municipio": "Bálsamo",
+      "ibge": "350480",
+      "value": 25
     },
     {
       "uf": "SP",
-      "municipio": "Boa Esperança Do Sul",
-      "ibge": "350670",
-      "value": 24
+      "municipio": "Motuca",
+      "ibge": "353205",
+      "value": 25
+    },
+    {
+      "uf": "SP",
+      "municipio": "Ipaussu",
+      "ibge": "352090",
+      "value": 25
+    },
+    {
+      "uf": "RO",
+      "municipio": "Seringueiras",
+      "ibge": "110150",
+      "value": 25
     },
     {
       "uf": "SE",
@@ -7851,26 +7831,38 @@
     },
     {
       "uf": "SE",
-      "municipio": "Carmópolis",
-      "ibge": "280150",
-      "value": 24
-    },
-    {
-      "uf": "SE",
       "municipio": "Neópolis",
       "ibge": "280440",
       "value": 24
     },
     {
-      "uf": "PI",
-      "municipio": "Jaicós",
-      "ibge": "220520",
+      "uf": "SP",
+      "municipio": "Icém",
+      "ibge": "351980",
+      "value": 24
+    },
+    {
+      "uf": "SP",
+      "municipio": "Bocaina",
+      "ibge": "350680",
       "value": 24
     },
     {
       "uf": "SE",
       "municipio": "Umbaúba",
       "ibge": "280760",
+      "value": 24
+    },
+    {
+      "uf": "SE",
+      "municipio": "Carmópolis",
+      "ibge": "280150",
+      "value": 24
+    },
+    {
+      "uf": "PI",
+      "municipio": "Jaicós",
+      "ibge": "220520",
       "value": 24
     },
     {
@@ -7881,92 +7873,26 @@
     },
     {
       "uf": "SP",
+      "municipio": "Boa Esperança Do Sul",
+      "ibge": "350670",
+      "value": 24
+    },
+    {
+      "uf": "SP",
       "municipio": "Sarapuí",
       "ibge": "355110",
       "value": 24
     },
     {
       "uf": "SP",
-      "municipio": "Bocaina",
-      "ibge": "350680",
+      "municipio": "Anhembi",
+      "ibge": "350230",
       "value": 24
-    },
-    {
-      "uf": "SP",
-      "municipio": "Icém",
-      "ibge": "351980",
-      "value": 24
-    },
-    {
-      "uf": "PI",
-      "municipio": "Água Branca",
-      "ibge": "220020",
-      "value": 23
-    },
-    {
-      "uf": "PI",
-      "municipio": "Marcolândia",
-      "ibge": "220595",
-      "value": 23
-    },
-    {
-      "uf": "AM",
-      "municipio": "Carauari",
-      "ibge": "130100",
-      "value": 23
     },
     {
       "uf": "SP",
       "municipio": "Pirapora Do Bom Jesus",
       "ibge": "353910",
-      "value": 23
-    },
-    {
-      "uf": "SP",
-      "municipio": "Paulicéia",
-      "ibge": "353640",
-      "value": 23
-    },
-    {
-      "uf": "SP",
-      "municipio": "Sete Barras",
-      "ibge": "355180",
-      "value": 23
-    },
-    {
-      "uf": "SP",
-      "municipio": "Rincão",
-      "ibge": "354370",
-      "value": 23
-    },
-    {
-      "uf": "SP",
-      "municipio": "Águas De Santa Bárbara",
-      "ibge": "350055",
-      "value": 23
-    },
-    {
-      "uf": "SP",
-      "municipio": "Ibirarema",
-      "ibge": "351950",
-      "value": 23
-    },
-    {
-      "uf": "SP",
-      "municipio": "Taiúva",
-      "ibge": "355320",
-      "value": 23
-    },
-    {
-      "uf": "SP",
-      "municipio": "Jaborandi",
-      "ibge": "352420",
-      "value": 23
-    },
-    {
-      "uf": "SP",
-      "municipio": "Santo Antônio Do Jardim",
-      "ibge": "354810",
       "value": 23
     },
     {
@@ -7983,6 +7909,84 @@
     },
     {
       "uf": "SP",
+      "municipio": "Ibirarema",
+      "ibge": "351950",
+      "value": 23
+    },
+    {
+      "uf": "SP",
+      "municipio": "Paulicéia",
+      "ibge": "353640",
+      "value": 23
+    },
+    {
+      "uf": "SP",
+      "municipio": "Jaborandi",
+      "ibge": "352420",
+      "value": 23
+    },
+    {
+      "uf": "SP",
+      "municipio": "Taiúva",
+      "ibge": "355320",
+      "value": 23
+    },
+    {
+      "uf": "SP",
+      "municipio": "Águas De Santa Bárbara",
+      "ibge": "350055",
+      "value": 23
+    },
+    {
+      "uf": "SP",
+      "municipio": "Rincão",
+      "ibge": "354370",
+      "value": 23
+    },
+    {
+      "uf": "PI",
+      "municipio": "Água Branca",
+      "ibge": "220020",
+      "value": 23
+    },
+    {
+      "uf": "PI",
+      "municipio": "Marcolândia",
+      "ibge": "220595",
+      "value": 23
+    },
+    {
+      "uf": "SP",
+      "municipio": "Sete Barras",
+      "ibge": "355180",
+      "value": 23
+    },
+    {
+      "uf": "AM",
+      "municipio": "Carauari",
+      "ibge": "130100",
+      "value": 23
+    },
+    {
+      "uf": "SP",
+      "municipio": "Santo Antônio Do Jardim",
+      "ibge": "354810",
+      "value": 23
+    },
+    {
+      "uf": "SP",
+      "municipio": "Nova Independência",
+      "ibge": "353320",
+      "value": 22
+    },
+    {
+      "uf": "SE",
+      "municipio": "Campo Do Brito",
+      "ibge": "280100",
+      "value": 22
+    },
+    {
+      "uf": "SP",
       "municipio": "Cajobi",
       "ibge": "350930",
       "value": 22
@@ -7994,15 +7998,21 @@
       "value": 22
     },
     {
-      "uf": "SP",
-      "municipio": "Catiguá",
-      "ibge": "351120",
+      "uf": "RO",
+      "municipio": "Ministro Andreazza",
+      "ibge": "110120",
       "value": 22
     },
     {
-      "uf": "SP",
-      "municipio": "Analândia",
-      "ibge": "350200",
+      "uf": "SE",
+      "municipio": "Rosário Do Catete",
+      "ibge": "280610",
+      "value": 22
+    },
+    {
+      "uf": "RO",
+      "municipio": "Alto Paraíso",
+      "ibge": "110040",
       "value": 22
     },
     {
@@ -8012,15 +8022,39 @@
       "value": 22
     },
     {
-      "uf": "PI",
-      "municipio": "São Miguel Do Tapuio",
-      "ibge": "221040",
+      "uf": "SP",
+      "municipio": "Santa Maria Da Serra",
+      "ibge": "354700",
+      "value": 22
+    },
+    {
+      "uf": "SP",
+      "municipio": "Catiguá",
+      "ibge": "351120",
+      "value": 22
+    },
+    {
+      "uf": "SE",
+      "municipio": "Carira",
+      "ibge": "280140",
+      "value": 22
+    },
+    {
+      "uf": "SE",
+      "municipio": "Japaratuba",
+      "ibge": "280330",
       "value": 22
     },
     {
       "uf": "PI",
       "municipio": "Elesbão Veloso",
       "ibge": "220350",
+      "value": 22
+    },
+    {
+      "uf": "PI",
+      "municipio": "São Miguel Do Tapuio",
+      "ibge": "221040",
       "value": 22
     },
     {
@@ -8037,62 +8071,44 @@
     },
     {
       "uf": "SP",
-      "municipio": "Santa Maria Da Serra",
-      "ibge": "354700",
+      "municipio": "Analândia",
+      "ibge": "350200",
       "value": 22
     },
     {
-      "uf": "RO",
-      "municipio": "Alto Paraíso",
-      "ibge": "110040",
-      "value": 22
+      "uf": "TO",
+      "municipio": "Peixe",
+      "ibge": "171660",
+      "value": 21
     },
     {
-      "uf": "RO",
-      "municipio": "Ministro Andreazza",
-      "ibge": "110120",
-      "value": 22
+      "uf": "AM",
+      "municipio": "Guajará",
+      "ibge": "130165",
+      "value": 21
     },
     {
-      "uf": "SE",
-      "municipio": "Carira",
-      "ibge": "280140",
-      "value": 22
-    },
-    {
-      "uf": "SP",
-      "municipio": "Nova Independência",
-      "ibge": "353320",
-      "value": 22
-    },
-    {
-      "uf": "SE",
-      "municipio": "Rosário Do Catete",
-      "ibge": "280610",
-      "value": 22
-    },
-    {
-      "uf": "SE",
-      "municipio": "Campo Do Brito",
-      "ibge": "280100",
-      "value": 22
-    },
-    {
-      "uf": "SE",
-      "municipio": "Japaratuba",
-      "ibge": "280330",
-      "value": 22
-    },
-    {
-      "uf": "SP",
-      "municipio": "Altair",
-      "ibge": "350090",
+      "uf": "AM",
+      "municipio": "Careiro Da Várzea",
+      "ibge": "130115",
       "value": 21
     },
     {
       "uf": "SP",
-      "municipio": "Oscar Bressane",
-      "ibge": "353450",
+      "municipio": "Echaporã",
+      "ibge": "351470",
+      "value": 21
+    },
+    {
+      "uf": "SP",
+      "municipio": "Guaraçaí",
+      "ibge": "351780",
+      "value": 21
+    },
+    {
+      "uf": "SP",
+      "municipio": "Bilac",
+      "ibge": "350640",
       "value": 21
     },
     {
@@ -8115,20 +8131,14 @@
     },
     {
       "uf": "SP",
-      "municipio": "Guaraçaí",
-      "ibge": "351780",
+      "municipio": "Altair",
+      "ibge": "350090",
       "value": 21
     },
     {
-      "uf": "AM",
-      "municipio": "Guajará",
-      "ibge": "130165",
-      "value": 21
-    },
-    {
-      "uf": "AM",
-      "municipio": "Careiro Da Várzea",
-      "ibge": "130115",
+      "uf": "SP",
+      "municipio": "Oscar Bressane",
+      "ibge": "353450",
       "value": 21
     },
     {
@@ -8139,21 +8149,63 @@
     },
     {
       "uf": "SP",
-      "municipio": "Echaporã",
-      "ibge": "351470",
-      "value": 21
+      "municipio": "Cosmorama",
+      "ibge": "351290",
+      "value": 20
     },
     {
       "uf": "SP",
-      "municipio": "Bilac",
-      "ibge": "350640",
-      "value": 21
+      "municipio": "Cássia Dos Coqueiros",
+      "ibge": "351090",
+      "value": 20
     },
     {
-      "uf": "TO",
-      "municipio": "Peixe",
-      "ibge": "171660",
-      "value": 21
+      "uf": "PI",
+      "municipio": "Castelo Do Piauí",
+      "ibge": "220260",
+      "value": 20
+    },
+    {
+      "uf": "AM",
+      "municipio": "Manaquiri",
+      "ibge": "130255",
+      "value": 20
+    },
+    {
+      "uf": "RR",
+      "municipio": "Pacaraima",
+      "ibge": "140045",
+      "value": 20
+    },
+    {
+      "uf": "SE",
+      "municipio": "Cristinápolis",
+      "ibge": "280170",
+      "value": 20
+    },
+    {
+      "uf": "SP",
+      "municipio": "Cananéia",
+      "ibge": "350990",
+      "value": 20
+    },
+    {
+      "uf": "SP",
+      "municipio": "Aramina",
+      "ibge": "350300",
+      "value": 20
+    },
+    {
+      "uf": "SP",
+      "municipio": "Boracéia",
+      "ibge": "350730",
+      "value": 20
+    },
+    {
+      "uf": "SP",
+      "municipio": "Iacanga",
+      "ibge": "351910",
+      "value": 20
     },
     {
       "uf": "SP",
@@ -8168,69 +8220,9 @@
       "value": 20
     },
     {
-      "uf": "PI",
-      "municipio": "Castelo Do Piauí",
-      "ibge": "220260",
-      "value": 20
-    },
-    {
-      "uf": "RR",
-      "municipio": "Pacaraima",
-      "ibge": "140045",
-      "value": 20
-    },
-    {
       "uf": "SP",
-      "municipio": "Aramina",
-      "ibge": "350300",
-      "value": 20
-    },
-    {
-      "uf": "SP",
-      "municipio": "Cosmorama",
-      "ibge": "351290",
-      "value": 20
-    },
-    {
-      "uf": "AM",
-      "municipio": "Manaquiri",
-      "ibge": "130255",
-      "value": 20
-    },
-    {
-      "uf": "SP",
-      "municipio": "Iacanga",
-      "ibge": "351910",
-      "value": 20
-    },
-    {
-      "uf": "SP",
-      "municipio": "Boracéia",
-      "ibge": "350730",
-      "value": 20
-    },
-    {
-      "uf": "SP",
-      "municipio": "Cássia Dos Coqueiros",
-      "ibge": "351090",
-      "value": 20
-    },
-    {
-      "uf": "SP",
-      "municipio": "Cananéia",
-      "ibge": "350990",
-      "value": 20
-    },
-    {
-      "uf": "SE",
-      "municipio": "Cristinápolis",
-      "ibge": "280170",
-      "value": 20
-    },
-    {
-      "uf": "AP",
-      "municipio": "Tartarugalzinho",
-      "ibge": "160070",
+      "municipio": "Nipoã",
+      "ibge": "353270",
       "value": 19
     },
     {
@@ -8247,32 +8239,8 @@
     },
     {
       "uf": "SP",
-      "municipio": "Potim",
-      "ibge": "354075",
-      "value": 19
-    },
-    {
-      "uf": "SP",
-      "municipio": "Nipoã",
-      "ibge": "353270",
-      "value": 19
-    },
-    {
-      "uf": "RR",
-      "municipio": "Caracaraí",
-      "ibge": "140020",
-      "value": 19
-    },
-    {
-      "uf": "SP",
       "municipio": "Terra Roxa",
       "ibge": "355440",
-      "value": 19
-    },
-    {
-      "uf": "RR",
-      "municipio": "Mucajaí",
-      "ibge": "140030",
       "value": 19
     },
     {
@@ -8282,9 +8250,15 @@
       "value": 19
     },
     {
-      "uf": "AM",
-      "municipio": "Barcelos",
-      "ibge": "130040",
+      "uf": "SP",
+      "municipio": "Potim",
+      "ibge": "354075",
+      "value": 19
+    },
+    {
+      "uf": "AP",
+      "municipio": "Tartarugalzinho",
+      "ibge": "160070",
       "value": 19
     },
     {
@@ -8294,15 +8268,57 @@
       "value": 19
     },
     {
+      "uf": "AM",
+      "municipio": "Barcelos",
+      "ibge": "130040",
+      "value": 19
+    },
+    {
+      "uf": "RR",
+      "municipio": "Mucajaí",
+      "ibge": "140030",
+      "value": 19
+    },
+    {
+      "uf": "RR",
+      "municipio": "Caracaraí",
+      "ibge": "140020",
+      "value": 19
+    },
+    {
       "uf": "SE",
       "municipio": "Salgado",
       "ibge": "280620",
       "value": 19
     },
     {
-      "uf": "SE",
-      "municipio": "Maruim",
-      "ibge": "280400",
+      "uf": "AC",
+      "municipio": "Feijó",
+      "ibge": "120030",
+      "value": 18
+    },
+    {
+      "uf": "PI",
+      "municipio": "Inhuma",
+      "ibge": "220470",
+      "value": 18
+    },
+    {
+      "uf": "PI",
+      "municipio": "Guadalupe",
+      "ibge": "220450",
+      "value": 18
+    },
+    {
+      "uf": "AC",
+      "municipio": "Mâncio Lima",
+      "ibge": "120033",
+      "value": 18
+    },
+    {
+      "uf": "SP",
+      "municipio": "Trabiju",
+      "ibge": "355475",
       "value": 18
     },
     {
@@ -8313,92 +8329,8 @@
     },
     {
       "uf": "SP",
-      "municipio": "Neves Paulista",
-      "ibge": "353250",
-      "value": 18
-    },
-    {
-      "uf": "SP",
-      "municipio": "Macaubal",
-      "ibge": "352810",
-      "value": 18
-    },
-    {
-      "uf": "PI",
-      "municipio": "Guadalupe",
-      "ibge": "220450",
-      "value": 18
-    },
-    {
-      "uf": "PI",
-      "municipio": "Inhuma",
-      "ibge": "220470",
-      "value": 18
-    },
-    {
-      "uf": "SP",
-      "municipio": "Euclides Da Cunha Paulista",
-      "ibge": "351535",
-      "value": 18
-    },
-    {
-      "uf": "AC",
-      "municipio": "Mâncio Lima",
-      "ibge": "120033",
-      "value": 18
-    },
-    {
-      "uf": "AC",
-      "municipio": "Feijó",
-      "ibge": "120030",
-      "value": 18
-    },
-    {
-      "uf": "SP",
-      "municipio": "Areias",
-      "ibge": "350350",
-      "value": 18
-    },
-    {
-      "uf": "RR",
-      "municipio": "Bonfim",
-      "ibge": "140015",
-      "value": 18
-    },
-    {
-      "uf": "SP",
-      "municipio": "Riolândia",
-      "ibge": "354420",
-      "value": 18
-    },
-    {
-      "uf": "SP",
-      "municipio": "Planalto",
-      "ibge": "353960",
-      "value": 18
-    },
-    {
-      "uf": "SP",
       "municipio": "Guapiara",
       "ibge": "351760",
-      "value": 18
-    },
-    {
-      "uf": "SP",
-      "municipio": "Adolfo",
-      "ibge": "350020",
-      "value": 18
-    },
-    {
-      "uf": "SP",
-      "municipio": "Trabiju",
-      "ibge": "355475",
-      "value": 18
-    },
-    {
-      "uf": "AM",
-      "municipio": "Silves",
-      "ibge": "130400",
       "value": 18
     },
     {
@@ -8409,50 +8341,74 @@
     },
     {
       "uf": "AM",
+      "municipio": "Silves",
+      "ibge": "130400",
+      "value": 18
+    },
+    {
+      "uf": "AM",
       "municipio": "Amaturá",
       "ibge": "130006",
       "value": 18
     },
     {
       "uf": "SP",
-      "municipio": "Taquarivaí",
-      "ibge": "355385",
-      "value": 17
+      "municipio": "Riolândia",
+      "ibge": "354420",
+      "value": 18
     },
     {
-      "uf": "AP",
-      "municipio": "Pedra Branca Do Amapari",
-      "ibge": "160015",
-      "value": 17
-    },
-    {
-      "uf": "SE",
-      "municipio": "Ribeirópolis",
-      "ibge": "280600",
-      "value": 17
-    },
-    {
-      "uf": "SE",
-      "municipio": "Poço Verde",
-      "ibge": "280550",
-      "value": 17
+      "uf": "RR",
+      "municipio": "Bonfim",
+      "ibge": "140015",
+      "value": 18
     },
     {
       "uf": "SP",
-      "municipio": "Santa Cruz Da Esperança",
-      "ibge": "354625",
-      "value": 17
+      "municipio": "Areias",
+      "ibge": "350350",
+      "value": 18
+    },
+    {
+      "uf": "SP",
+      "municipio": "Planalto",
+      "ibge": "353960",
+      "value": 18
+    },
+    {
+      "uf": "SP",
+      "municipio": "Neves Paulista",
+      "ibge": "353250",
+      "value": 18
+    },
+    {
+      "uf": "SE",
+      "municipio": "Maruim",
+      "ibge": "280400",
+      "value": 18
+    },
+    {
+      "uf": "SP",
+      "municipio": "Euclides Da Cunha Paulista",
+      "ibge": "351535",
+      "value": 18
+    },
+    {
+      "uf": "SP",
+      "municipio": "Macaubal",
+      "ibge": "352810",
+      "value": 18
+    },
+    {
+      "uf": "SP",
+      "municipio": "Adolfo",
+      "ibge": "350020",
+      "value": 18
     },
     {
       "uf": "SP",
       "municipio": "Taiaçu",
       "ibge": "355310",
-      "value": 17
-    },
-    {
-      "uf": "SP",
-      "municipio": "Palmeira D'oeste",
-      "ibge": "353520",
       "value": 17
     },
     {
@@ -8463,68 +8419,20 @@
     },
     {
       "uf": "SP",
-      "municipio": "Redenção Da Serra",
-      "ibge": "354230",
+      "municipio": "Iporanga",
+      "ibge": "352120",
       "value": 17
     },
     {
       "uf": "SP",
-      "municipio": "Guaiçara",
-      "ibge": "351720",
+      "municipio": "Palmeira D'oeste",
+      "ibge": "353520",
       "value": 17
     },
     {
       "uf": "PI",
       "municipio": "Simões",
       "ibge": "221070",
-      "value": 17
-    },
-    {
-      "uf": "SP",
-      "municipio": "Cândido Rodrigues",
-      "ibge": "351010",
-      "value": 17
-    },
-    {
-      "uf": "AM",
-      "municipio": "Atalaia Do Norte",
-      "ibge": "130020",
-      "value": 17
-    },
-    {
-      "uf": "AM",
-      "municipio": "Anori",
-      "ibge": "130010",
-      "value": 17
-    },
-    {
-      "uf": "SP",
-      "municipio": "Lavínia",
-      "ibge": "352650",
-      "value": 17
-    },
-    {
-      "uf": "SP",
-      "municipio": "Novais",
-      "ibge": "353325",
-      "value": 17
-    },
-    {
-      "uf": "SP",
-      "municipio": "Macedônia",
-      "ibge": "352820",
-      "value": 17
-    },
-    {
-      "uf": "SP",
-      "municipio": "Monte Alegre Do Sul",
-      "ibge": "353120",
-      "value": 17
-    },
-    {
-      "uf": "TO",
-      "municipio": "Sítio Novo Do Tocantins",
-      "ibge": "172080",
       "value": 17
     },
     {
@@ -8535,8 +8443,26 @@
     },
     {
       "uf": "SP",
-      "municipio": "Espírito Santo Do Turvo",
-      "ibge": "351519",
+      "municipio": "Cândido Rodrigues",
+      "ibge": "351010",
+      "value": 17
+    },
+    {
+      "uf": "SP",
+      "municipio": "Guaiçara",
+      "ibge": "351720",
+      "value": 17
+    },
+    {
+      "uf": "TO",
+      "municipio": "Sítio Novo Do Tocantins",
+      "ibge": "172080",
+      "value": 17
+    },
+    {
+      "uf": "AP",
+      "municipio": "Pedra Branca Do Amapari",
+      "ibge": "160015",
       "value": 17
     },
     {
@@ -8547,8 +8473,80 @@
     },
     {
       "uf": "SP",
-      "municipio": "Iporanga",
-      "ibge": "352120",
+      "municipio": "Macedônia",
+      "ibge": "352820",
+      "value": 17
+    },
+    {
+      "uf": "AM",
+      "municipio": "Anori",
+      "ibge": "130010",
+      "value": 17
+    },
+    {
+      "uf": "AM",
+      "municipio": "Atalaia Do Norte",
+      "ibge": "130020",
+      "value": 17
+    },
+    {
+      "uf": "SE",
+      "municipio": "Ribeirópolis",
+      "ibge": "280600",
+      "value": 17
+    },
+    {
+      "uf": "AM",
+      "municipio": "Novo Aripuanã",
+      "ibge": "130330",
+      "value": 17
+    },
+    {
+      "uf": "SE",
+      "municipio": "Poço Verde",
+      "ibge": "280550",
+      "value": 17
+    },
+    {
+      "uf": "SP",
+      "municipio": "Espírito Santo Do Turvo",
+      "ibge": "351519",
+      "value": 17
+    },
+    {
+      "uf": "SP",
+      "municipio": "Monte Alegre Do Sul",
+      "ibge": "353120",
+      "value": 17
+    },
+    {
+      "uf": "SP",
+      "municipio": "Redenção Da Serra",
+      "ibge": "354230",
+      "value": 17
+    },
+    {
+      "uf": "SP",
+      "municipio": "Lavínia",
+      "ibge": "352650",
+      "value": 17
+    },
+    {
+      "uf": "SP",
+      "municipio": "Taquarivaí",
+      "ibge": "355385",
+      "value": 17
+    },
+    {
+      "uf": "SP",
+      "municipio": "Novais",
+      "ibge": "353325",
+      "value": 17
+    },
+    {
+      "uf": "SP",
+      "municipio": "Santa Cruz Da Esperança",
+      "ibge": "354625",
       "value": 17
     },
     {
@@ -8559,14 +8557,8 @@
     },
     {
       "uf": "AM",
-      "municipio": "Novo Aripuanã",
-      "ibge": "130330",
-      "value": 17
-    },
-    {
-      "uf": "SP",
-      "municipio": "Pedrinhas Paulista",
-      "ibge": "353715",
+      "municipio": "Alvarães",
+      "ibge": "130002",
       "value": 16
     },
     {
@@ -8577,14 +8569,20 @@
     },
     {
       "uf": "SP",
-      "municipio": "Alto Alegre",
-      "ibge": "350110",
+      "municipio": "Paulo De Faria",
+      "ibge": "353660",
       "value": 16
     },
     {
       "uf": "RO",
       "municipio": "Itapuã Do Oeste",
       "ibge": "110110",
+      "value": 16
+    },
+    {
+      "uf": "SP",
+      "municipio": "Santa Albertina",
+      "ibge": "354570",
       "value": 16
     },
     {
@@ -8600,33 +8598,45 @@
       "value": 16
     },
     {
-      "uf": "AM",
-      "municipio": "Ipixuna",
-      "ibge": "130180",
+      "uf": "SP",
+      "municipio": "Alto Alegre",
+      "ibge": "350110",
       "value": 16
     },
     {
       "uf": "SP",
-      "municipio": "Paulo De Faria",
-      "ibge": "353660",
+      "municipio": "Pedrinhas Paulista",
+      "ibge": "353715",
       "value": 16
     },
     {
-      "uf": "SP",
-      "municipio": "Santa Albertina",
-      "ibge": "354570",
-      "value": 16
+      "uf": "SE",
+      "municipio": "Indiaroba",
+      "ibge": "280280",
+      "value": 15
     },
     {
-      "uf": "AP",
-      "municipio": "Mazagão",
-      "ibge": "160040",
+      "uf": "SE",
+      "municipio": "Moita Bonita",
+      "ibge": "280410",
+      "value": 15
+    },
+    {
+      "uf": "AC",
+      "municipio": "Epitaciolândia",
+      "ibge": "120025",
+      "value": 15
+    },
+    {
+      "uf": "TO",
+      "municipio": "São Miguel Do Tocantins",
+      "ibge": "172020",
       "value": 15
     },
     {
       "uf": "SP",
-      "municipio": "Álvaro De Carvalho",
-      "ibge": "350140",
+      "municipio": "Sabino",
+      "ibge": "354460",
       "value": 15
     },
     {
@@ -8637,26 +8647,14 @@
     },
     {
       "uf": "SP",
-      "municipio": "Urânia",
-      "ibge": "355580",
+      "municipio": "Álvaro De Carvalho",
+      "ibge": "350140",
       "value": 15
     },
     {
       "uf": "SP",
-      "municipio": "Sabino",
-      "ibge": "354460",
-      "value": 15
-    },
-    {
-      "uf": "SE",
-      "municipio": "Moita Bonita",
-      "ibge": "280410",
-      "value": 15
-    },
-    {
-      "uf": "SE",
-      "municipio": "Indiaroba",
-      "ibge": "280280",
+      "municipio": "Urânia",
+      "ibge": "355580",
       "value": 15
     },
     {
@@ -8678,28 +8676,10 @@
       "value": 15
     },
     {
-      "uf": "AC",
-      "municipio": "Epitaciolândia",
-      "ibge": "120025",
-      "value": 15
-    },
-    {
-      "uf": "TO",
-      "municipio": "São Miguel Do Tocantins",
-      "ibge": "172020",
-      "value": 15
-    },
-    {
       "uf": "AP",
-      "municipio": "Ferreira Gomes",
-      "ibge": "160023",
-      "value": 14
-    },
-    {
-      "uf": "AC",
-      "municipio": "Acrelândia",
-      "ibge": "120001",
-      "value": 14
+      "municipio": "Mazagão",
+      "ibge": "160040",
+      "value": 15
     },
     {
       "uf": "SP",
@@ -8708,9 +8688,33 @@
       "value": 14
     },
     {
+      "uf": "SP",
+      "municipio": "Borebi",
+      "ibge": "350745",
+      "value": 14
+    },
+    {
       "uf": "TO",
       "municipio": "Divinópolis Do Tocantins",
       "ibge": "170710",
+      "value": 14
+    },
+    {
+      "uf": "RO",
+      "municipio": "Alto Alegre Dos Parecis",
+      "ibge": "110037",
+      "value": 14
+    },
+    {
+      "uf": "AP",
+      "municipio": "Ferreira Gomes",
+      "ibge": "160023",
+      "value": 14
+    },
+    {
+      "uf": "RO",
+      "municipio": "Santa Luzia D'oeste",
+      "ibge": "110029",
       "value": 14
     },
     {
@@ -8726,15 +8730,9 @@
       "value": 14
     },
     {
-      "uf": "RO",
-      "municipio": "Alto Alegre Dos Parecis",
-      "ibge": "110037",
-      "value": 14
-    },
-    {
-      "uf": "RO",
-      "municipio": "Santa Luzia D'oeste",
-      "ibge": "110029",
+      "uf": "AC",
+      "municipio": "Acrelândia",
+      "ibge": "120001",
       "value": 14
     },
     {
@@ -8745,20 +8743,14 @@
     },
     {
       "uf": "SP",
-      "municipio": "Borebi",
-      "ibge": "350745",
-      "value": 14
-    },
-    {
-      "uf": "SP",
       "municipio": "Iaras",
       "ibge": "351925",
       "value": 14
     },
     {
-      "uf": "AC",
-      "municipio": "Rodrigues Alves",
-      "ibge": "120042",
+      "uf": "TO",
+      "municipio": "Paranã",
+      "ibge": "171620",
       "value": 13
     },
     {
@@ -8768,27 +8760,9 @@
       "value": 13
     },
     {
-      "uf": "TO",
-      "municipio": "Paranã",
-      "ibge": "171620",
-      "value": 13
-    },
-    {
-      "uf": "SE",
-      "municipio": "Riachuelo",
-      "ibge": "280590",
-      "value": 13
-    },
-    {
       "uf": "SP",
-      "municipio": "Campos Novos Paulista",
-      "ibge": "350980",
-      "value": 13
-    },
-    {
-      "uf": "SP",
-      "municipio": "Tuiuti",
-      "ibge": "355495",
+      "municipio": "Santa Mercedes",
+      "ibge": "354710",
       "value": 13
     },
     {
@@ -8799,8 +8773,8 @@
     },
     {
       "uf": "SP",
-      "municipio": "Arapeí",
-      "ibge": "350315",
+      "municipio": "Campos Novos Paulista",
+      "ibge": "350980",
       "value": 13
     },
     {
@@ -8817,32 +8791,26 @@
     },
     {
       "uf": "SP",
-      "municipio": "Mira Estrela",
-      "ibge": "353000",
-      "value": 13
-    },
-    {
-      "uf": "SP",
       "municipio": "Santa Lúcia",
       "ibge": "354690",
       "value": 13
     },
     {
       "uf": "SP",
-      "municipio": "General Salgado",
-      "ibge": "351690",
+      "municipio": "Arapeí",
+      "ibge": "350315",
       "value": 13
     },
     {
       "uf": "SP",
-      "municipio": "Santa Mercedes",
-      "ibge": "354710",
+      "municipio": "Mira Estrela",
+      "ibge": "353000",
       "value": 13
     },
     {
-      "uf": "RO",
-      "municipio": "Novo Horizonte Do Oeste",
-      "ibge": "110050",
+      "uf": "SP",
+      "municipio": "General Salgado",
+      "ibge": "351690",
       "value": 13
     },
     {
@@ -8853,26 +8821,32 @@
     },
     {
       "uf": "RO",
-      "municipio": "Vale Do Paraíso",
-      "ibge": "110180",
-      "value": 12
+      "municipio": "Novo Horizonte Do Oeste",
+      "ibge": "110050",
+      "value": 13
+    },
+    {
+      "uf": "SP",
+      "municipio": "Tuiuti",
+      "ibge": "355495",
+      "value": 13
+    },
+    {
+      "uf": "SE",
+      "municipio": "Riachuelo",
+      "ibge": "280590",
+      "value": 13
+    },
+    {
+      "uf": "AC",
+      "municipio": "Rodrigues Alves",
+      "ibge": "120042",
+      "value": 13
     },
     {
       "uf": "SP",
       "municipio": "Taciba",
       "ibge": "355290",
-      "value": 12
-    },
-    {
-      "uf": "SP",
-      "municipio": "Alfredo Marcondes",
-      "ibge": "350080",
-      "value": 12
-    },
-    {
-      "uf": "SP",
-      "municipio": "Iacri",
-      "ibge": "351920",
       "value": 12
     },
     {
@@ -8889,44 +8863,20 @@
     },
     {
       "uf": "SP",
-      "municipio": "Pratânia",
-      "ibge": "354105",
-      "value": 12
-    },
-    {
-      "uf": "SP",
-      "municipio": "Monte Castelo",
-      "ibge": "353160",
-      "value": 12
-    },
-    {
-      "uf": "SP",
-      "municipio": "Sales",
-      "ibge": "354480",
-      "value": 12
-    },
-    {
-      "uf": "SP",
       "municipio": "Mendonça",
       "ibge": "352950",
       "value": 12
     },
     {
       "uf": "SP",
-      "municipio": "Natividade Da Serra",
-      "ibge": "353230",
+      "municipio": "Pratânia",
+      "ibge": "354105",
       "value": 12
     },
     {
-      "uf": "SP",
-      "municipio": "Dobrada",
-      "ibge": "351400",
-      "value": 12
-    },
-    {
-      "uf": "RO",
-      "municipio": "Nova União",
-      "ibge": "110143",
+      "uf": "TO",
+      "municipio": "Pindorama Do Tocantins",
+      "ibge": "171700",
       "value": 12
     },
     {
@@ -8942,21 +8892,15 @@
       "value": 12
     },
     {
-      "uf": "AC",
-      "municipio": "Assis Brasil",
-      "ibge": "120005",
+      "uf": "SP",
+      "municipio": "Alfredo Marcondes",
+      "ibge": "350080",
       "value": 12
     },
     {
       "uf": "SP",
-      "municipio": "Jeriquara",
-      "ibge": "352540",
-      "value": 12
-    },
-    {
-      "uf": "TO",
-      "municipio": "Pindorama Do Tocantins",
-      "ibge": "171700",
+      "municipio": "Natividade Da Serra",
+      "ibge": "353230",
       "value": 12
     },
     {
@@ -8967,8 +8911,26 @@
     },
     {
       "uf": "SP",
+      "municipio": "Jeriquara",
+      "ibge": "352540",
+      "value": 12
+    },
+    {
+      "uf": "SP",
+      "municipio": "Monte Castelo",
+      "ibge": "353160",
+      "value": 12
+    },
+    {
+      "uf": "SP",
       "municipio": "Coronel Macedo",
       "ibge": "351260",
+      "value": 12
+    },
+    {
+      "uf": "RO",
+      "municipio": "Vale Do Paraíso",
+      "ibge": "110180",
       "value": 12
     },
     {
@@ -8979,14 +8941,38 @@
     },
     {
       "uf": "SP",
-      "municipio": "Aparecida D'oeste",
-      "ibge": "350260",
-      "value": 11
+      "municipio": "Sales",
+      "ibge": "354480",
+      "value": 12
     },
     {
       "uf": "SP",
-      "municipio": "Brejo Alegre",
-      "ibge": "350775",
+      "municipio": "Dobrada",
+      "ibge": "351400",
+      "value": 12
+    },
+    {
+      "uf": "RO",
+      "municipio": "Nova União",
+      "ibge": "110143",
+      "value": 12
+    },
+    {
+      "uf": "SP",
+      "municipio": "Iacri",
+      "ibge": "351920",
+      "value": 12
+    },
+    {
+      "uf": "AC",
+      "municipio": "Assis Brasil",
+      "ibge": "120005",
+      "value": 12
+    },
+    {
+      "uf": "RR",
+      "municipio": "Amajari",
+      "ibge": "140002",
       "value": 11
     },
     {
@@ -8996,27 +8982,9 @@
       "value": 11
     },
     {
-      "uf": "RO",
-      "municipio": "Costa Marques",
-      "ibge": "110008",
-      "value": 11
-    },
-    {
-      "uf": "SP",
-      "municipio": "Guzolândia",
-      "ibge": "351890",
-      "value": 11
-    },
-    {
-      "uf": "SP",
-      "municipio": "São João Das Duas Pontes",
-      "ibge": "354920",
-      "value": 11
-    },
-    {
       "uf": "TO",
-      "municipio": "Lagoa Da Confusão",
-      "ibge": "171190",
+      "municipio": "Monte Do Carmo",
+      "ibge": "171360",
       "value": 11
     },
     {
@@ -9026,27 +8994,21 @@
       "value": 11
     },
     {
+      "uf": "TO",
+      "municipio": "Lagoa Da Confusão",
+      "ibge": "171190",
+      "value": 11
+    },
+    {
       "uf": "SP",
       "municipio": "Santa Ernestina",
       "ibge": "354650",
       "value": 11
     },
     {
-      "uf": "TO",
-      "municipio": "Monte Do Carmo",
-      "ibge": "171360",
-      "value": 11
-    },
-    {
       "uf": "SP",
-      "municipio": "Piacatu",
-      "ibge": "353770",
-      "value": 11
-    },
-    {
-      "uf": "RR",
-      "municipio": "Amajari",
-      "ibge": "140002",
+      "municipio": "Brejo Alegre",
+      "ibge": "350775",
       "value": 11
     },
     {
@@ -9063,62 +9025,56 @@
     },
     {
       "uf": "SP",
+      "municipio": "São João Das Duas Pontes",
+      "ibge": "354920",
+      "value": 11
+    },
+    {
+      "uf": "SP",
+      "municipio": "Guzolândia",
+      "ibge": "351890",
+      "value": 11
+    },
+    {
+      "uf": "SP",
       "municipio": "Lutécia",
       "ibge": "352790",
       "value": 11
     },
     {
       "uf": "SP",
-      "municipio": "Irapuã",
-      "ibge": "352150",
+      "municipio": "Piacatu",
+      "ibge": "353770",
+      "value": 11
+    },
+    {
+      "uf": "SP",
+      "municipio": "Aparecida D'oeste",
+      "ibge": "350260",
+      "value": 11
+    },
+    {
+      "uf": "RO",
+      "municipio": "Cabixi",
+      "ibge": "110003",
+      "value": 11
+    },
+    {
+      "uf": "RR",
+      "municipio": "Caroebe",
+      "ibge": "140023",
       "value": 10
     },
     {
       "uf": "SP",
-      "municipio": "Coroados",
-      "ibge": "351250",
-      "value": 10
-    },
-    {
-      "uf": "SP",
-      "municipio": "Itapura",
-      "ibge": "352300",
-      "value": 10
-    },
-    {
-      "uf": "SP",
-      "municipio": "Tarabai",
-      "ibge": "355390",
-      "value": 10
-    },
-    {
-      "uf": "SP",
-      "municipio": "Sagres",
-      "ibge": "354470",
+      "municipio": "Sandovalina",
+      "ibge": "354550",
       "value": 10
     },
     {
       "uf": "SP",
       "municipio": "Pardinho",
       "ibge": "353610",
-      "value": 10
-    },
-    {
-      "uf": "SP",
-      "municipio": "Narandiba",
-      "ibge": "353220",
-      "value": 10
-    },
-    {
-      "uf": "SP",
-      "municipio": "Cabrália Paulista",
-      "ibge": "350830",
-      "value": 10
-    },
-    {
-      "uf": "SP",
-      "municipio": "Ribeirão Grande",
-      "ibge": "354325",
       "value": 10
     },
     {
@@ -9135,6 +9091,18 @@
     },
     {
       "uf": "SP",
+      "municipio": "Irapuã",
+      "ibge": "352150",
+      "value": 10
+    },
+    {
+      "uf": "SP",
+      "municipio": "Sagres",
+      "ibge": "354470",
+      "value": 10
+    },
+    {
+      "uf": "SP",
       "municipio": "Flora Rica",
       "ibge": "351580",
       "value": 10
@@ -9147,20 +9115,14 @@
     },
     {
       "uf": "TO",
-      "municipio": "Luzinópolis",
-      "ibge": "171245",
+      "municipio": "Palmeirópolis",
+      "ibge": "171575",
       "value": 10
     },
     {
       "uf": "TO",
       "municipio": "Itacajá",
       "ibge": "171050",
-      "value": 10
-    },
-    {
-      "uf": "TO",
-      "municipio": "Palmeirópolis",
-      "ibge": "171575",
       "value": 10
     },
     {
@@ -9177,24 +9139,6 @@
     },
     {
       "uf": "SP",
-      "municipio": "Óleo",
-      "ibge": "353380",
-      "value": 10
-    },
-    {
-      "uf": "SP",
-      "municipio": "Sandovalina",
-      "ibge": "354550",
-      "value": 10
-    },
-    {
-      "uf": "RR",
-      "municipio": "Caroebe",
-      "ibge": "140023",
-      "value": 10
-    },
-    {
-      "uf": "SP",
       "municipio": "Parapuã",
       "ibge": "353600",
       "value": 10
@@ -9206,63 +9150,57 @@
       "value": 10
     },
     {
-      "uf": "AP",
-      "municipio": "Vitória Do Jari",
-      "ibge": "160080",
-      "value": 9
+      "uf": "SP",
+      "municipio": "Óleo",
+      "ibge": "353380",
+      "value": 10
     },
     {
       "uf": "SP",
-      "municipio": "São José Da Bela Vista",
-      "ibge": "354950",
-      "value": 9
+      "municipio": "Tarabai",
+      "ibge": "355390",
+      "value": 10
+    },
+    {
+      "uf": "TO",
+      "municipio": "Luzinópolis",
+      "ibge": "171245",
+      "value": 10
     },
     {
       "uf": "SP",
-      "municipio": "Lavrinhas",
-      "ibge": "352660",
-      "value": 9
+      "municipio": "Coroados",
+      "ibge": "351250",
+      "value": 10
     },
     {
       "uf": "SP",
-      "municipio": "Mirassolândia",
-      "ibge": "353040",
-      "value": 9
+      "municipio": "Cabrália Paulista",
+      "ibge": "350830",
+      "value": 10
     },
     {
       "uf": "SP",
-      "municipio": "Indiana",
-      "ibge": "352060",
-      "value": 9
+      "municipio": "Narandiba",
+      "ibge": "353220",
+      "value": 10
     },
     {
       "uf": "SP",
-      "municipio": "Balbinos",
-      "ibge": "350470",
-      "value": 9
+      "municipio": "Ribeirão Grande",
+      "ibge": "354325",
+      "value": 10
     },
     {
       "uf": "SP",
-      "municipio": "Avaí",
-      "ibge": "350430",
-      "value": 9
+      "municipio": "Itapura",
+      "ibge": "352300",
+      "value": 10
     },
     {
       "uf": "SP",
-      "municipio": "Álvares Florence",
-      "ibge": "350120",
-      "value": 9
-    },
-    {
-      "uf": "SP",
-      "municipio": "Glicério",
-      "ibge": "351710",
-      "value": 9
-    },
-    {
-      "uf": "SP",
-      "municipio": "Suzanápolis",
-      "ibge": "355255",
+      "municipio": "Rubiácea",
+      "ibge": "354440",
       "value": 9
     },
     {
@@ -9272,21 +9210,15 @@
       "value": 9
     },
     {
-      "uf": "SP",
-      "municipio": "Riversul",
-      "ibge": "354350",
+      "uf": "AC",
+      "municipio": "Bujari",
+      "ibge": "120013",
       "value": 9
     },
     {
       "uf": "AC",
       "municipio": "Capixaba",
       "ibge": "120017",
-      "value": 9
-    },
-    {
-      "uf": "AC",
-      "municipio": "Bujari",
-      "ibge": "120013",
       "value": 9
     },
     {
@@ -9297,8 +9229,44 @@
     },
     {
       "uf": "SP",
+      "municipio": "Glicério",
+      "ibge": "351710",
+      "value": 9
+    },
+    {
+      "uf": "SP",
+      "municipio": "Riversul",
+      "ibge": "354350",
+      "value": 9
+    },
+    {
+      "uf": "SP",
+      "municipio": "Suzanápolis",
+      "ibge": "355255",
+      "value": 9
+    },
+    {
+      "uf": "AP",
+      "municipio": "Vitória Do Jari",
+      "ibge": "160080",
+      "value": 9
+    },
+    {
+      "uf": "SP",
       "municipio": "Onda Verde",
       "ibge": "353400",
+      "value": 9
+    },
+    {
+      "uf": "TO",
+      "municipio": "Axixá Do Tocantins",
+      "ibge": "170290",
+      "value": 9
+    },
+    {
+      "uf": "TO",
+      "municipio": "Araguanã",
+      "ibge": "170215",
       "value": 9
     },
     {
@@ -9309,26 +9277,14 @@
     },
     {
       "uf": "SP",
-      "municipio": "Rubiácea",
-      "ibge": "354440",
+      "municipio": "Indiana",
+      "ibge": "352060",
       "value": 9
     },
     {
       "uf": "SP",
-      "municipio": "Júlio Mesquita",
-      "ibge": "352580",
-      "value": 9
-    },
-    {
-      "uf": "TO",
-      "municipio": "Filadélfia",
-      "ibge": "170770",
-      "value": 9
-    },
-    {
-      "uf": "TO",
-      "municipio": "Aguiarnópolis",
-      "ibge": "170030",
+      "municipio": "Lavrinhas",
+      "ibge": "352660",
       "value": 9
     },
     {
@@ -9339,32 +9295,50 @@
     },
     {
       "uf": "SP",
-      "municipio": "Santa Cruz Da Conceição",
-      "ibge": "354620",
+      "municipio": "São José Da Bela Vista",
+      "ibge": "354950",
+      "value": 9
+    },
+    {
+      "uf": "SP",
+      "municipio": "Mirassolândia",
+      "ibge": "353040",
+      "value": 9
+    },
+    {
+      "uf": "SP",
+      "municipio": "Júlio Mesquita",
+      "ibge": "352580",
+      "value": 9
+    },
+    {
+      "uf": "SP",
+      "municipio": "Balbinos",
+      "ibge": "350470",
+      "value": 9
+    },
+    {
+      "uf": "SP",
+      "municipio": "Álvares Florence",
+      "ibge": "350120",
+      "value": 9
+    },
+    {
+      "uf": "SP",
+      "municipio": "Avaí",
+      "ibge": "350430",
+      "value": 9
+    },
+    {
+      "uf": "RR",
+      "municipio": "Normandia",
+      "ibge": "140040",
       "value": 8
     },
     {
       "uf": "SP",
-      "municipio": "Caiuá",
-      "ibge": "350910",
-      "value": 8
-    },
-    {
-      "uf": "SP",
-      "municipio": "Ribeira",
-      "ibge": "354280",
-      "value": 8
-    },
-    {
-      "uf": "SP",
-      "municipio": "Santo Expedito",
-      "ibge": "354830",
-      "value": 8
-    },
-    {
-      "uf": "AP",
-      "municipio": "Amapá",
-      "ibge": "160010",
+      "municipio": "Jumirim",
+      "ibge": "352585",
       "value": 8
     },
     {
@@ -9375,32 +9349,8 @@
     },
     {
       "uf": "SP",
-      "municipio": "João Ramalho",
-      "ibge": "352560",
-      "value": 8
-    },
-    {
-      "uf": "SP",
       "municipio": "Campina Do Monte Alegre",
       "ibge": "350945",
-      "value": 8
-    },
-    {
-      "uf": "SP",
-      "municipio": "Salmourão",
-      "ibge": "354510",
-      "value": 8
-    },
-    {
-      "uf": "RR",
-      "municipio": "Normandia",
-      "ibge": "140040",
-      "value": 8
-    },
-    {
-      "uf": "SP",
-      "municipio": "Zacarias",
-      "ibge": "355715",
       "value": 8
     },
     {
@@ -9411,8 +9361,32 @@
     },
     {
       "uf": "SP",
-      "municipio": "Jumirim",
-      "ibge": "352585",
+      "municipio": "Caiuá",
+      "ibge": "350910",
+      "value": 8
+    },
+    {
+      "uf": "AP",
+      "municipio": "Amapá",
+      "ibge": "160010",
+      "value": 8
+    },
+    {
+      "uf": "SP",
+      "municipio": "Santa Cruz Da Conceição",
+      "ibge": "354620",
+      "value": 8
+    },
+    {
+      "uf": "SP",
+      "municipio": "João Ramalho",
+      "ibge": "352560",
+      "value": 8
+    },
+    {
+      "uf": "SP",
+      "municipio": "Ribeira",
+      "ibge": "354280",
       "value": 8
     },
     {
@@ -9423,14 +9397,74 @@
     },
     {
       "uf": "SP",
-      "municipio": "Taquaral",
-      "ibge": "355365",
+      "municipio": "Salmourão",
+      "ibge": "354510",
+      "value": 8
+    },
+    {
+      "uf": "SP",
+      "municipio": "Santo Expedito",
+      "ibge": "354830",
+      "value": 8
+    },
+    {
+      "uf": "SP",
+      "municipio": "Zacarias",
+      "ibge": "355715",
+      "value": 8
+    },
+    {
+      "uf": "RR",
+      "municipio": "Uiramutã",
+      "ibge": "140070",
+      "value": 7
+    },
+    {
+      "uf": "SP",
+      "municipio": "Tejupá",
+      "ibge": "355420",
+      "value": 7
+    },
+    {
+      "uf": "SP",
+      "municipio": "Mombuca",
+      "ibge": "353090",
       "value": 7
     },
     {
       "uf": "AP",
       "municipio": "Calçoene",
       "ibge": "160020",
+      "value": 7
+    },
+    {
+      "uf": "SP",
+      "municipio": "Taquaral",
+      "ibge": "355365",
+      "value": 7
+    },
+    {
+      "uf": "SP",
+      "municipio": "Torre De Pedra",
+      "ibge": "355465",
+      "value": 7
+    },
+    {
+      "uf": "SP",
+      "municipio": "Marabá Paulista",
+      "ibge": "352870",
+      "value": 7
+    },
+    {
+      "uf": "SP",
+      "municipio": "Paulistânia",
+      "ibge": "353657",
+      "value": 7
+    },
+    {
+      "uf": "SP",
+      "municipio": "Queiroz",
+      "ibge": "354180",
       "value": 7
     },
     {
@@ -9447,62 +9481,8 @@
     },
     {
       "uf": "SP",
-      "municipio": "Queiroz",
-      "ibge": "354180",
-      "value": 7
-    },
-    {
-      "uf": "SP",
       "municipio": "Fernão",
       "ibge": "351565",
-      "value": 7
-    },
-    {
-      "uf": "SP",
-      "municipio": "Paulistânia",
-      "ibge": "353657",
-      "value": 7
-    },
-    {
-      "uf": "SP",
-      "municipio": "Nantes",
-      "ibge": "353215",
-      "value": 7
-    },
-    {
-      "uf": "SP",
-      "municipio": "Tejupá",
-      "ibge": "355420",
-      "value": 7
-    },
-    {
-      "uf": "SP",
-      "municipio": "Pracinha",
-      "ibge": "354085",
-      "value": 7
-    },
-    {
-      "uf": "SP",
-      "municipio": "Marabá Paulista",
-      "ibge": "352870",
-      "value": 7
-    },
-    {
-      "uf": "SP",
-      "municipio": "Mombuca",
-      "ibge": "353090",
-      "value": 7
-    },
-    {
-      "uf": "SP",
-      "municipio": "Torre De Pedra",
-      "ibge": "355465",
-      "value": 7
-    },
-    {
-      "uf": "SP",
-      "municipio": "Meridiano",
-      "ibge": "352960",
       "value": 7
     },
     {
@@ -9513,15 +9493,57 @@
     },
     {
       "uf": "SP",
+      "municipio": "Pracinha",
+      "ibge": "354085",
+      "value": 7
+    },
+    {
+      "uf": "SP",
       "municipio": "Presidente Alves",
       "ibge": "354110",
       "value": 7
     },
     {
-      "uf": "RR",
-      "municipio": "Uiramutã",
-      "ibge": "140070",
+      "uf": "SP",
+      "municipio": "Meridiano",
+      "ibge": "352960",
       "value": 7
+    },
+    {
+      "uf": "SP",
+      "municipio": "Nantes",
+      "ibge": "353215",
+      "value": 7
+    },
+    {
+      "uf": "AC",
+      "municipio": "Santa Rosa Do Purus",
+      "ibge": "120043",
+      "value": 6
+    },
+    {
+      "uf": "AC",
+      "municipio": "Porto Acre",
+      "ibge": "120080",
+      "value": 6
+    },
+    {
+      "uf": "RR",
+      "municipio": "Iracema",
+      "ibge": "140028",
+      "value": 6
+    },
+    {
+      "uf": "SP",
+      "municipio": "Mariápolis",
+      "ibge": "352890",
+      "value": 6
+    },
+    {
+      "uf": "SP",
+      "municipio": "Pongaí",
+      "ibge": "354010",
+      "value": 6
     },
     {
       "uf": "SP",
@@ -9531,26 +9553,14 @@
     },
     {
       "uf": "SP",
-      "municipio": "Alvinlândia",
-      "ibge": "350150",
+      "municipio": "Timburi",
+      "ibge": "355460",
       "value": 6
     },
     {
       "uf": "SP",
-      "municipio": "Canas",
-      "ibge": "350995",
-      "value": 6
-    },
-    {
-      "uf": "SP",
-      "municipio": "Florínea",
-      "ibge": "351610",
-      "value": 6
-    },
-    {
-      "uf": "SP",
-      "municipio": "Emilianópolis",
-      "ibge": "351512",
+      "municipio": "Gastão Vidigal",
+      "ibge": "351680",
       "value": 6
     },
     {
@@ -9567,68 +9577,14 @@
     },
     {
       "uf": "SP",
-      "municipio": "Gastão Vidigal",
-      "ibge": "351680",
+      "municipio": "Florínea",
+      "ibge": "351610",
       "value": 6
     },
     {
       "uf": "SP",
-      "municipio": "Barra Do Chapéu",
-      "ibge": "350535",
-      "value": 6
-    },
-    {
-      "uf": "SP",
-      "municipio": "Nova Luzitânia",
-      "ibge": "353330",
-      "value": 6
-    },
-    {
-      "uf": "SP",
-      "municipio": "Platina",
-      "ibge": "353970",
-      "value": 6
-    },
-    {
-      "uf": "AC",
-      "municipio": "Porto Acre",
-      "ibge": "120080",
-      "value": 6
-    },
-    {
-      "uf": "AC",
-      "municipio": "Santa Rosa Do Purus",
-      "ibge": "120043",
-      "value": 6
-    },
-    {
-      "uf": "SP",
-      "municipio": "Pontalinda",
-      "ibge": "354025",
-      "value": 6
-    },
-    {
-      "uf": "SP",
-      "municipio": "Mariápolis",
-      "ibge": "352890",
-      "value": 6
-    },
-    {
-      "uf": "SP",
-      "municipio": "Timburi",
-      "ibge": "355460",
-      "value": 6
-    },
-    {
-      "uf": "SP",
-      "municipio": "Ribeirão Dos Índios",
-      "ibge": "354323",
-      "value": 6
-    },
-    {
-      "uf": "SP",
-      "municipio": "São Francisco",
-      "ibge": "354900",
+      "municipio": "Emilianópolis",
+      "ibge": "351512",
       "value": 6
     },
     {
@@ -9639,32 +9595,8 @@
     },
     {
       "uf": "SP",
-      "municipio": "Pongaí",
-      "ibge": "354010",
-      "value": 6
-    },
-    {
-      "uf": "RR",
-      "municipio": "Iracema",
-      "ibge": "140028",
-      "value": 6
-    },
-    {
-      "uf": "RR",
-      "municipio": "São João Da Baliza",
-      "ibge": "140050",
-      "value": 6
-    },
-    {
-      "uf": "SP",
-      "municipio": "Sebastianópolis Do Sul",
-      "ibge": "355130",
-      "value": 6
-    },
-    {
-      "uf": "SP",
-      "municipio": "Guarani D'oeste",
-      "ibge": "351800",
+      "municipio": "Platina",
+      "ibge": "353970",
       "value": 6
     },
     {
@@ -9681,62 +9613,68 @@
     },
     {
       "uf": "SP",
-      "municipio": "Sarutaiá",
-      "ibge": "355120",
-      "value": 5
+      "municipio": "Canas",
+      "ibge": "350995",
+      "value": 6
     },
     {
       "uf": "SP",
-      "municipio": "Piquerobi",
-      "ibge": "353830",
-      "value": 5
+      "municipio": "Guarani D'oeste",
+      "ibge": "351800",
+      "value": 6
     },
     {
       "uf": "SP",
-      "municipio": "Gabriel Monteiro",
-      "ibge": "351650",
-      "value": 5
+      "municipio": "Sebastianópolis Do Sul",
+      "ibge": "355130",
+      "value": 6
     },
     {
       "uf": "SP",
-      "municipio": "Paranapuã",
-      "ibge": "353590",
-      "value": 5
+      "municipio": "São Francisco",
+      "ibge": "354900",
+      "value": 6
     },
     {
       "uf": "SP",
-      "municipio": "Mesópolis",
-      "ibge": "352965",
-      "value": 5
+      "municipio": "Alvinlândia",
+      "ibge": "350150",
+      "value": 6
     },
     {
       "uf": "SP",
-      "municipio": "Itapirapuã Paulista",
-      "ibge": "352265",
-      "value": 5
+      "municipio": "Pontalinda",
+      "ibge": "354025",
+      "value": 6
     },
     {
       "uf": "SP",
-      "municipio": "Santana Da Ponte Pensa",
-      "ibge": "354720",
-      "value": 5
+      "municipio": "Barra Do Chapéu",
+      "ibge": "350535",
+      "value": 6
     },
     {
       "uf": "SP",
-      "municipio": "São João De Iracema",
-      "ibge": "354925",
-      "value": 5
+      "municipio": "Nova Luzitânia",
+      "ibge": "353330",
+      "value": 6
     },
     {
       "uf": "SP",
-      "municipio": "Dirce Reis",
-      "ibge": "351385",
-      "value": 5
+      "municipio": "Ribeirão Dos Índios",
+      "ibge": "354323",
+      "value": 6
     },
     {
-      "uf": "SP",
-      "municipio": "Uru",
-      "ibge": "355590",
+      "uf": "RR",
+      "municipio": "São João Da Baliza",
+      "ibge": "140050",
+      "value": 6
+    },
+    {
+      "uf": "AC",
+      "municipio": "Jordão",
+      "ibge": "120032",
       "value": 5
     },
     {
@@ -9747,32 +9685,20 @@
     },
     {
       "uf": "SP",
-      "municipio": "Ocauçu",
-      "ibge": "353370",
+      "municipio": "Piquerobi",
+      "ibge": "353830",
       "value": 5
     },
     {
       "uf": "SP",
-      "municipio": "Nova Guataporanga",
-      "ibge": "353310",
+      "municipio": "Dirce Reis",
+      "ibge": "351385",
       "value": 5
     },
     {
       "uf": "SP",
-      "municipio": "Rubinéia",
-      "ibge": "354450",
-      "value": 5
-    },
-    {
-      "uf": "SP",
-      "municipio": "Elisiário",
-      "ibge": "351492",
-      "value": 5
-    },
-    {
-      "uf": "AC",
-      "municipio": "Jordão",
-      "ibge": "120032",
+      "municipio": "Sarutaiá",
+      "ibge": "355120",
       "value": 5
     },
     {
@@ -9783,8 +9709,56 @@
     },
     {
       "uf": "SP",
+      "municipio": "Uru",
+      "ibge": "355590",
+      "value": 5
+    },
+    {
+      "uf": "SP",
+      "municipio": "Paranapuã",
+      "ibge": "353590",
+      "value": 5
+    },
+    {
+      "uf": "SP",
+      "municipio": "Itapirapuã Paulista",
+      "ibge": "352265",
+      "value": 5
+    },
+    {
+      "uf": "SP",
       "municipio": "União Paulista",
       "ibge": "355570",
+      "value": 5
+    },
+    {
+      "uf": "SP",
+      "municipio": "Elisiário",
+      "ibge": "351492",
+      "value": 5
+    },
+    {
+      "uf": "SP",
+      "municipio": "Ocauçu",
+      "ibge": "353370",
+      "value": 5
+    },
+    {
+      "uf": "SP",
+      "municipio": "Mesópolis",
+      "ibge": "352965",
+      "value": 5
+    },
+    {
+      "uf": "SP",
+      "municipio": "Santana Da Ponte Pensa",
+      "ibge": "354720",
+      "value": 5
+    },
+    {
+      "uf": "SP",
+      "municipio": "Nova Guataporanga",
+      "ibge": "353310",
       "value": 5
     },
     {
@@ -9795,15 +9769,21 @@
     },
     {
       "uf": "SP",
-      "municipio": "Vitória Brasil",
-      "ibge": "355695",
-      "value": 4
+      "municipio": "Rubinéia",
+      "ibge": "354450",
+      "value": 5
     },
     {
       "uf": "SP",
-      "municipio": "Lupércio",
-      "ibge": "352780",
-      "value": 4
+      "municipio": "São João De Iracema",
+      "ibge": "354925",
+      "value": 5
+    },
+    {
+      "uf": "SP",
+      "municipio": "Gabriel Monteiro",
+      "ibge": "351650",
+      "value": 5
     },
     {
       "uf": "SP",
@@ -9813,50 +9793,8 @@
     },
     {
       "uf": "SP",
-      "municipio": "Santa Salete",
-      "ibge": "354765",
-      "value": 4
-    },
-    {
-      "uf": "SP",
-      "municipio": "Ubirajara",
-      "ibge": "355550",
-      "value": 4
-    },
-    {
-      "uf": "SP",
-      "municipio": "Aspásia",
-      "ibge": "350395",
-      "value": 4
-    },
-    {
-      "uf": "SP",
-      "municipio": "Itaoca",
-      "ibge": "352215",
-      "value": 4
-    },
-    {
-      "uf": "AP",
-      "municipio": "Itaubal",
-      "ibge": "160025",
-      "value": 4
-    },
-    {
-      "uf": "AP",
-      "municipio": "Serra Do Navio",
-      "ibge": "160005",
-      "value": 4
-    },
-    {
-      "uf": "AP",
-      "municipio": "Cutias",
-      "ibge": "160021",
-      "value": 4
-    },
-    {
-      "uf": "SP",
-      "municipio": "Marinópolis",
-      "ibge": "352910",
+      "municipio": "Estrela Do Norte",
+      "ibge": "351530",
       "value": 4
     },
     {
@@ -9867,14 +9805,68 @@
     },
     {
       "uf": "SP",
+      "municipio": "Lupércio",
+      "ibge": "352780",
+      "value": 4
+    },
+    {
+      "uf": "SP",
+      "municipio": "Santa Salete",
+      "ibge": "354765",
+      "value": 4
+    },
+    {
+      "uf": "SP",
+      "municipio": "Vitória Brasil",
+      "ibge": "355695",
+      "value": 4
+    },
+    {
+      "uf": "SP",
+      "municipio": "Aspásia",
+      "ibge": "350395",
+      "value": 4
+    },
+    {
+      "uf": "SP",
+      "municipio": "Marinópolis",
+      "ibge": "352910",
+      "value": 4
+    },
+    {
+      "uf": "SP",
       "municipio": "Bento De Abreu",
       "ibge": "350620",
       "value": 4
     },
     {
       "uf": "SP",
-      "municipio": "Estrela Do Norte",
-      "ibge": "351530",
+      "municipio": "Ubirajara",
+      "ibge": "355550",
+      "value": 4
+    },
+    {
+      "uf": "AP",
+      "municipio": "Serra Do Navio",
+      "ibge": "160005",
+      "value": 4
+    },
+    {
+      "uf": "AP",
+      "municipio": "Itaubal",
+      "ibge": "160025",
+      "value": 4
+    },
+    {
+      "uf": "AP",
+      "municipio": "Cutias",
+      "ibge": "160021",
+      "value": 4
+    },
+    {
+      "uf": "SP",
+      "municipio": "Itaoca",
+      "ibge": "352215",
       "value": 4
     },
     {
@@ -9885,14 +9877,14 @@
     },
     {
       "uf": "SP",
-      "municipio": "Arco-íris",
-      "ibge": "350335",
+      "municipio": "Bom Sucesso De Itararé",
+      "ibge": "350715",
       "value": 3
     },
     {
       "uf": "SP",
-      "municipio": "Dolcinópolis",
-      "ibge": "351420",
+      "municipio": "Arco-íris",
+      "ibge": "350335",
       "value": 3
     },
     {
@@ -9903,8 +9895,8 @@
     },
     {
       "uf": "SP",
-      "municipio": "Bom Sucesso De Itararé",
-      "ibge": "350715",
+      "municipio": "Dolcinópolis",
+      "ibge": "351420",
       "value": 3
     },
     {

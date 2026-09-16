@@ -379,7 +379,12 @@ async function queryDadosferaBi() {
              )), 'YYYY-MM') M,
              COUNT(DISTINCT UF_CRM) N
       FROM GOLD.TB_ESPECIALIDADE_X_FONTES
-      WHERE COALESCE(TRY_TO_DATE(DT_INSCRICAO, 'DD/MM/YYYY'), TRY_TO_DATE(DT_INSCRICAO)) >= DATEADD(MONTH, -35, DATE_TRUNC('MONTH', CURRENT_DATE()))
+      WHERE COALESCE(TRY_TO_DATE(DT_INSCRICAO, 'DD/MM/YYYY'), TRY_TO_DATE(DT_INSCRICAO))
+              >= DATEADD(MONTH, -35, DATE_TRUNC('MONTH', CURRENT_DATE()))
+        AND COALESCE(TRY_TO_DATE(DT_INSCRICAO, 'DD/MM/YYYY'), TRY_TO_DATE(DT_INSCRICAO))
+              < DATEADD(MONTH, 1, DATE_TRUNC('MONTH', CURRENT_DATE()))
+        AND YEAR(COALESCE(TRY_TO_DATE(DT_INSCRICAO, 'DD/MM/YYYY'), TRY_TO_DATE(DT_INSCRICAO)))
+              BETWEEN 2000 AND YEAR(CURRENT_DATE())
       GROUP BY 1 ORDER BY 1
     `),
     snowflakeSql(`
@@ -416,7 +421,13 @@ async function queryDadosferaBi() {
     especialidade_cfm: labelRows(especialidadeCfm),
     ufs,
     regioes: Object.entries(regioes).map(([label, value]) => ({ label, value })).sort((a, b) => b.value - a.value),
-    mensal: (mensal || []).filter((r) => r && r[0]).map((r) => ({ mes: String(r[0]), value: toNumber(r[1]) })),
+    mensal: (mensal || []).filter((r) => r && r[0]).map((r) => ({ mes: String(r[0]), value: toNumber(r[1]) })).filter((m) => {
+      const y = Number(String(m.mes).slice(0, 4));
+      const mo = Number(String(m.mes).slice(5, 7));
+      const now = new Date();
+      return /^\d{4}-\d{2}$/.test(m.mes) && y >= 2000 && y <= now.getFullYear() && mo >= 1 && mo <= 12
+        && y * 100 + mo <= now.getFullYear() * 100 + (now.getMonth() + 1);
+    }),
     cidades: (cidadesRaw || []).map((r) => ({
       uf: String(r[0] || ""),
       municipio: String(r[1] || ""),
