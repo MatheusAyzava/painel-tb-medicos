@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/style.css?v=31" />
+  <link rel="stylesheet" href="assets/style.css?v=33" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 </head>
 <body>
@@ -224,7 +224,7 @@
               </label>
               <button type="button" class="btn ghost" id="map-reset">Ver Brasil</button>
             </div>
-            <p class="map-hint">Clique no mês na evolução mensal e depois na cidade para ver os médicos dali.</p>
+            <p class="map-hint" id="map-hint">Clique no mês na evolução mensal e depois na cidade para ver os médicos novos dali.</p>
             <div id="map-br"></div>
             <div class="heat-legend">
               <span>menor</span>
@@ -253,6 +253,7 @@
                 <tr>
                   <th>UF+CRM</th>
                   <th>Nome</th>
+                  <th>Especialidade</th>
                   <th>Cidade</th>
                   <th>UF</th>
                   <th>Telefone</th>
@@ -260,7 +261,7 @@
                 </tr>
               </thead>
               <tbody id="novos-body">
-                <tr><td colspan="6">Clique num mês na evolução mensal e depois em Buscar ou numa cidade.</td></tr>
+                <tr><td colspan="7">Clique num mês na evolução mensal e depois em Buscar ou numa cidade.</td></tr>
               </tbody>
             </table>
           </div>
@@ -278,7 +279,7 @@
     });
   </script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="assets/app.js?v=31"></script>
-  <script src="assets/bi.js?v=31"></script>
+  <script src="assets/app.js?v=33"></script>
+  <script src="assets/bi.js?v=33"></script>
 </body>
 </html>

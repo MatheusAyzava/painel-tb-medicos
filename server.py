@@ -576,10 +576,13 @@ def query_medicos_novos(override: dict | None = None) -> dict:
         safe_mun = municipio.replace("'", "''")
         city_filter += f" AND UPPER(p.MUNICIPIO) = UPPER('{safe_mun}')"
 
-    date_filter = f"""
+    date_filter = ""
+    if modo == "novos":
+        date_filter = f"""
               AND b.DT_NOVO >= DATE_FROM_PARTS({int(ano)}, {int(mo)}, 1)
               AND b.DT_NOVO < DATEADD(MONTH, 1, DATE_FROM_PARTS({int(ano)}, {int(mo)}, 1))
         """
+    join_base = "JOIN" if modo == "novos" else "LEFT JOIN"
 
     if city_filter:
         sql = f"""
@@ -594,15 +597,16 @@ def query_medicos_novos(override: dict | None = None) -> dict:
             ),
             base AS (
               SELECT UF_CRM,
-                     MIN(COALESCE(TRY_TO_DATE(DT_INSCRICAO, 'DD/MM/YYYY'), TRY_TO_DATE(DT_INSCRICAO))) AS DT_NOVO
+                     MIN(COALESCE(TRY_TO_DATE(DT_INSCRICAO, 'DD/MM/YYYY'), TRY_TO_DATE(DT_INSCRICAO))) AS DT_NOVO,
+                     MIN(COALESCE(NULLIF(ESPECIALIDADE, ''), NULLIF(ESPECIALIDADE_RQE, ''), 'SEM ESPECIALIDADE')) AS ESPECIALIDADE
               FROM GOLD.TB_ESPECIALIDADE_X_FONTES
               GROUP BY UF_CRM
             )
             SELECT m.UF_CRM, m.NOME, c.MUNICIPIO, COALESCE(c.UF, m.UF), tel.TELEFONE, em.EMAIL,
-                   TO_CHAR(b.DT_NOVO, 'YYYY-MM-DD')
+                   TO_CHAR(b.DT_NOVO, 'YYYY-MM-DD'), b.ESPECIALIDADE
             FROM GOLD.TB_MEDICOS m
             JOIN cid c ON c.UF_CRM = m.UF_CRM
-            JOIN base b ON b.UF_CRM = m.UF_CRM
+            {join_base} base b ON b.UF_CRM = m.UF_CRM
             LEFT JOIN (
               SELECT UF_CRM, TELEFONE
               FROM GOLD.TB_MEDICOS_TELEFONES_FREQUENCIA
@@ -622,11 +626,12 @@ def query_medicos_novos(override: dict | None = None) -> dict:
         sql = f"""
             WITH base AS (
               SELECT UF_CRM,
-                     MIN(COALESCE(TRY_TO_DATE(DT_INSCRICAO, 'DD/MM/YYYY'), TRY_TO_DATE(DT_INSCRICAO))) AS DT_NOVO
+                     MIN(COALESCE(TRY_TO_DATE(DT_INSCRICAO, 'DD/MM/YYYY'), TRY_TO_DATE(DT_INSCRICAO))) AS DT_NOVO,
+                     MIN(COALESCE(NULLIF(ESPECIALIDADE, ''), NULLIF(ESPECIALIDADE_RQE, ''), 'SEM ESPECIALIDADE')) AS ESPECIALIDADE
               FROM GOLD.TB_ESPECIALIDADE_X_FONTES
               GROUP BY UF_CRM
             )
-            SELECT m.UF_CRM, m.NOME, NULL, m.UF, tel.TELEFONE, em.EMAIL, TO_CHAR(b.DT_NOVO, 'YYYY-MM-DD')
+            SELECT m.UF_CRM, m.NOME, NULL, m.UF, tel.TELEFONE, em.EMAIL, TO_CHAR(b.DT_NOVO, 'YYYY-MM-DD'), b.ESPECIALIDADE
             FROM GOLD.TB_MEDICOS m
             JOIN base b ON b.UF_CRM = m.UF_CRM
             LEFT JOIN (
@@ -662,6 +667,7 @@ def query_medicos_novos(override: dict | None = None) -> dict:
                 "telefone": str(r[4] or ""),
                 "email": str(r[5] or ""),
                 "data": str(r[6] or ""),
+                "especialidade": str(r[7] or ""),
             }
             for r in rows
         ]
@@ -674,6 +680,61 @@ def query_medicos_novos(override: dict | None = None) -> dict:
             "total": len(lista),
             "linhas": lista,
         }
+    finally:
+        ctx.close()
+
+
+def query_cidades_novos(override: dict | None = None) -> dict:
+    cfg = merge_cfg(override)
+    body = override or {}
+    mes = str(body.get("mes") or "").strip()
+    if not re.fullmatch(r"\d{4}-\d{2}", mes):
+        mes = datetime.now().strftime("%Y-%m")
+    ano, mo = mes.split("-")
+    sql = f"""
+        WITH cid AS (
+          SELECT UF_CRM, MUNICIPIO, UF, IBGE
+          FROM GOLD.TB_CNES_PROFISSIONAIS p
+          WHERE CBO LIKE '225%'
+            AND NULLIF(UF_CRM, '') IS NOT NULL
+            AND MUNICIPIO IS NOT NULL
+          QUALIFY ROW_NUMBER() OVER (PARTITION BY UF_CRM ORDER BY UPDATE_DATE DESC NULLS LAST) = 1
+        ),
+        base AS (
+          SELECT UF_CRM,
+                 MIN(COALESCE(TRY_TO_DATE(DT_INSCRICAO, 'DD/MM/YYYY'), TRY_TO_DATE(DT_INSCRICAO))) AS DT_NOVO
+          FROM GOLD.TB_ESPECIALIDADE_X_FONTES
+          GROUP BY UF_CRM
+        )
+        SELECT c.UF, c.MUNICIPIO, c.IBGE, COUNT(DISTINCT m.UF_CRM) AS N
+        FROM GOLD.TB_MEDICOS m
+        JOIN cid c ON c.UF_CRM = m.UF_CRM
+        JOIN base b ON b.UF_CRM = m.UF_CRM
+        WHERE UPPER(m.SITUACAO) = 'ATIVO'
+          AND b.DT_NOVO >= DATE_FROM_PARTS({int(ano)}, {int(mo)}, 1)
+          AND b.DT_NOVO < DATEADD(MONTH, 1, DATE_FROM_PARTS({int(ano)}, {int(mo)}, 1))
+        GROUP BY 1, 2, 3
+        ORDER BY N DESC
+    """
+    ctx = connect_snowflake(cfg)
+    warehouse = (cfg.get("snowflake_warehouse") or "COMPUTE_WH").strip()
+    try:
+        cur = ctx.cursor()
+        cur.execute(f"USE WAREHOUSE {warehouse}")
+        cur.execute("USE DATABASE DADOSFERA_PRD_DIGITALSOLVERS")
+        cur.close()
+        rows = snowflake_fetch(ctx, sql)[1]
+        cidades = [
+            {
+                "uf": str(r[0] or ""),
+                "municipio": str(r[1] or ""),
+                "ibge": str(r[2] or ""),
+                "value": as_int([r[3]]),
+            }
+            for r in rows
+            if r and r[1]
+        ]
+        return {"mes": mes, "cidades": cidades, "total": len(cidades)}
     finally:
         ctx.close()
 
@@ -1285,6 +1346,9 @@ class Handler(SimpleHTTPRequestHandler):
                 return
             if parsed.path == "/api/medicos-novos":
                 send_json(self, query_medicos_novos(body))
+                return
+            if parsed.path == "/api/cidades-novos":
+                send_json(self, query_cidades_novos(body))
                 return
             if parsed.path == "/api/databricks":
                 send_json(self, query_databricks(body))

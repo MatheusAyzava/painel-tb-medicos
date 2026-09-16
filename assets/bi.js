@@ -8,7 +8,18 @@ const UF_CENTRO = {
   SE: [-10.57, -37.45], SP: [-22.19, -48.79], TO: [-9.46, -48.26],
 };
 
-const biState = { data: null, munis: [], map: null, layer: null, novos: [], modo: "novos", cidade: null, mes: null };
+const biState = {
+  data: null,
+  munis: [],
+  map: null,
+  layer: null,
+  novos: [],
+  modo: "novos",
+  cidade: null,
+  mes: null,
+  cidadesNovos: {},
+};
+let mapaReq = 0;
 
 const MES_NOMES = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"];
 const MES_EIXO = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
@@ -168,7 +179,7 @@ function renderBi(data) {
   const ufs = ["BR", ...[...new Set((data.cidades || []).map((c) => c.uf).filter(Boolean))].sort()];
   sel.innerHTML = ufs.map((u) => `<option value="${u}">${u === "BR" ? "Brasil" : u}</option>`).join("");
   sel.value = ufs.includes(current) ? current : "BR";
-  drawMap(sel.value);
+  atualizarMapa();
 }
 
 function padIbge(code) {
@@ -183,6 +194,56 @@ function ensureMap() {
     attribution: "Tiles © Esri",
   }).addTo(biState.map);
   return biState.map;
+}
+
+function mapaCidades() {
+  if (biState.modo === "novos") return biState.cidadesNovos[mesValue()] || [];
+  return (biState.data && biState.data.cidades) || [];
+}
+
+function atualizarHint() {
+  const hint = document.getElementById("map-hint");
+  if (!hint) return;
+  const mes = mesLabel(mesValue()) || "mês";
+  hint.textContent = biState.modo === "novos"
+    ? `Clique no mês na evolução mensal e depois na cidade para ver os médicos novos de ${mes}.`
+    : "Clique na cidade para ver todos os médicos dali.";
+}
+
+async function atualizarMapa() {
+  const uf = document.getElementById("map-uf").value;
+  atualizarHint();
+  const req = ++mapaReq;
+  if (biState.modo === "novos") {
+    const mes = mesValue();
+    if (!biState.cidadesNovos[mes] && biState.layer && biState.map) {
+      biState.map.removeLayer(biState.layer);
+      biState.layer = null;
+    }
+    if (!biState.cidadesNovos[mes]) {
+      try {
+        const res = await fetch("/api/cidades-novos", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ mes }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Falha ao filtrar cidades de médicos novos");
+        if (req !== mapaReq) return;
+        biState.cidadesNovos[mes] = data.cidades || [];
+      } catch (err) {
+        if (req !== mapaReq) return;
+        biState.cidadesNovos[mes] = [];
+        const toast = document.getElementById("toast");
+        if (toast) {
+          toast.hidden = false;
+          toast.textContent = err.message || "Não carreguei as cidades de médicos novos.";
+        }
+      }
+    }
+  }
+  if (req !== mapaReq) return;
+  drawMap(document.getElementById("map-uf").value || uf);
 }
 
 function drawMap(uf) {
@@ -203,8 +264,9 @@ function drawMap(uf) {
     byName.set(`${m.u}|${String(m.n).toLowerCase()}`, m);
   });
   const brasil = !uf || uf === "BR";
-  const cidades = (biState.data.cidades || []).filter((c) => brasil || c.uf === uf);
+  const cidades = mapaCidades().filter((c) => brasil || c.uf === uf);
   const max = Math.max(...cidades.map((c) => c.value), 1);
+  const rotulo = biState.modo === "novos" ? "médicos novos" : "médicos";
 
   cidades.forEach((c) => {
     const ibge7 = padIbge(c.ibge);
@@ -222,7 +284,7 @@ function drawMap(uf) {
       fillColor: heatColor(t),
       fillOpacity: 0.75,
       weight: 1,
-    }).bindTooltip(`${c.municipio}: ${biFmt(c.value)}`).on("click", () => {
+    }).bindTooltip(`${c.municipio}: ${biFmt(c.value)} ${rotulo}`).on("click", () => {
       abrirCidade(c);
     }).addTo(group);
   });
@@ -283,7 +345,8 @@ function setModo(modo) {
   document.getElementById("modo-todos").classList.toggle("on", biState.modo === "todos");
   document.getElementById("modo-novos").classList.toggle("on", biState.modo === "novos");
   atualizarTitulo();
-  if (biState.cidade) buscarLista();
+  atualizarMapa();
+  buscarLista();
 }
 
 function abrirCidade(cidade) {
@@ -297,14 +360,15 @@ function escolherMes(mes) {
   if (!/^\d{4}-\d{2}$/.test(mes)) return;
   biState.mes = mes;
   atualizarTitulo();
+  atualizarMapa();
   document.getElementById("novos-body").scrollIntoView({ behavior: "smooth", block: "start" });
   buscarLista();
 }
 
 function downloadNovosCsv() {
   if (!biState.novos.length) return;
-  const header = "UF_CRM;NOME;CIDADE;UF;TELEFONE;EMAIL";
-  const body = biState.novos.map((r) => [r.uf_crm, r.nome, r.cidade, r.uf, r.telefone, r.email].map(csvEscape).join(";")).join("\n");
+  const header = "UF_CRM;NOME;ESPECIALIDADE;CIDADE;UF;TELEFONE;EMAIL";
+  const body = biState.novos.map((r) => [r.uf_crm, r.nome, r.especialidade, r.cidade, r.uf, r.telefone, r.email].map(csvEscape).join(";")).join("\n");
   const blob = new Blob(["\ufeff" + header + "\n" + body], { type: "text/csv;charset=utf-8" });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
@@ -325,11 +389,11 @@ async function buscarLista() {
   }
   atualizarTitulo();
   if (biState.modo === "todos" && !biState.cidade) {
-    bodyEl.innerHTML = "<tr><td colspan='6'>Clique numa cidade no mapa para ver todos os médicos dali naquele mês.</td></tr>";
+    bodyEl.innerHTML = "<tr><td colspan='7'>Clique numa cidade no mapa para ver todos os médicos dali.</td></tr>";
     document.getElementById("novos-count").textContent = "0 registros";
     return;
   }
-  bodyEl.innerHTML = "<tr><td colspan='6'>Consultando Snowflake…</td></tr>";
+  bodyEl.innerHTML = "<tr><td colspan='7'>Consultando Snowflake…</td></tr>";
   try {
     const res = await fetch("/api/medicos-novos", {
       method: "POST",
@@ -341,17 +405,18 @@ async function buscarLista() {
     biState.novos = data.linhas || [];
     document.getElementById("novos-count").textContent = `${biFmt(data.total)} registros`;
     if (data.aviso && !biState.novos.length) {
-      bodyEl.innerHTML = `<tr><td colspan="6">${data.aviso}</td></tr>`;
+      bodyEl.innerHTML = `<tr><td colspan="7">${data.aviso}</td></tr>`;
       return;
     }
     if (!biState.novos.length) {
-      bodyEl.innerHTML = "<tr><td colspan='6'>Nenhum médico encontrado nesse mês.</td></tr>";
+      bodyEl.innerHTML = "<tr><td colspan='7'>Nenhum médico encontrado.</td></tr>";
       return;
     }
     bodyEl.innerHTML = biState.novos.map((r) => `
       <tr>
         <td>${r.uf_crm}</td>
         <td>${r.nome}</td>
+        <td>${r.especialidade || "—"}</td>
         <td>${r.cidade || "—"}</td>
         <td>${r.uf || "—"}</td>
         <td>${r.telefone || "—"}</td>
@@ -359,7 +424,7 @@ async function buscarLista() {
       </tr>
     `).join("");
   } catch (err) {
-    bodyEl.innerHTML = `<tr><td colspan="6">${err.message}</td></tr>`;
+    bodyEl.innerHTML = `<tr><td colspan="7">${err.message}</td></tr>`;
   }
 }
 
@@ -383,10 +448,10 @@ async function initBi() {
     btn.addEventListener("click", () => switchTab(btn.dataset.tab));
   });
   if (location.hash.replace("#", "") === "dadosfera") switchTab("dadosfera");
-  document.getElementById("map-uf").addEventListener("change", (e) => drawMap(e.target.value));
+  document.getElementById("map-uf").addEventListener("change", () => atualizarMapa());
   document.getElementById("map-reset").addEventListener("click", () => {
     document.getElementById("map-uf").value = "BR";
-    drawMap("BR");
+    atualizarMapa();
   });
   document.getElementById("btn-novos").addEventListener("click", buscarLista);
   document.getElementById("btn-csv").addEventListener("click", downloadNovosCsv);
@@ -403,6 +468,7 @@ async function initBi() {
   } catch {
     biState.munis = [];
   }
+  if (biState.data) atualizarMapa();
 }
 
 initBi();

@@ -15,6 +15,9 @@
 [functions.dadosfera-bi]
   timeout = 26
 
+[functions.cidades-novos]
+  timeout = 26
+
 [functions.medicos-novos]
   timeout = 26
 
