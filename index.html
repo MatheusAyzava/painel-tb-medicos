@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/style.css?v=41" />
+  <link rel="stylesheet" href="assets/style.css?v=43" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 </head>
 <body>
@@ -292,7 +292,7 @@
         </header>
         <section class="panel cnes-search-panel">
           <div class="cnes-search-bar">
-            <input type="search" id="cnes-q" placeholder="Nome, CRM, CPF ou CNS" autocomplete="off" />
+            <input type="search" id="cnes-q" placeholder="Nome, CRM ou CNS" autocomplete="off" />
             <div class="cnes-search-tools">
               <select id="cnes-uf">
                 <option value="">Todos os estados</option>
@@ -314,7 +314,7 @@
               </div>
             </div>
           </div>
-          <p class="map-hint">Consulta a base GOLD do CNES: carga horária, hospital em que mais atende, setor público/privado, endereço e tipo de vínculo — no mesmo detalhe da consulta do Datasus.</p>
+          <p class="map-hint">Consulta a base GOLD do CNES: horas por CBO, estabelecimento e total geral. A busca usa nome, CRM ou CNS — CPF não entra na consulta nem no resultado.</p>
         </section>
         <section class="cnes-layout">
           <article class="panel cnes-list-panel">
@@ -328,39 +328,23 @@
               <p class="map-hint" id="cnes-detail-local">Selecione um médico à esquerda para ver todos os estabelecimentos.</p>
             </header>
             <div class="cnes-kpis" id="cnes-kpis"></div>
+            <div class="cnes-cbo-grid" id="cnes-cbos" hidden></div>
             <p class="cnes-principal" id="cnes-principal" hidden></p>
             <div class="table-wrap cnes-table-wrap">
               <table class="novos-table cnes-table">
-                <colgroup>
-                  <col class="cnes-col-cnes" />
-                  <col class="cnes-col-est" />
-                  <col class="cnes-col-cid" />
-                  <col class="cnes-col-uf" />
-                  <col class="cnes-col-setor" />
-                  <col class="cnes-col-h" />
-                  <col class="cnes-col-h" />
-                  <col class="cnes-col-h" />
-                  <col class="cnes-col-cbo" />
-                  <col class="cnes-col-vinc" />
-                  <col class="cnes-col-end" />
-                </colgroup>
                 <thead>
                   <tr>
-                    <th>CNES</th>
-                    <th>Estabelecimento</th>
-                    <th>Cidade</th>
+                    <th>CNS</th>
+                    <th>Nome</th>
                     <th>UF</th>
-                    <th>Setor</th>
-                    <th>Horas</th>
-                    <th>Amb</th>
-                    <th>Hosp</th>
+                    <th>Município</th>
                     <th>CBO</th>
-                    <th>Vínculo</th>
-                    <th>Endereço</th>
+                    <th>Estabelecimento</th>
+                    <th>Total horas</th>
                   </tr>
                 </thead>
                 <tbody id="cnes-vinculos">
-                  <tr><td colspan="11">Nenhum vínculo carregado.</td></tr>
+                  <tr><td colspan="7">Nenhum vínculo carregado.</td></tr>
                 </tbody>
               </table>
             </div>
@@ -379,8 +363,8 @@
     });
   </script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="assets/app.js?v=41"></script>
-  <script src="assets/bi.js?v=41"></script>
-  <script src="assets/cnes-tab.js?v=41"></script>
+  <script src="assets/app.js?v=43"></script>
+  <script src="assets/bi.js?v=43"></script>
+  <script src="assets/cnes-tab.js?v=43"></script>
 </body>
 </html>

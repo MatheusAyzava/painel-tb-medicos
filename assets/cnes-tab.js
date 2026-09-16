@@ -82,24 +82,40 @@ function renderCnesDetalhe(pessoaId) {
   const body = document.getElementById("cnes-vinculos");
   const principal = document.getElementById("cnes-principal");
   document.querySelectorAll(".cnes-doc").forEach((btn) => btn.classList.toggle("on", btn.dataset.pessoa === pessoaId));
+  const cbos = document.getElementById("cnes-cbos");
   if (!doc) {
     title.textContent = "Detalhe do profissional";
     local.textContent = "Selecione um médico à esquerda.";
     kpis.innerHTML = "";
+    if (cbos) {
+      cbos.hidden = true;
+      cbos.innerHTML = "";
+    }
     if (principal) {
       principal.hidden = true;
       principal.innerHTML = "";
     }
-    body.innerHTML = "<tr><td colspan='11'>Nenhum vínculo carregado.</td></tr>";
+    body.innerHTML = "<tr><td colspan='7'>Nenhum vínculo carregado.</td></tr>";
     return;
   }
   title.textContent = doc.nome || doc.uf_crm;
-  local.textContent = `${doc.uf_crm} · CNS ${doc.cns || "—"} · CPF ${doc.cpf || "—"} · ${((doc.cidades) || []).join(" · ") || "sem cidade"}`;
+  local.textContent = `${doc.uf_crm} · CNS ${doc.cns || "—"} · ${((doc.cidades) || []).join(" · ") || "sem cidade"}`;
   kpis.innerHTML = `
-    <div><b>${cnesFmt(doc.horas_total)}h</b><span>Carga horária</span></div>
+    <div><b>${cnesFmt(doc.horas_total)}h</b><span>Total geral</span></div>
+    <div><b>${cnesFmt((doc.horas_cbo || []).length)}</b><span>CBOs</span></div>
     <div><b>${cnesFmt(doc.vinculos)}</b><span>Estabelecimentos</span></div>
-    <div><b>${cnesEsc(doc.setor || "—")}</b><span>Setor principal</span></div>
   `;
+  if (cbos) {
+    const lista = doc.horas_cbo || [];
+    cbos.hidden = !lista.length;
+    cbos.innerHTML = lista.map((item) => `
+      <div>
+        <b>${cnesFmt(item.horas)}h</b>
+        <strong title="${cnesEsc(item.cbo || "")}">${cnesCbo(item.cbo)}</strong>
+        <span title="${cnesEsc(item.estabelecimento || "")}">${cnesEsc(item.estabelecimento || "—")}</span>
+      </div>
+    `).join("");
+  }
   if (principal) {
     principal.hidden = !doc.estabelecimento;
     principal.innerHTML = doc.estabelecimento
@@ -107,27 +123,24 @@ function renderCnesDetalhe(pessoaId) {
       : "";
   }
   if (!rows.length) {
-    body.innerHTML = "<tr><td colspan='11'>Sem vínculos CNES para este CRM.</td></tr>";
+    body.innerHTML = "<tr><td colspan='7'>Sem vínculos CNES para este CRM.</td></tr>";
     return;
   }
-  body.innerHTML = rows.map((v) => {
-    const end = [v.endereco, v.bairro, v.cep].filter(Boolean).join(" · ") || "—";
-    const vinculo = cnesCurto(v.vinculo);
-    return `
+  const ordered = [...rows].sort((a, b) => String(a.cbo || "").localeCompare(String(b.cbo || ""), "pt-BR") || (Number(b.horas_total) || 0) - (Number(a.horas_total) || 0));
+  body.innerHTML = ordered.map((v) => `
     <tr>
-      <td class="num">${cnesEsc(v.cnes || "—")}</td>
-      <td class="est" title="${cnesEsc(v.estabelecimento || "")}">${cnesEsc(v.estabelecimento || "—")}</td>
-      <td class="cid" title="${cnesEsc(v.municipio || "")}">${cnesEsc(v.municipio || "—")}</td>
+      <td>${cnesEsc(v.cns || "—")}</td>
+      <td>${cnesEsc(v.nome || "—")}</td>
       <td class="uf">${cnesEsc(v.uf || "—")}</td>
-      <td class="setor">${cnesEsc(v.setor || "—")}</td>
-      <td class="hrs">${cnesFmt(v.horas_total)}</td>
-      <td class="hrs">${cnesFmt(v.horas_amb)}</td>
-      <td class="hrs">${cnesFmt(v.horas_hosp)}</td>
+      <td>${cnesEsc(v.municipio || "—")}</td>
       <td class="cbo" title="${cnesEsc(v.cbo || "")}">${cnesCbo(v.cbo)}</td>
-      <td class="vinc" title="${cnesEsc(v.vinculo || "")}">${cnesEsc(vinculo)}</td>
-      <td class="end" title="${cnesEsc(end)}">${cnesEsc(end)}</td>
+      <td class="est" title="${cnesEsc(v.estabelecimento || "")}">${cnesEsc(v.estabelecimento || "—")}</td>
+      <td class="hrs">${cnesFmt(v.horas_total)}</td>
+    </tr>`).join("") + `
+    <tr class="cnes-total">
+      <td colspan="6">Total geral</td>
+      <td class="hrs">${cnesFmt(doc.horas_total)}</td>
     </tr>`;
-  }).join("");
 }
 
 async function buscarCnes() {
@@ -168,9 +181,7 @@ function baixarCnesCsv() {
     : ((cnesState.data && cnesState.data.vinculos) || []);
   if (!rows.length) return;
   const header = [
-    "UF_CRM", "NOME", "CPF", "CNS", "CRM", "CBO", "CNES", "ESTABELECIMENTO", "CNPJ",
-    "SETOR", "NATUREZA", "GESTAO", "SUS", "VINCULO", "HORAS_TOTAL", "HORAS_AMB", "HORAS_HOSP",
-    "MUNICIPIO", "UF", "IBGE", "ENDERECO", "BAIRRO", "CEP", "TELEFONE", "TIPO", "UNIDADE",
+    "CNS", "NOME", "UF", "MUNICIPIO", "CBO", "ESTABELECIMENTO", "HORAS",
   ].join(";");
   const esc = (v) => {
     const t = String(v == null ? "" : v);
@@ -178,9 +189,7 @@ function baixarCnesCsv() {
     return t;
   };
   const body = rows.map((v) => [
-    v.uf_crm, v.nome, v.cpf, v.cns, v.crm, v.cbo, v.cnes, v.estabelecimento, v.cnpj,
-    v.setor, v.natureza, v.gestao, v.sus, v.vinculo, v.horas_total, v.horas_amb, v.horas_hosp,
-    v.municipio, v.uf, v.ibge, v.endereco, v.bairro, v.cep, v.telefone, v.tipo, v.unidade,
+    v.cns, v.nome, v.uf, v.municipio, v.cbo, v.estabelecimento, v.horas_total,
   ].map(esc).join(";")).join("\n");
   const blob = new Blob(["\ufeff" + header + "\n" + body], { type: "text/csv;charset=utf-8" });
   const a = document.createElement("a");

@@ -771,8 +771,8 @@ function cnesBuscaSql(parsed, { uf, novos, ano, mo }) {
   } else if (tokens.length) {
     parts.push(`(${cnesNameSql("c", tokens, "NOME_PROFISSIONAL")})`);
   }
-  if (digits.length >= 8) {
-    parts.push(`(TO_VARCHAR(c.CPF) LIKE '%${digits}%' OR TO_VARCHAR(c.CNS) LIKE '%${digits}%')`);
+  if (digits.length >= 8 && digits.length !== 11) {
+    parts.push(`TO_VARCHAR(c.CNS) LIKE '%${digits}%'`);
   }
   const where = parts.length ? parts.join(" OR ") : "1=0";
   const novosSql = novos ? `
@@ -787,7 +787,11 @@ function cnesBuscaSql(parsed, { uf, novos, ano, mo }) {
     )` : "";
   return `
     SELECT
-      c.UF_CRM, c.NOME_PROFISSIONAL, c.CPF, c.CNS, c.CRM, c.CBO, c.CNES,
+      c.UF_CRM, c.NOME_PROFISSIONAL,
+      IFF(LENGTH(REGEXP_REPLACE(TO_VARCHAR(c.CPF), '[^0-9]', '')) >= 11,
+          SHA2(REGEXP_REPLACE(TO_VARCHAR(c.CPF), '[^0-9]', ''), 256),
+          NULL),
+      c.CNS, c.CRM, c.CBO, c.CNES,
       COALESCE(c.NOME_ESTABELECIMENTO, c.ESTABELECIMENTO),
       COALESCE(c.CNPJ_ESTABELECIMENTO, c.CNPJ_PROFISSIONAL),
       COALESCE(c.NATUREZA_JURIDICA_PROFISSIONAL, c.NATUREZA_JURIDICA_ESTABELECIMENTO),
@@ -803,7 +807,8 @@ function cnesBuscaSql(parsed, { uf, novos, ano, mo }) {
       ${uf ? `AND (c.UF_ESTABELECIMENTO = '${uf}' OR c.UF_CRM ILIKE '${uf}%')` : ""}
       ${novosSql}
     QUALIFY ROW_NUMBER() OVER (
-      PARTITION BY c.UF_CRM, c.NOME_PROFISSIONAL, COALESCE(TO_VARCHAR(c.CNES), c.ESTABELECIMENTO)
+      PARTITION BY c.UF_CRM, c.NOME_PROFISSIONAL,
+        COALESCE(TO_VARCHAR(c.CNES), c.ESTABELECIMENTO), COALESCE(c.CBO, '')
       ORDER BY c.UPDATE_DATE DESC NULLS LAST, c.ANOMES DESC NULLS LAST
     ) = 1
     AND DENSE_RANK() OVER (ORDER BY c.NOME_PROFISSIONAL, c.UF_CRM) <= 25
@@ -819,14 +824,67 @@ function cnesUfDeCrm(ufCrm) {
   return String(ufCrm || "").replace(/[^A-Za-z]/g, "").slice(0, 2).toUpperCase();
 }
 
+function cnesHashCpf(value) {
+  const digits = cnesDigits(value);
+  if (digits.length < 11) return "";
+  return crypto.createHash("sha256").update(digits, "utf8").digest("hex");
+}
+
 function cnesPessoaKey(row) {
-  const cpf = cnesDigits(row && row.cpf);
-  if (cpf.length >= 11) return `cpf:${cpf}`;
+  const hashed = String((row && (row.cpf_hash || row.cpf)) || "").trim();
+  if (/^[a-f0-9]{64}$/i.test(hashed)) return `id:${hashed.toLowerCase()}`;
+  const fromPlain = cnesHashCpf(hashed);
+  if (fromPlain) return `id:${fromPlain}`;
   const cns = cnesDigits(row && row.cns);
   if (cns.length >= 14) return `cns:${cns}`;
   const nome = String((row && row.nome) || "").trim().toUpperCase();
   const crm = cnesDigits(row && row.crm) || String((row && row.uf_crm) || "").replace(/^[A-Za-z]{2}/, "");
   return `crm:${nome}::${crm}`;
+}
+
+function cnesPublicId(row, groupedId) {
+  const cns = cnesDigits(row && row.cns);
+  if (cns.length >= 14) return `cns:${cns}`;
+  const crm = String((row && row.uf_crm) || "").trim();
+  if (crm) return `crm:${crm}`;
+  return groupedId;
+}
+
+function cnesPublicVinculo(v, publicId, ufCrm) {
+  return {
+    pessoa_id: publicId,
+    uf_crm: ufCrm,
+    nome: v.nome || "",
+    cns: v.cns || "",
+    crm: v.crm || "",
+    cbo: v.cbo || "",
+    cnes: v.cnes || "",
+    estabelecimento: v.estabelecimento || "",
+    municipio: v.municipio || "",
+    uf: v.uf || "",
+    horas_total: Number(v.horas_total) || 0,
+  };
+}
+
+function cnesHorasPorCbo(rows) {
+  const byCbo = new Map();
+  rows.forEach((v) => {
+    const label = String(v.cbo || "Sem CBO").trim() || "Sem CBO";
+    if (!byCbo.has(label)) {
+      byCbo.set(label, { cbo: label, horas: 0, vinculos: 0, estabelecimento: v.estabelecimento || "", _max: -1 });
+    }
+    const item = byCbo.get(label);
+    const horas = Number(v.horas_total) || 0;
+    item.horas += horas;
+    item.vinculos += 1;
+    if (horas >= item._max) {
+      item._max = horas;
+      item.estabelecimento = v.estabelecimento || item.estabelecimento;
+    }
+  });
+  return [...byCbo.values()]
+    .map(({ _max, ...rest }) => rest)
+    .sort((a, b) => b.horas - a.horas || a.cbo.localeCompare(b.cbo, "pt-BR"));
 }
 
 function agruparCnes(vinculos) {
@@ -853,11 +911,12 @@ function agruparCnes(vinculos) {
     });
     const canonUf = cnesUfDeCrm(canon.uf_crm);
     const kept = rows.filter((v) => cnesUfDeCrm(v.uf_crm) === canonUf);
+    const publicId = cnesPublicId(kept[0], id);
+    const horasCbo = cnesHorasPorCbo(kept);
     const doc = {
-      pessoa_id: id,
+      pessoa_id: publicId,
       uf_crm: canon.uf_crm,
       nome: kept[0].nome,
-      cpf: kept[0].cpf,
       cns: kept[0].cns,
       crm: kept[0].crm,
       uf: kept[0].uf,
@@ -866,29 +925,28 @@ function agruparCnes(vinculos) {
       estabelecimento: kept[0].estabelecimento,
       setor: kept[0].setor,
       cidades: new Set(),
+      horas_cbo: horasCbo,
       _max: -1,
       principal_cnes: "",
     };
     kept.forEach((v) => {
-      v.pessoa_id = id;
-      v.uf_crm = canon.uf_crm;
-      filtrados.push(v);
-      doc.horas_total += Number(v.horas_total) || 0;
+      const pub = cnesPublicVinculo(v, publicId, canon.uf_crm);
+      filtrados.push(pub);
+      doc.horas_total += pub.horas_total;
       doc.vinculos += 1;
-      if (v.municipio) doc.cidades.add(`${v.municipio}/${v.uf}`);
-      if ((Number(v.horas_total) || 0) >= doc._max) {
-        doc._max = Number(v.horas_total) || 0;
-        doc.estabelecimento = v.estabelecimento;
+      if (pub.municipio) doc.cidades.add(`${pub.municipio}/${pub.uf}`);
+      if (pub.horas_total >= doc._max) {
+        doc._max = pub.horas_total;
+        doc.estabelecimento = pub.estabelecimento;
         doc.setor = v.setor;
-        doc.principal_cnes = v.cnes;
-        doc.uf = v.uf;
+        doc.principal_cnes = pub.cnes;
+        doc.uf = pub.uf;
       }
     });
     profissionais.push({
       pessoa_id: doc.pessoa_id,
       uf_crm: doc.uf_crm,
       nome: doc.nome,
-      cpf: doc.cpf,
       cns: doc.cns,
       crm: doc.crm,
       uf: doc.uf,
@@ -897,6 +955,7 @@ function agruparCnes(vinculos) {
       estabelecimento: doc.estabelecimento,
       setor: doc.setor,
       cidades: [...doc.cidades],
+      horas_cbo: doc.horas_cbo,
       principal_cnes: doc.principal_cnes || "",
     });
   });
@@ -914,7 +973,7 @@ function mapCnesVinculos(rows) {
     return {
       uf_crm: ufCrm,
       nome,
-      cpf: String(r[2] || ""),
+      cpf_hash: String(r[2] || "").toLowerCase(),
       cns: String(r[3] || ""),
       crm: String(r[4] || ""),
       cbo: String(r[5] || ""),
@@ -952,9 +1011,12 @@ async function queryCnesBusca(opts = {}) {
   const q = String(opts.q || "").trim();
   const compactQ = q.replace(/\s/g, "");
   if (compactQ.length < 3) {
-    return { aviso: "Digite pelo menos 3 caracteres: nome, CRM, CPF ou CNS.", profissionais: [], vinculos: [] };
+    return { aviso: "Digite pelo menos 3 caracteres: nome, CRM ou CNS.", profissionais: [], vinculos: [] };
   }
   const parsed = cnesBuscaParse(q);
+  if (!parsed.tokens.length && !parsed.isCrm && parsed.digits.length === 11) {
+    return { aviso: "Por proteção de dados a busca não usa CPF. Pesquise por nome, CRM ou CNS.", profissionais: [], vinculos: [] };
+  }
   const uf = String(opts.uf || "").replace(/[^A-Za-z]/g, "").toUpperCase().slice(0, 2);
   const novos = String(opts.novos || "").toLowerCase() === "true" || opts.novos === true;
   const ok = /^\d{4}-\d{2}$/.test(String(opts.mes || ""));

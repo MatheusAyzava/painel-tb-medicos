@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import csv
+import hashlib
 import json
 import os
 import re
@@ -860,8 +861,8 @@ def _cnes_busca_sql(parsed: dict, uf: str, novos: bool, ano: int, mo: int) -> st
         parts.append(f"(c.UF_CRM = '{compact}' OR c.UF_CRM ILIKE '%{digits}' OR TO_VARCHAR(c.CRM) = '{digits}')")
     elif tokens:
         parts.append(f"({_cnes_name_sql('c', tokens, 'NOME_PROFISSIONAL')})")
-    if len(parsed["digits"]) >= 8:
-        parts.append(f"(TO_VARCHAR(c.CPF) LIKE '%{parsed['digits']}%' OR TO_VARCHAR(c.CNS) LIKE '%{parsed['digits']}%')")
+    if len(parsed["digits"]) >= 8 and len(parsed["digits"]) != 11:
+        parts.append(f"TO_VARCHAR(c.CNS) LIKE '%{parsed['digits']}%'")
     where = " OR ".join(parts) if parts else "1=0"
     novos_sql = ""
     if novos:
@@ -878,7 +879,11 @@ def _cnes_busca_sql(parsed: dict, uf: str, novos: bool, ano: int, mo: int) -> st
     uf_sql = f"AND (c.UF_ESTABELECIMENTO = '{uf}' OR c.UF_CRM ILIKE '{uf}%')" if uf else ""
     return f"""
         SELECT
-          c.UF_CRM, c.NOME_PROFISSIONAL, c.CPF, c.CNS, c.CRM, c.CBO, c.CNES,
+          c.UF_CRM, c.NOME_PROFISSIONAL,
+          IFF(LENGTH(REGEXP_REPLACE(TO_VARCHAR(c.CPF), '[^0-9]', '')) >= 11,
+              SHA2(REGEXP_REPLACE(TO_VARCHAR(c.CPF), '[^0-9]', ''), 256),
+              NULL),
+          c.CNS, c.CRM, c.CBO, c.CNES,
           COALESCE(c.NOME_ESTABELECIMENTO, c.ESTABELECIMENTO),
           COALESCE(c.CNPJ_ESTABELECIMENTO, c.CNPJ_PROFISSIONAL),
           COALESCE(c.NATUREZA_JURIDICA_PROFISSIONAL, c.NATUREZA_JURIDICA_ESTABELECIMENTO),
@@ -894,7 +899,8 @@ def _cnes_busca_sql(parsed: dict, uf: str, novos: bool, ano: int, mo: int) -> st
           {uf_sql}
           {novos_sql}
         QUALIFY ROW_NUMBER() OVER (
-          PARTITION BY c.UF_CRM, c.NOME_PROFISSIONAL, COALESCE(TO_VARCHAR(c.CNES), c.ESTABELECIMENTO)
+          PARTITION BY c.UF_CRM, c.NOME_PROFISSIONAL,
+            COALESCE(TO_VARCHAR(c.CNES), c.ESTABELECIMENTO), COALESCE(c.CBO, '')
           ORDER BY c.UPDATE_DATE DESC NULLS LAST, c.ANOMES DESC NULLS LAST
         ) = 1
         AND DENSE_RANK() OVER (ORDER BY c.NOME_PROFISSIONAL, c.UF_CRM) <= 25
@@ -910,16 +916,69 @@ def _cnes_uf_crm(uf_crm) -> str:
     return re.sub(r"[^A-Za-z]", "", str(uf_crm or "")).upper()[:2]
 
 
+def _cnes_hash_cpf(value) -> str:
+    digits = _cnes_digits(value)
+    if len(digits) < 11:
+        return ""
+    return hashlib.sha256(digits.encode("utf-8")).hexdigest()
+
+
 def _cnes_pessoa_key(item: dict) -> str:
-    cpf = _cnes_digits(item.get("cpf"))
-    if len(cpf) >= 11:
-        return f"cpf:{cpf}"
+    hashed = str(item.get("cpf_hash") or "").strip().lower()
+    if len(hashed) == 64 and re.fullmatch(r"[a-f0-9]{64}", hashed):
+        return f"id:{hashed}"
+    plain = _cnes_hash_cpf(item.get("cpf"))
+    if plain:
+        return f"id:{plain}"
     cns = _cnes_digits(item.get("cns"))
     if len(cns) >= 14:
         return f"cns:{cns}"
     nome = str(item.get("nome") or "").strip().upper()
     crm = _cnes_digits(item.get("crm")) or re.sub(r"^[A-Za-z]{2}", "", str(item.get("uf_crm") or ""))
     return f"crm:{nome}::{crm}"
+
+
+def _cnes_public_id(item: dict, grouped_id: str) -> str:
+    cns = _cnes_digits(item.get("cns"))
+    if len(cns) >= 14:
+        return f"cns:{cns}"
+    crm = str(item.get("uf_crm") or "").strip()
+    return f"crm:{crm}" if crm else grouped_id
+
+
+def _cnes_public_vinculo(item: dict, public_id: str, uf_crm: str) -> dict:
+    return {
+        "pessoa_id": public_id,
+        "uf_crm": uf_crm,
+        "nome": item.get("nome") or "",
+        "cns": item.get("cns") or "",
+        "crm": item.get("crm") or "",
+        "cbo": item.get("cbo") or "",
+        "cnes": item.get("cnes") or "",
+        "estabelecimento": item.get("estabelecimento") or "",
+        "municipio": item.get("municipio") or "",
+        "uf": item.get("uf") or "",
+        "horas_total": item.get("horas_total") or 0,
+    }
+
+
+def _cnes_horas_cbo(rows: list[dict]) -> list[dict]:
+    by_cbo: dict[str, dict] = {}
+    for item in rows:
+        label = str(item.get("cbo") or "Sem CBO").strip() or "Sem CBO"
+        cur = by_cbo.setdefault(label, {"cbo": label, "horas": 0, "vinculos": 0, "estabelecimento": item.get("estabelecimento") or "", "_max": -1})
+        horas = item.get("horas_total") or 0
+        cur["horas"] += horas
+        cur["vinculos"] += 1
+        if horas >= cur["_max"]:
+            cur["_max"] = horas
+            cur["estabelecimento"] = item.get("estabelecimento") or cur["estabelecimento"]
+    out = []
+    for cur in by_cbo.values():
+        cur.pop("_max", None)
+        out.append(cur)
+    out.sort(key=lambda x: (-x["horas"], x["cbo"]))
+    return out
 
 
 def _cnes_agrupar(vinculos: list[dict]) -> tuple[list[dict], list[dict]]:
@@ -938,32 +997,34 @@ def _cnes_agrupar(vinculos: list[dict]) -> tuple[list[dict], list[dict]]:
         canon = max(by_uf.values(), key=lambda info: (info["horas"], info["n"]))
         canon_uf = _cnes_uf_crm(canon["uf_crm"])
         kept = [item for item in rows if _cnes_uf_crm(item.get("uf_crm")) == canon_uf]
+        public_id = _cnes_public_id(kept[0], pessoa_id)
+        horas_cbo = _cnes_horas_cbo(kept)
         doc = {
-            "pessoa_id": pessoa_id, "uf_crm": canon["uf_crm"], "nome": kept[0]["nome"],
-            "cpf": kept[0]["cpf"], "cns": kept[0]["cns"], "crm": kept[0]["crm"], "uf": kept[0]["uf"],
+            "pessoa_id": public_id, "uf_crm": canon["uf_crm"], "nome": kept[0]["nome"],
+            "cns": kept[0]["cns"], "crm": kept[0]["crm"], "uf": kept[0]["uf"],
             "horas_total": 0, "vinculos": 0, "estabelecimento": kept[0]["estabelecimento"],
-            "setor": kept[0]["setor"], "cidades": set(), "_max": -1, "principal_cnes": "",
+            "setor": kept[0]["setor"], "cidades": set(), "horas_cbo": horas_cbo, "_max": -1, "principal_cnes": "",
         }
         for item in kept:
-            item["pessoa_id"] = pessoa_id
-            item["uf_crm"] = canon["uf_crm"]
-            filtrados.append(item)
-            doc["horas_total"] += item["horas_total"]
+            pub = _cnes_public_vinculo(item, public_id, canon["uf_crm"])
+            filtrados.append(pub)
+            doc["horas_total"] += pub["horas_total"]
             doc["vinculos"] += 1
-            if item["municipio"]:
-                doc["cidades"].add(f"{item['municipio']}/{item['uf']}")
-            if item["horas_total"] >= doc["_max"]:
-                doc["_max"] = item["horas_total"]
-                doc["estabelecimento"] = item["estabelecimento"]
-                doc["setor"] = item["setor"]
-                doc["principal_cnes"] = item["cnes"]
-                doc["uf"] = item["uf"]
+            if pub["municipio"]:
+                doc["cidades"].add(f"{pub['municipio']}/{pub['uf']}")
+            if pub["horas_total"] >= doc["_max"]:
+                doc["_max"] = pub["horas_total"]
+                doc["estabelecimento"] = pub["estabelecimento"]
+                doc["setor"] = item.get("setor")
+                doc["principal_cnes"] = pub["cnes"]
+                doc["uf"] = pub["uf"]
         profissionais.append({
             "pessoa_id": doc["pessoa_id"], "uf_crm": doc["uf_crm"], "nome": doc["nome"],
-            "cpf": doc["cpf"], "cns": doc["cns"], "crm": doc["crm"], "uf": doc["uf"],
+            "cns": doc["cns"], "crm": doc["crm"], "uf": doc["uf"],
             "horas_total": doc["horas_total"], "vinculos": doc["vinculos"],
             "estabelecimento": doc["estabelecimento"], "setor": doc["setor"],
-            "cidades": sorted(doc["cidades"]), "principal_cnes": doc.get("principal_cnes") or "",
+            "cidades": sorted(doc["cidades"]), "horas_cbo": doc["horas_cbo"],
+            "principal_cnes": doc.get("principal_cnes") or "",
         })
     return profissionais, filtrados
 
@@ -973,8 +1034,10 @@ def query_cnes_busca(override: dict | None = None) -> dict:
     body = override or {}
     q = str(body.get("q") or "").strip()
     if len(re.sub(r"\s", "", q)) < 3:
-        return {"aviso": "Digite pelo menos 3 caracteres: nome, CRM, CPF ou CNS.", "profissionais": [], "vinculos": []}
+        return {"aviso": "Digite pelo menos 3 caracteres: nome, CRM ou CNS.", "profissionais": [], "vinculos": []}
     parsed = _cnes_busca_parse(q)
+    if not parsed["tokens"] and not parsed["is_crm"] and len(parsed["digits"]) == 11:
+        return {"aviso": "Por proteção de dados a busca não usa CPF. Pesquise por nome, CRM ou CNS.", "profissionais": [], "vinculos": []}
     uf = re.sub(r"[^A-Za-z]", "", str(body.get("uf") or "")).upper()[:2]
     novos = str(body.get("novos") or "").lower() in {"1", "true", "sim"}
     mes = str(body.get("mes") or "").strip()
@@ -996,7 +1059,7 @@ def query_cnes_busca(override: dict | None = None) -> dict:
             item = {
                 "uf_crm": str(r[0] or ""),
                 "nome": str(r[1] or ""),
-                "cpf": str(r[2] or ""),
+                "cpf_hash": str(r[2] or "").lower(),
                 "cns": str(r[3] or ""),
                 "crm": str(r[4] or ""),
                 "cbo": str(r[5] or ""),

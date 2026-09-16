@@ -988,6 +988,50 @@ input, textarea {
   color: var(--green);
 }
 .cnes-kpis span { color: var(--muted); font-size: 12px; margin-top: 4px; }
+.cnes-cbo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+  margin: 0 0 12px;
+}
+.cnes-cbo-grid[hidden] { display: none; }
+.cnes-cbo-grid > div {
+  background: #0c1218;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 12px 14px;
+  min-width: 0;
+}
+.cnes-cbo-grid b {
+  display: block;
+  font-family: Outfit, sans-serif;
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  color: var(--green);
+}
+.cnes-cbo-grid strong {
+  display: block;
+  margin-top: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+.cnes-cbo-grid span {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cnes-cbo-grid em {
+  font-style: normal;
+  color: var(--muted);
+  margin-right: 4px;
+}
 .cnes-principal {
   display: flex;
   align-items: baseline;
@@ -1016,30 +1060,26 @@ input, textarea {
 }
 .cnes-table-wrap { max-height: min(62vh, 680px); overflow: auto; }
 .cnes-table {
-  min-width: 1320px;
-  width: max-content;
+  min-width: 100%;
+  width: 100%;
   table-layout: auto;
   font-size: 13px;
 }
-.cnes-col-cnes { width: 88px; }
-.cnes-col-est { min-width: 220px; }
-.cnes-col-cid { min-width: 110px; }
-.cnes-col-uf { width: 44px; }
-.cnes-col-setor { min-width: 78px; }
-.cnes-col-h { width: 58px; }
-.cnes-col-cbo { min-width: 200px; }
-.cnes-col-vinc { min-width: 150px; }
-.cnes-col-end { min-width: 280px; }
 .cnes-table th, .cnes-table td {
   vertical-align: top;
   padding: 9px 10px;
 }
 .cnes-table td.hrs { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.cnes-table td.num, .cnes-table td.uf, .cnes-table td.setor { white-space: nowrap; }
-.cnes-table td.est, .cnes-table td.cbo, .cnes-table td.vinc, .cnes-table td.end {
+.cnes-table td.uf { white-space: nowrap; }
+.cnes-table td.est, .cnes-table td.cbo {
   white-space: normal;
   overflow-wrap: anywhere;
   line-height: 1.35;
+}
+.cnes-table tr.cnes-total td {
+  font-weight: 700;
+  background: #102016;
+  border-bottom: none;
 }
 .cnes-table td.cbo em {
   font-style: normal;
