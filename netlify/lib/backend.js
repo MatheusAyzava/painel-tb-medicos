@@ -134,25 +134,31 @@ async function snowflakeSql(sql) {
   });
   let data = await res.json().catch(() => ({}));
   const started = Date.now();
+  const pollHeaders = {
+    Authorization: `Bearer ${token}`,
+    "X-Snowflake-Authorization-Token-Type": "KEYPAIR_JWT",
+    Accept: "application/json",
+  };
   while (
     (res.status === 202 || data.code === "333334") &&
     data.statementHandle &&
     Date.now() - started < 50000
   ) {
     await new Promise((r) => setTimeout(r, 900));
-    res = await fetch(`${base}/${data.statementHandle}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "X-Snowflake-Authorization-Token-Type": "KEYPAIR_JWT",
-        Accept: "application/json",
-      },
-    });
+    res = await fetch(`${base}/${data.statementHandle}`, { headers: pollHeaders });
     data = await res.json().catch(() => ({}));
   }
   if (!Array.isArray(data.data)) {
     throw new Error(data.message || data.error || `Snowflake HTTP ${res.status}`);
   }
-  return data.data;
+  let rows = data.data;
+  const partitions = (data.resultSetMetaData && data.resultSetMetaData.partitionInfo) || [];
+  for (let i = 1; i < partitions.length; i++) {
+    const part = await fetch(`${base}/${data.statementHandle}?partition=${i}`, { headers: pollHeaders });
+    const pdata = await part.json().catch(() => ({}));
+    if (Array.isArray(pdata.data)) rows = rows.concat(pdata.data);
+  }
+  return rows;
 }
 
 async function querySnowflake() {
@@ -481,7 +487,8 @@ async function queryMedicosNovos(opts = {}) {
     return { modo, mes: stamp, total: 0, total_completo: 0, linhas: [], aviso: "Clique numa cidade no mapa para listar os médicos." };
   }
 
-  const buscaFilter = buscaSqlFilter(opts.q || opts.busca, Boolean(cityFilter));
+  const buscaFilter = buscaSqlFilter(opts.q || opts.busca, Boolean(cityFilter) && !opts.sem_cidade);
+  const semCidade = Boolean(opts.sem_cidade) && modo === "novos";
 
   const dateFilter = modo === "novos"
     ? `AND b.DT_NOVO >= DATE_FROM_PARTS(${ano}, ${mo}, 1) AND b.DT_NOVO < DATEADD(MONTH, 1, DATE_FROM_PARTS(${ano}, ${mo}, 1))`
@@ -497,11 +504,40 @@ async function queryMedicosNovos(opts = {}) {
       QUALIFY ROW_NUMBER() OVER (PARTITION BY UF_CRM ORDER BY QTDE_REPETICOES DESC NULLS LAST) = 1
     ) em ON em.UF_CRM = m.UF_CRM`;
 
-  const sql = cityFilter ? `
+  const sql = semCidade ? `
+    WITH novos AS (
+      SELECT UF_CRM,
+             MIN(COALESCE(TRY_TO_DATE(DT_INSCRICAO, 'DD/MM/YYYY'), TRY_TO_DATE(DT_INSCRICAO))) AS DT_NOVO,
+             MIN(COALESCE(NULLIF(ESPECIALIDADE, ''), NULLIF(ESPECIALIDADE_RQE, ''), 'SEM ESPECIALIDADE')) AS ESPECIALIDADE
+      FROM GOLD.TB_ESPECIALIDADE_X_FONTES
+      WHERE COALESCE(TRY_TO_DATE(DT_INSCRICAO, 'DD/MM/YYYY'), TRY_TO_DATE(DT_INSCRICAO))
+              >= DATE_FROM_PARTS(${ano}, ${mo}, 1)
+        AND COALESCE(TRY_TO_DATE(DT_INSCRICAO, 'DD/MM/YYYY'), TRY_TO_DATE(DT_INSCRICAO))
+              < DATEADD(MONTH, 1, DATE_FROM_PARTS(${ano}, ${mo}, 1))
+      GROUP BY UF_CRM
+    ),
+    cid AS (
+      SELECT p.UF_CRM
+      FROM novos n
+      JOIN GOLD.TB_CNES_PROFISSIONAIS p ON p.UF_CRM = n.UF_CRM
+      WHERE NULLIF(p.MUNICIPIO, '') IS NOT NULL
+      QUALIFY ROW_NUMBER() OVER (PARTITION BY p.UF_CRM ORDER BY p.UPDATE_DATE DESC NULLS LAST) = 1
+    )
+    SELECT COALESCE(m.UF_CRM, n.UF_CRM), COALESCE(m.NOME, ''), 'Sem cidade · ' || COALESCE(m.UF, LEFT(n.UF_CRM, 2)),
+           COALESCE(m.UF, LEFT(n.UF_CRM, 2)), tel.TELEFONE, em.EMAIL, TO_CHAR(n.DT_NOVO, 'YYYY-MM-DD'), n.ESPECIALIDADE, COUNT(*) OVER()
+    FROM novos n
+    LEFT JOIN cid c ON c.UF_CRM = n.UF_CRM
+    LEFT JOIN GOLD.TB_MEDICOS m ON m.UF_CRM = n.UF_CRM
+    ${telJoin.replace(/m\.UF_CRM/g, "n.UF_CRM")}
+    WHERE c.UF_CRM IS NULL
+      AND COALESCE(m.UF, LEFT(n.UF_CRM, 2)) = '${uf || ""}'
+      ${buscaSqlFilter(opts.q || opts.busca, false)}
+    ORDER BY COALESCE(m.NOME, n.UF_CRM) LIMIT 8000
+  ` : cityFilter ? `
     WITH cid AS (
       SELECT UF_CRM, MUNICIPIO, UF, IBGE
       FROM GOLD.TB_CNES_PROFISSIONAIS p
-      WHERE CBO LIKE '225%' AND NULLIF(UF_CRM, '') IS NOT NULL AND MUNICIPIO IS NOT NULL
+      WHERE NULLIF(UF_CRM, '') IS NOT NULL AND MUNICIPIO IS NOT NULL
         ${cityFilter}
       QUALIFY ROW_NUMBER() OVER (PARTITION BY UF_CRM ORDER BY UPDATE_DATE DESC NULLS LAST) = 1
     ),
@@ -553,33 +589,45 @@ async function queryCidadesNovos(opts = {}) {
   const stamp = ok ? String(opts.mes) : new Date().toISOString().slice(0, 7);
   const [ano, mo] = stamp.split("-").map(Number);
   const rows = await snowflakeSql(`
-    WITH cid AS (
-      SELECT UF_CRM, MUNICIPIO, UF, IBGE
-      FROM GOLD.TB_CNES_PROFISSIONAIS p
-      WHERE CBO LIKE '225%' AND NULLIF(UF_CRM, '') IS NOT NULL AND MUNICIPIO IS NOT NULL
-      QUALIFY ROW_NUMBER() OVER (PARTITION BY UF_CRM ORDER BY UPDATE_DATE DESC NULLS LAST) = 1
+    WITH novos AS (
+      SELECT UF_CRM
+      FROM GOLD.TB_ESPECIALIDADE_X_FONTES
+      WHERE COALESCE(TRY_TO_DATE(DT_INSCRICAO, 'DD/MM/YYYY'), TRY_TO_DATE(DT_INSCRICAO))
+              >= DATE_FROM_PARTS(${ano}, ${mo}, 1)
+        AND COALESCE(TRY_TO_DATE(DT_INSCRICAO, 'DD/MM/YYYY'), TRY_TO_DATE(DT_INSCRICAO))
+              < DATEADD(MONTH, 1, DATE_FROM_PARTS(${ano}, ${mo}, 1))
+        AND YEAR(COALESCE(TRY_TO_DATE(DT_INSCRICAO, 'DD/MM/YYYY'), TRY_TO_DATE(DT_INSCRICAO)))
+              BETWEEN 2000 AND YEAR(CURRENT_DATE())
+      GROUP BY UF_CRM
     ),
-    base AS (
-      SELECT UF_CRM, MIN(COALESCE(TRY_TO_DATE(DT_INSCRICAO, 'DD/MM/YYYY'), TRY_TO_DATE(DT_INSCRICAO))) AS DT_NOVO
-      FROM GOLD.TB_ESPECIALIDADE_X_FONTES GROUP BY UF_CRM
+    cid AS (
+      SELECT p.UF_CRM, p.MUNICIPIO, p.UF, p.IBGE
+      FROM novos n
+      JOIN GOLD.TB_CNES_PROFISSIONAIS p ON p.UF_CRM = n.UF_CRM
+      WHERE NULLIF(p.MUNICIPIO, '') IS NOT NULL
+      QUALIFY ROW_NUMBER() OVER (PARTITION BY p.UF_CRM ORDER BY p.UPDATE_DATE DESC NULLS LAST) = 1
     )
-    SELECT c.UF, c.MUNICIPIO, c.IBGE, COUNT(DISTINCT m.UF_CRM) N
-    FROM GOLD.TB_MEDICOS m
-    JOIN cid c ON c.UF_CRM = m.UF_CRM
-    JOIN base b ON b.UF_CRM = m.UF_CRM
-    WHERE UPPER(m.SITUACAO) = 'ATIVO'
-      AND b.DT_NOVO >= DATE_FROM_PARTS(${ano}, ${mo}, 1)
-      AND b.DT_NOVO < DATEADD(MONTH, 1, DATE_FROM_PARTS(${ano}, ${mo}, 1))
-    GROUP BY 1, 2, 3
+    SELECT
+      COALESCE(NULLIF(c.UF, ''), m.UF, LEFT(n.UF_CRM, 2)) UF,
+      COALESCE(NULLIF(c.MUNICIPIO, ''), 'Sem cidade · ' || COALESCE(NULLIF(c.UF, ''), m.UF, LEFT(n.UF_CRM, 2))) MUNICIPIO,
+      COALESCE(TO_VARCHAR(c.IBGE), '') IBGE,
+      COUNT(DISTINCT n.UF_CRM) N,
+      IFF(NULLIF(c.MUNICIPIO, '') IS NULL, 1, 0) SEM_CIDADE
+    FROM novos n
+    LEFT JOIN cid c ON c.UF_CRM = n.UF_CRM
+    LEFT JOIN GOLD.TB_MEDICOS m ON m.UF_CRM = n.UF_CRM
+    GROUP BY 1, 2, 3, 5
     ORDER BY N DESC
   `);
-  const cidades = (rows || []).filter((r) => r && r[1]).map((r) => ({
-    uf: String(r[0] || ""),
+  const cidades = (rows || []).filter((r) => r && r[0] && r[1]).map((r) => ({
+    uf: String(r[0] || "").toUpperCase(),
     municipio: String(r[1] || ""),
     ibge: String(r[2] || ""),
     value: toNumber(r[3]),
+    sem_cidade: toNumber(r[4]) === 1,
   }));
-  return { mes: stamp, cidades, total: cidades.length };
+  const medicos = cidades.reduce((s, c) => s + c.value, 0);
+  return { mes: stamp, cidades, total: cidades.length, medicos };
 }
 
 function queryCnes() {

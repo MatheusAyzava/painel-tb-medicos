@@ -184,8 +184,26 @@ function renderBi(data) {
   atualizarMapa();
 }
 
-function padIbge(code) {
-  return String(code || "").replace(/\D/g, "").padStart(7, "0");
+function foldText(value) {
+  return String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function lookupGeo(cidade, byIbge, byName) {
+  const digits = String(cidade.ibge || "").replace(/\D/g, "");
+  const ibge7 = digits.padStart(7, "0");
+  const geo = byIbge.get(digits)
+    || byIbge.get(ibge7)
+    || (digits.length >= 6 ? byIbge.get(digits.slice(0, 6)) : null)
+    || byName.get(`${String(cidade.uf || "").toUpperCase()}|${foldText(cidade.municipio)}`);
+  if (geo) return { lat: geo.y, lng: geo.x };
+  const centro = UF_CENTRO[String(cidade.uf || "").toUpperCase()];
+  if (centro) return { lat: centro[0], lng: centro[1], fallback: true };
+  return null;
 }
 
 function ensureMap() {
@@ -207,9 +225,15 @@ function atualizarHint() {
   const hint = document.getElementById("map-hint");
   if (!hint) return;
   const mes = mesLabel(mesValue()) || "mês";
-  hint.textContent = biState.modo === "novos"
-    ? `Clique no mês na evolução mensal e depois na cidade para ver os médicos novos de ${mes}.`
-    : "Clique na cidade para ver todos os médicos dali.";
+  if (biState.modo !== "novos") {
+    hint.textContent = "Clique na cidade para ver todos os médicos dali.";
+    return;
+  }
+  const cidades = biState.cidadesNovos[mesValue()] || [];
+  const medicos = cidades.reduce((s, c) => s + (Number(c.value) || 0), 0);
+  hint.textContent = medicos
+    ? `${biFmt(medicos)} médicos novos de ${mes} em ${biFmt(cidades.length)} localidades. Clique na bolinha para ver a lista.`
+    : `Clique no mês na evolução mensal e depois na cidade para ver os médicos novos de ${mes}.`;
 }
 
 async function atualizarMapa() {
@@ -233,9 +257,9 @@ async function atualizarMapa() {
         if (!res.ok) throw new Error(data.error || "Falha ao filtrar cidades de médicos novos");
         if (req !== mapaReq) return;
         biState.cidadesNovos[mes] = data.cidades || [];
+        atualizarHint();
       } catch (err) {
         if (req !== mapaReq) return;
-        biState.cidadesNovos[mes] = [];
         const toast = document.getElementById("toast");
         if (toast) {
           toast.hidden = false;
@@ -263,7 +287,7 @@ function drawMap(uf) {
     const code = String(m.i || "");
     byIbge.set(code, m);
     if (code.length >= 6) byIbge.set(code.slice(0, 6), m);
-    byName.set(`${m.u}|${String(m.n).toLowerCase()}`, m);
+    byName.set(`${String(m.u || "").toUpperCase()}|${foldText(m.n)}`, m);
   });
   const brasil = !uf || uf === "BR";
   const cidades = mapaCidades().filter((c) => brasil || c.uf === uf);
@@ -271,13 +295,9 @@ function drawMap(uf) {
   const rotulo = biState.modo === "novos" ? "médicos novos" : "médicos";
 
   cidades.forEach((c) => {
-    const ibge7 = padIbge(c.ibge);
-    const ibge6 = String(c.ibge || "").replace(/\D/g, "");
-    const geo = byIbge.get(ibge7)
-      || byIbge.get(ibge6)
-      || byName.get(`${c.uf}|${String(c.municipio).toLowerCase()}`);
+    const geo = lookupGeo(c, byIbge, byName);
     if (!geo) return;
-    const ll = [geo.y, geo.x];
+    const ll = [geo.lat, geo.lng];
     bounds.push(ll);
     const t = c.value / max;
     L.circleMarker(ll, {
@@ -286,7 +306,7 @@ function drawMap(uf) {
       fillColor: heatColor(t),
       fillOpacity: 0.75,
       weight: 1,
-    }).bindTooltip(`${c.municipio}: ${biFmt(c.value)} ${rotulo}`).on("click", () => {
+    }).bindTooltip(`${c.municipio}${c.uf ? " · " + c.uf : ""}: ${biFmt(c.value)} ${rotulo}`).on("click", () => {
       abrirCidade(c);
     }).addTo(group);
   });
@@ -450,6 +470,7 @@ async function buscarLista() {
     payload.uf = biState.cidade.uf;
     payload.municipio = biState.cidade.municipio;
     payload.ibge = biState.cidade.ibge;
+    payload.sem_cidade = Boolean(biState.cidade.sem_cidade);
   }
   atualizarTitulo();
   if (biState.modo === "todos" && !biState.cidade) {

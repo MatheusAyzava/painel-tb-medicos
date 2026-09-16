@@ -603,14 +603,57 @@ def query_medicos_novos(override: dict | None = None) -> dict:
               AND b.DT_NOVO < DATEADD(MONTH, 1, DATE_FROM_PARTS({int(ano)}, {int(mo)}, 1))
         """
     join_base = "JOIN" if modo == "novos" else "LEFT JOIN"
+    sem_cidade = modo == "novos" and str(body.get("sem_cidade") or "").lower() in {"1", "true", "sim"}
 
-    if city_filter:
+    if sem_cidade:
+        sql = f"""
+            WITH novos AS (
+              SELECT UF_CRM,
+                     MIN(COALESCE(TRY_TO_DATE(DT_INSCRICAO, 'DD/MM/YYYY'), TRY_TO_DATE(DT_INSCRICAO))) AS DT_NOVO,
+                     MIN(COALESCE(NULLIF(ESPECIALIDADE, ''), NULLIF(ESPECIALIDADE_RQE, ''), 'SEM ESPECIALIDADE')) AS ESPECIALIDADE
+              FROM GOLD.TB_ESPECIALIDADE_X_FONTES
+              WHERE COALESCE(TRY_TO_DATE(DT_INSCRICAO, 'DD/MM/YYYY'), TRY_TO_DATE(DT_INSCRICAO))
+                      >= DATE_FROM_PARTS({int(ano)}, {int(mo)}, 1)
+                AND COALESCE(TRY_TO_DATE(DT_INSCRICAO, 'DD/MM/YYYY'), TRY_TO_DATE(DT_INSCRICAO))
+                      < DATEADD(MONTH, 1, DATE_FROM_PARTS({int(ano)}, {int(mo)}, 1))
+              GROUP BY UF_CRM
+            ),
+            cid AS (
+              SELECT p.UF_CRM
+              FROM novos n
+              JOIN GOLD.TB_CNES_PROFISSIONAIS p ON p.UF_CRM = n.UF_CRM
+              WHERE NULLIF(p.MUNICIPIO, '') IS NOT NULL
+              QUALIFY ROW_NUMBER() OVER (PARTITION BY p.UF_CRM ORDER BY p.UPDATE_DATE DESC NULLS LAST) = 1
+            )
+            SELECT COALESCE(m.UF_CRM, n.UF_CRM), COALESCE(m.NOME, ''),
+                   'Sem cidade · ' || COALESCE(m.UF, LEFT(n.UF_CRM, 2)),
+                   COALESCE(m.UF, LEFT(n.UF_CRM, 2)), tel.TELEFONE, em.EMAIL,
+                   TO_CHAR(n.DT_NOVO, 'YYYY-MM-DD'), n.ESPECIALIDADE, COUNT(*) OVER()
+            FROM novos n
+            LEFT JOIN cid c ON c.UF_CRM = n.UF_CRM
+            LEFT JOIN GOLD.TB_MEDICOS m ON m.UF_CRM = n.UF_CRM
+            LEFT JOIN (
+              SELECT UF_CRM, TELEFONE
+              FROM GOLD.TB_MEDICOS_TELEFONES_FREQUENCIA
+              QUALIFY ROW_NUMBER() OVER (PARTITION BY UF_CRM ORDER BY QTDE_REPETICOES DESC NULLS LAST) = 1
+            ) tel ON tel.UF_CRM = n.UF_CRM
+            LEFT JOIN (
+              SELECT UF_CRM, EMAIL
+              FROM GOLD.TB_MEDICOS_EMAILS_FREQUENCIA
+              QUALIFY ROW_NUMBER() OVER (PARTITION BY UF_CRM ORDER BY QTDE_REPETICOES DESC NULLS LAST) = 1
+            ) em ON em.UF_CRM = n.UF_CRM
+            WHERE c.UF_CRM IS NULL
+              AND COALESCE(m.UF, LEFT(n.UF_CRM, 2)) = '{uf}'
+              {("AND (UPPER(COALESCE(m.NOME, '')) LIKE '%%%s%%' OR UPPER(n.UF_CRM) LIKE '%%%s%%' OR UPPER(COALESCE(n.ESPECIALIDADE, '')) LIKE '%%%s%%')" % (like, like, like)) if like else ""}
+            ORDER BY COALESCE(m.NOME, n.UF_CRM)
+            LIMIT 8000
+        """
+    elif city_filter:
         sql = f"""
             WITH cid AS (
               SELECT UF_CRM, MUNICIPIO, UF, IBGE
               FROM GOLD.TB_CNES_PROFISSIONAIS p
-              WHERE CBO LIKE '225%'
-                AND NULLIF(UF_CRM, '') IS NOT NULL
+              WHERE NULLIF(UF_CRM, '') IS NOT NULL
                 AND MUNICIPIO IS NOT NULL
                 {city_filter}
               QUALIFY ROW_NUMBER() OVER (PARTITION BY UF_CRM ORDER BY UPDATE_DATE DESC NULLS LAST) = 1
@@ -716,28 +759,34 @@ def query_cidades_novos(override: dict | None = None) -> dict:
         mes = datetime.now().strftime("%Y-%m")
     ano, mo = mes.split("-")
     sql = f"""
-        WITH cid AS (
-          SELECT UF_CRM, MUNICIPIO, UF, IBGE
-          FROM GOLD.TB_CNES_PROFISSIONAIS p
-          WHERE CBO LIKE '225%'
-            AND NULLIF(UF_CRM, '') IS NOT NULL
-            AND MUNICIPIO IS NOT NULL
-          QUALIFY ROW_NUMBER() OVER (PARTITION BY UF_CRM ORDER BY UPDATE_DATE DESC NULLS LAST) = 1
-        ),
-        base AS (
-          SELECT UF_CRM,
-                 MIN(COALESCE(TRY_TO_DATE(DT_INSCRICAO, 'DD/MM/YYYY'), TRY_TO_DATE(DT_INSCRICAO))) AS DT_NOVO
+        WITH novos AS (
+          SELECT UF_CRM
           FROM GOLD.TB_ESPECIALIDADE_X_FONTES
+          WHERE COALESCE(TRY_TO_DATE(DT_INSCRICAO, 'DD/MM/YYYY'), TRY_TO_DATE(DT_INSCRICAO))
+                  >= DATE_FROM_PARTS({int(ano)}, {int(mo)}, 1)
+            AND COALESCE(TRY_TO_DATE(DT_INSCRICAO, 'DD/MM/YYYY'), TRY_TO_DATE(DT_INSCRICAO))
+                  < DATEADD(MONTH, 1, DATE_FROM_PARTS({int(ano)}, {int(mo)}, 1))
+            AND YEAR(COALESCE(TRY_TO_DATE(DT_INSCRICAO, 'DD/MM/YYYY'), TRY_TO_DATE(DT_INSCRICAO)))
+                  BETWEEN 2000 AND YEAR(CURRENT_DATE())
           GROUP BY UF_CRM
+        ),
+        cid AS (
+          SELECT p.UF_CRM, p.MUNICIPIO, p.UF, p.IBGE
+          FROM novos n
+          JOIN GOLD.TB_CNES_PROFISSIONAIS p ON p.UF_CRM = n.UF_CRM
+          WHERE NULLIF(p.MUNICIPIO, '') IS NOT NULL
+          QUALIFY ROW_NUMBER() OVER (PARTITION BY p.UF_CRM ORDER BY p.UPDATE_DATE DESC NULLS LAST) = 1
         )
-        SELECT c.UF, c.MUNICIPIO, c.IBGE, COUNT(DISTINCT m.UF_CRM) AS N
-        FROM GOLD.TB_MEDICOS m
-        JOIN cid c ON c.UF_CRM = m.UF_CRM
-        JOIN base b ON b.UF_CRM = m.UF_CRM
-        WHERE UPPER(m.SITUACAO) = 'ATIVO'
-          AND b.DT_NOVO >= DATE_FROM_PARTS({int(ano)}, {int(mo)}, 1)
-          AND b.DT_NOVO < DATEADD(MONTH, 1, DATE_FROM_PARTS({int(ano)}, {int(mo)}, 1))
-        GROUP BY 1, 2, 3
+        SELECT
+          COALESCE(NULLIF(c.UF, ''), m.UF, LEFT(n.UF_CRM, 2)) AS UF,
+          COALESCE(NULLIF(c.MUNICIPIO, ''), 'Sem cidade · ' || COALESCE(NULLIF(c.UF, ''), m.UF, LEFT(n.UF_CRM, 2))) AS MUNICIPIO,
+          COALESCE(TO_VARCHAR(c.IBGE), '') AS IBGE,
+          COUNT(DISTINCT n.UF_CRM) AS N,
+          IFF(NULLIF(c.MUNICIPIO, '') IS NULL, 1, 0) AS SEM_CIDADE
+        FROM novos n
+        LEFT JOIN cid c ON c.UF_CRM = n.UF_CRM
+        LEFT JOIN GOLD.TB_MEDICOS m ON m.UF_CRM = n.UF_CRM
+        GROUP BY 1, 2, 3, 5
         ORDER BY N DESC
     """
     ctx = connect_snowflake(cfg)
@@ -750,15 +799,21 @@ def query_cidades_novos(override: dict | None = None) -> dict:
         rows = snowflake_fetch(ctx, sql)[1]
         cidades = [
             {
-                "uf": str(r[0] or ""),
+                "uf": str(r[0] or "").upper(),
                 "municipio": str(r[1] or ""),
                 "ibge": str(r[2] or ""),
                 "value": as_int([r[3]]),
+                "sem_cidade": as_int([r[4]]) == 1,
             }
             for r in rows
-            if r and r[1]
+            if r and r[0] and r[1]
         ]
-        return {"mes": mes, "cidades": cidades, "total": len(cidades)}
+        return {
+            "mes": mes,
+            "cidades": cidades,
+            "total": len(cidades),
+            "medicos": sum(c["value"] for c in cidades),
+        }
     finally:
         ctx.close()
 
