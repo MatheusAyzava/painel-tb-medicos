@@ -1,5 +1,33 @@
 const cnesState = { data: null, selecionado: null };
 
+function cnesEsc(value) {
+  return String(value == null ? "" : value).replace(/[&<>"']/g, (ch) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;",
+  }[ch]));
+}
+
+function cnesCurto(value) {
+  const raw = String(value || "").trim();
+  if (!raw || raw === "—") return "—";
+  const first = raw.split("/")[0].replace(/^\s*[\d.\s-]+/, "").replace(/^\d+\s*-\s*/, "").trim();
+  const text = (first || raw).replace(/\s+/g, " ").trim();
+  const clean = text.replace(/\bnao se aplica\b/ig, "").replace(/\s{2,}/g, " ").trim() || raw;
+  const lower = clean.toLowerCase();
+  return lower.charAt(0).toUpperCase() + lower.slice(1);
+}
+
+function cnesCbo(value) {
+  const raw = String(value || "").trim();
+  if (!raw || raw === "—") return "—";
+  const match = raw.match(/^(\d+)\s*-\s*(.+)$/);
+  if (!match) return cnesEsc(raw);
+  return `<em>${cnesEsc(match[1])}</em> ${cnesEsc(match[2])}`;
+}
+
 function cnesFmt(n) {
   return Math.round(Number(n) || 0).toLocaleString("pt-BR");
 }
@@ -36,9 +64,9 @@ function renderCnesDocs() {
     ? `${cnesFmt(docs.length)} médico(s) — clique para ver os estabelecimentos`
     : (cnesState.data && cnesState.data.aviso) || "Nenhum médico encontrado.";
   box.innerHTML = docs.map((d) => `
-    <button type="button" class="cnes-doc${cnesState.selecionado === cnesPessoaId(d) ? " on" : ""}" data-pessoa="${cnesPessoaId(d)}">
-      <strong>${d.nome || d.uf_crm}</strong>
-      <span>${d.uf_crm} · ${cnesFmt(d.vinculos)} vínculo(s) · ${cnesFmt(d.horas_total)}h · ${d.setor || "—"}</span>
+    <button type="button" class="cnes-doc${cnesState.selecionado === cnesPessoaId(d) ? " on" : ""}" data-pessoa="${cnesEsc(cnesPessoaId(d))}">
+      <strong>${cnesEsc(d.nome || d.uf_crm)}</strong>
+      <span>${cnesEsc(d.uf_crm)} · ${cnesFmt(d.vinculos)} vínculo(s) · ${cnesFmt(d.horas_total)}h · ${cnesEsc(d.setor || "—")}</span>
     </button>
   `).join("");
 }
@@ -52,41 +80,54 @@ function renderCnesDetalhe(pessoaId) {
   const local = document.getElementById("cnes-detail-local");
   const kpis = document.getElementById("cnes-kpis");
   const body = document.getElementById("cnes-vinculos");
+  const principal = document.getElementById("cnes-principal");
   document.querySelectorAll(".cnes-doc").forEach((btn) => btn.classList.toggle("on", btn.dataset.pessoa === pessoaId));
   if (!doc) {
     title.textContent = "Detalhe do profissional";
     local.textContent = "Selecione um médico à esquerda.";
     kpis.innerHTML = "";
+    if (principal) {
+      principal.hidden = true;
+      principal.innerHTML = "";
+    }
     body.innerHTML = "<tr><td colspan='11'>Nenhum vínculo carregado.</td></tr>";
     return;
   }
   title.textContent = doc.nome || doc.uf_crm;
   local.textContent = `${doc.uf_crm} · CNS ${doc.cns || "—"} · CPF ${doc.cpf || "—"} · ${((doc.cidades) || []).join(" · ") || "sem cidade"}`;
   kpis.innerHTML = `
-    <div><b>${cnesFmt(doc.horas_total)}h</b><span>Carga horária total</span></div>
+    <div><b>${cnesFmt(doc.horas_total)}h</b><span>Carga horária</span></div>
     <div><b>${cnesFmt(doc.vinculos)}</b><span>Estabelecimentos</span></div>
-    <div><b>${doc.setor || "—"}</b><span>Setor do principal</span></div>
-    <div><b>${doc.estabelecimento || "—"}</b><span>Onde mais atende</span></div>
+    <div><b>${cnesEsc(doc.setor || "—")}</b><span>Setor principal</span></div>
   `;
+  if (principal) {
+    principal.hidden = !doc.estabelecimento;
+    principal.innerHTML = doc.estabelecimento
+      ? `<span>Onde mais atende</span><strong title="${cnesEsc(doc.estabelecimento)}">${cnesEsc(doc.estabelecimento)}</strong>`
+      : "";
+  }
   if (!rows.length) {
     body.innerHTML = "<tr><td colspan='11'>Sem vínculos CNES para este CRM.</td></tr>";
     return;
   }
-  body.innerHTML = rows.map((v) => `
+  body.innerHTML = rows.map((v) => {
+    const end = [v.endereco, v.bairro, v.cep].filter(Boolean).join(" · ") || "—";
+    const vinculo = cnesCurto(v.vinculo);
+    return `
     <tr>
-      <td>${v.cnes || "—"}</td>
-      <td>${v.estabelecimento || "—"}</td>
-      <td>${v.municipio || "—"}</td>
-      <td>${v.uf || "—"}</td>
-      <td>${v.setor || "—"}</td>
-      <td>${cnesFmt(v.horas_total)}</td>
-      <td>${cnesFmt(v.horas_amb)}</td>
-      <td>${cnesFmt(v.horas_hosp)}</td>
-      <td>${v.cbo || "—"}</td>
-      <td>${v.vinculo || "—"}</td>
-      <td>${[v.endereco, v.bairro, v.cep].filter(Boolean).join(" · ") || "—"}</td>
-    </tr>
-  `).join("");
+      <td class="num">${cnesEsc(v.cnes || "—")}</td>
+      <td class="est" title="${cnesEsc(v.estabelecimento || "")}">${cnesEsc(v.estabelecimento || "—")}</td>
+      <td class="cid" title="${cnesEsc(v.municipio || "")}">${cnesEsc(v.municipio || "—")}</td>
+      <td class="uf">${cnesEsc(v.uf || "—")}</td>
+      <td class="setor">${cnesEsc(v.setor || "—")}</td>
+      <td class="hrs">${cnesFmt(v.horas_total)}</td>
+      <td class="hrs">${cnesFmt(v.horas_amb)}</td>
+      <td class="hrs">${cnesFmt(v.horas_hosp)}</td>
+      <td class="cbo" title="${cnesEsc(v.cbo || "")}">${cnesCbo(v.cbo)}</td>
+      <td class="vinc" title="${cnesEsc(v.vinculo || "")}">${cnesEsc(vinculo)}</td>
+      <td class="end" title="${cnesEsc(end)}">${cnesEsc(end)}</td>
+    </tr>`;
+  }).join("");
 }
 
 async function buscarCnes() {

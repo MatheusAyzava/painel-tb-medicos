@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/style.css?v=39" />
+  <link rel="stylesheet" href="assets/style.css?v=40" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 </head>
 <body>
@@ -308,8 +308,10 @@
                 Só médicos novos
               </label>
               <strong id="cnes-mes">mês</strong>
-              <button type="button" class="btn" id="cnes-btn">Buscar no CNES</button>
-              <button type="button" class="btn ghost" id="cnes-csv">Baixar vínculos</button>
+              <div class="cnes-search-actions">
+                <button type="button" class="btn" id="cnes-btn">Buscar no CNES</button>
+                <button type="button" class="btn ghost" id="cnes-csv">Baixar vínculos</button>
+              </div>
             </div>
           </div>
           <p class="map-hint">Consulta a base GOLD do CNES: carga horária, hospital em que mais atende, setor público/privado, endereço e tipo de vínculo — no mesmo detalhe da consulta do Datasus.</p>
@@ -321,11 +323,27 @@
             <div id="cnes-docs"></div>
           </article>
           <article class="panel cnes-detail-panel">
-            <h2 id="cnes-detail-title">Detalhe do profissional</h2>
+            <header class="cnes-detail-head">
+              <h2 id="cnes-detail-title">Detalhe do profissional</h2>
+              <p class="map-hint" id="cnes-detail-local">Selecione um médico à esquerda para ver todos os estabelecimentos.</p>
+            </header>
             <div class="cnes-kpis" id="cnes-kpis"></div>
-            <p class="map-hint" id="cnes-detail-local">Selecione um médico à esquerda para ver todos os estabelecimentos.</p>
-            <div class="table-wrap">
+            <p class="cnes-principal" id="cnes-principal" hidden></p>
+            <div class="table-wrap cnes-table-wrap">
               <table class="novos-table cnes-table">
+                <colgroup>
+                  <col class="cnes-col-cnes" />
+                  <col class="cnes-col-est" />
+                  <col class="cnes-col-cid" />
+                  <col class="cnes-col-uf" />
+                  <col class="cnes-col-setor" />
+                  <col class="cnes-col-h" />
+                  <col class="cnes-col-h" />
+                  <col class="cnes-col-h" />
+                  <col class="cnes-col-cbo" />
+                  <col class="cnes-col-vinc" />
+                  <col class="cnes-col-end" />
+                </colgroup>
                 <thead>
                   <tr>
                     <th>CNES</th>
@@ -361,8 +379,8 @@
     });
   </script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="assets/app.js?v=39"></script>
-  <script src="assets/bi.js?v=39"></script>
-  <script src="assets/cnes-tab.js?v=39"></script>
+  <script src="assets/app.js?v=40"></script>
+  <script src="assets/bi.js?v=40"></script>
+  <script src="assets/cnes-tab.js?v=40"></script>
 </body>
 </html>
