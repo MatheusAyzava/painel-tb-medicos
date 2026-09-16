@@ -737,21 +737,40 @@ function cnesSetor(natureza, grupo) {
   return "Não informado";
 }
 
-async function queryCnesBusca(opts = {}) {
-  const q = String(opts.q || "").trim();
-  const compact = q.replace(/\s/g, "");
-  if (compact.length < 3) {
-    return { aviso: "Digite pelo menos 3 caracteres: nome, CRM, CPF ou CNS.", profissionais: [], vinculos: [] };
+function cnesBuscaFiltro(q) {
+  const like = String(q || "").replace(/[%_\\']/g, "").slice(0, 80).toUpperCase();
+  const compact = like.replace(/\s/g, "");
+  const digits = String(q || "").replace(/\D/g, "").slice(0, 15);
+  const tokens = like.split(/[\s,;./-]+/).filter((t) => t.length >= 2 && !/^\d+$/.test(t)).slice(0, 6);
+  const isCrm = /^[A-Z]{2}\d{3,}/.test(compact) || /^\d{4,8}[A-Z]?$/.test(compact);
+  const nameSql = (alias) => tokens.length
+    ? tokens.map((t) => `UPPER(${alias}.NOME) LIKE '%${t}%'`).join(" AND ")
+    : "";
+  const whereP = [];
+  const whereM = [];
+  const nomeP = nameSql("p");
+  const nomeM = nameSql("m");
+  if (nomeP) whereP.push(`(${nomeP})`);
+  if (nomeM) whereM.push(`(${nomeM})`);
+  if (isCrm) {
+    whereP.push(`(UPPER(p.UF_CRM) LIKE '%${compact.slice(0, 20)}%' OR UPPER(TO_VARCHAR(p.CRM)) LIKE '%${(digits || compact).slice(0, 20)}%')`);
+    whereM.push(`UPPER(m.UF_CRM) LIKE '%${compact.slice(0, 20)}%'`);
   }
-  const like = q.replace(/[%_\\']/g, "").slice(0, 80).toUpperCase();
-  const digits = q.replace(/\D/g, "").slice(0, 14);
-  const uf = String(opts.uf || "").replace(/[^A-Za-z]/g, "").toUpperCase().slice(0, 2);
-  const novos = String(opts.novos || "").toLowerCase() === "true" || opts.novos === true;
-  const ok = /^\d{4}-\d{2}$/.test(String(opts.mes || ""));
-  const stamp = ok ? String(opts.mes) : new Date().toISOString().slice(0, 7);
-  const [ano, mo] = stamp.split("-").map(Number);
-  const ufFilter = uf ? `AND p.UF = '${uf}'` : "";
-  const novosJoin = novos ? `
+  if (digits.length >= 8) {
+    whereP.push(`(REGEXP_REPLACE(TO_VARCHAR(p.CPF), '[^0-9]', '') LIKE '%${digits}%' OR TO_VARCHAR(p.CNS) LIKE '%${digits}%')`);
+  }
+  return {
+    whereP: whereP.length ? whereP.join(" OR ") : "1=0",
+    whereM: whereM.length ? whereM.join(" OR ") : "1=0",
+  };
+}
+
+function cnesPessoaKey(ufCrm, nome) {
+  return `${String(ufCrm || "").trim()}::${String(nome || "").trim().toUpperCase()}`;
+}
+
+function cnesNovosJoin(alias, ano, mo) {
+  return `
     JOIN (
       SELECT UF_CRM
       FROM GOLD.TB_ESPECIALIDADE_X_FONTES
@@ -760,26 +779,34 @@ async function queryCnesBusca(opts = {}) {
         AND COALESCE(TRY_TO_DATE(DT_INSCRICAO, 'DD/MM/YYYY'), TRY_TO_DATE(DT_INSCRICAO))
               < DATEADD(MONTH, 1, DATE_FROM_PARTS(${ano}, ${mo}, 1))
       GROUP BY UF_CRM
-    ) nv ON nv.UF_CRM = p.UF_CRM
-  ` : "";
-  const docFilter = digits.length >= 5
-    ? `OR REGEXP_REPLACE(TO_VARCHAR(p.CPF), '[^0-9]', '') LIKE '%${digits}%' OR TO_VARCHAR(p.CNS) LIKE '%${digits}%'`
-    : "";
+    ) nv ON nv.UF_CRM = ${alias}.UF_CRM
+  `;
+}
+
+async function queryCnesBusca(opts = {}) {
+  const q = String(opts.q || "").trim();
+  const compact = q.replace(/\s/g, "");
+  if (compact.length < 3) {
+    return { aviso: "Digite pelo menos 3 caracteres: nome, CRM, CPF ou CNS.", profissionais: [], vinculos: [] };
+  }
+  const { whereP } = cnesBuscaFiltro(q);
+  const uf = String(opts.uf || "").replace(/[^A-Za-z]/g, "").toUpperCase().slice(0, 2);
+  const novos = String(opts.novos || "").toLowerCase() === "true" || opts.novos === true;
+  const ok = /^\d{4}-\d{2}$/.test(String(opts.mes || ""));
+  const stamp = ok ? String(opts.mes) : new Date().toISOString().slice(0, 7);
+  const [ano, mo] = stamp.split("-").map(Number);
+  const ufFilterP = uf ? `AND p.UF = '${uf}'` : "";
+  const novosJoinP = novos ? cnesNovosJoin("p", ano, mo) : "";
   const rows = await snowflakeSql(`
     WITH hits AS (
-      SELECT p.UF_CRM
+      SELECT p.UF_CRM, p.NOME
       FROM GOLD.TB_CNES_PROFISSIONAIS p
-      ${novosJoin}
+      ${novosJoinP}
       WHERE NULLIF(p.UF_CRM, '') IS NOT NULL
-        ${ufFilter}
-        AND (
-          UPPER(p.NOME) LIKE '%${like}%'
-          OR UPPER(p.UF_CRM) LIKE '%${like}%'
-          OR UPPER(TO_VARCHAR(p.CRM)) LIKE '%${like}%'
-          ${docFilter}
-        )
-      GROUP BY p.UF_CRM
-      LIMIT 25
+        ${ufFilterP}
+        AND (${whereP})
+      GROUP BY p.UF_CRM, p.NOME
+      QUALIFY ROW_NUMBER() OVER (ORDER BY p.NOME) <= 25
     )
     SELECT
       p.UF_CRM, p.NOME, p.CPF, p.CNS, p.CRM, p.CBO, p.CNES, p.ESTABELECIMENTO, p.CNPJ,
@@ -788,12 +815,13 @@ async function queryCnesBusca(opts = {}) {
       e.NOME_ESTABELECIMENTO, e.LOGRADOURO, e.NUMERO, e.COMPLEMENTO, e.BAIRRO,
       e.MUNICIPIO_ESTABELECIMENTO, e.UF_ESTABELECIMENTO, e.CEP, e.TELEFONE, e.EMAIL,
       e.GRUPO_NATUREZA_JURIDICA, e.TIPO_ESTABELECIMENTO, e.TIPO_UNIDADE, e.ANOMES
-    FROM GOLD.TB_CNES_PROFISSIONAIS p
-    JOIN hits h ON h.UF_CRM = p.UF_CRM
+    FROM hits h
+    JOIN GOLD.TB_CNES_PROFISSIONAIS p
+      ON p.UF_CRM = h.UF_CRM AND UPPER(TRIM(p.NOME)) = UPPER(TRIM(h.NOME))
     LEFT JOIN GOLD.TB_CNES_PROFISSIONAIS_ESTABELECIMENTOS e
       ON e.UF_CRM = p.UF_CRM AND TO_VARCHAR(e.CNES) = TO_VARCHAR(p.CNES)
     QUALIFY ROW_NUMBER() OVER (
-      PARTITION BY p.UF_CRM, COALESCE(TO_VARCHAR(p.CNES), p.ESTABELECIMENTO)
+      PARTITION BY p.UF_CRM, UPPER(TRIM(p.NOME)), COALESCE(TO_VARCHAR(p.CNES), p.ESTABELECIMENTO)
       ORDER BY e.UPDATE_DATE DESC NULLS LAST, p.UPDATE_DATE DESC NULLS LAST
     ) = 1
     ORDER BY p.NOME, TRY_TO_DOUBLE(TO_VARCHAR(p.CH_TOTAL)) DESC NULLS LAST
@@ -840,8 +868,11 @@ async function queryCnesBusca(opts = {}) {
   });
   const byDoc = new Map();
   vinculos.forEach((v) => {
-    if (!byDoc.has(v.uf_crm)) {
-      byDoc.set(v.uf_crm, {
+    const id = cnesPessoaKey(v.uf_crm, v.nome);
+    v.pessoa_id = id;
+    if (!byDoc.has(id)) {
+      byDoc.set(id, {
+        pessoa_id: id,
         uf_crm: v.uf_crm,
         nome: v.nome,
         cpf: v.cpf,
@@ -855,7 +886,7 @@ async function queryCnesBusca(opts = {}) {
         cidades: new Set(),
       });
     }
-    const doc = byDoc.get(v.uf_crm);
+    const doc = byDoc.get(id);
     doc.horas_total += v.horas_total;
     doc.vinculos += 1;
     if (v.municipio) doc.cidades.add(`${v.municipio}/${v.uf}`);
@@ -867,6 +898,7 @@ async function queryCnesBusca(opts = {}) {
     }
   });
   const profissionais = [...byDoc.values()].map((d) => ({
+    pessoa_id: d.pessoa_id,
     uf_crm: d.uf_crm,
     nome: d.nome,
     cpf: d.cpf,
@@ -880,7 +912,12 @@ async function queryCnesBusca(opts = {}) {
     cidades: [...d.cidades],
     principal_cnes: d.principal_cnes || "",
   }));
-  return { q, mes: stamp, novos, total: profissionais.length, profissionais, vinculos };
+  const aviso = profissionais.length
+    ? ""
+    : (novos
+      ? "Nenhum médico novo deste mês corresponde à busca. Desmarque a opção para consultar a base completa."
+      : "Nenhum profissional encontrado no CNES para essa busca.");
+  return { q, mes: stamp, novos, total: profissionais.length, aviso, profissionais, vinculos };
 }
 
 function queryCnes() {

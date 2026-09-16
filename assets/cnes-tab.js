@@ -20,8 +20,12 @@ function atualizarCnesMes() {
   if (el) el.textContent = cnesMesLabel();
 }
 
-function vinculosDoMedico(ufCrm) {
-  return ((cnesState.data && cnesState.data.vinculos) || []).filter((v) => v.uf_crm === ufCrm);
+function cnesPessoaId(d) {
+  return d && (d.pessoa_id || `${d.uf_crm || ""}::${String(d.nome || "").trim().toUpperCase()}`);
+}
+
+function vinculosDoMedico(pessoaId) {
+  return ((cnesState.data && cnesState.data.vinculos) || []).filter((v) => cnesPessoaId(v) === pessoaId);
 }
 
 function renderCnesDocs() {
@@ -32,23 +36,23 @@ function renderCnesDocs() {
     ? `${cnesFmt(docs.length)} médico(s) — clique para ver os estabelecimentos`
     : (cnesState.data && cnesState.data.aviso) || "Nenhum médico encontrado.";
   box.innerHTML = docs.map((d) => `
-    <button type="button" class="cnes-doc${cnesState.selecionado === d.uf_crm ? " on" : ""}" data-ufcrm="${d.uf_crm}">
+    <button type="button" class="cnes-doc${cnesState.selecionado === cnesPessoaId(d) ? " on" : ""}" data-pessoa="${cnesPessoaId(d)}">
       <strong>${d.nome || d.uf_crm}</strong>
       <span>${d.uf_crm} · ${cnesFmt(d.vinculos)} vínculo(s) · ${cnesFmt(d.horas_total)}h · ${d.setor || "—"}</span>
     </button>
   `).join("");
 }
 
-function renderCnesDetalhe(ufCrm) {
-  cnesState.selecionado = ufCrm;
+function renderCnesDetalhe(pessoaId) {
+  cnesState.selecionado = pessoaId;
   const docs = (cnesState.data && cnesState.data.profissionais) || [];
-  const doc = docs.find((d) => d.uf_crm === ufCrm);
-  const rows = vinculosDoMedico(ufCrm);
+  const doc = docs.find((d) => cnesPessoaId(d) === pessoaId);
+  const rows = vinculosDoMedico(pessoaId);
   const title = document.getElementById("cnes-detail-title");
   const local = document.getElementById("cnes-detail-local");
   const kpis = document.getElementById("cnes-kpis");
   const body = document.getElementById("cnes-vinculos");
-  document.querySelectorAll(".cnes-doc").forEach((btn) => btn.classList.toggle("on", btn.dataset.ufcrm === ufCrm));
+  document.querySelectorAll(".cnes-doc").forEach((btn) => btn.classList.toggle("on", btn.dataset.pessoa === pessoaId));
   if (!doc) {
     title.textContent = "Detalhe do profissional";
     local.textContent = "Selecione um médico à esquerda.";
@@ -104,7 +108,7 @@ async function buscarCnes() {
     cnesState.selecionado = null;
     renderCnesDocs();
     const first = (data.profissionais || [])[0];
-    if (first) renderCnesDetalhe(first.uf_crm);
+    if (first) renderCnesDetalhe(cnesPessoaId(first));
     else renderCnesDetalhe(null);
   } catch (err) {
     count.textContent = err.message || "Não consultei o CNES.";
@@ -157,7 +161,7 @@ function initCnesTab() {
   if (docs) {
     docs.addEventListener("click", (event) => {
       const card = event.target.closest(".cnes-doc");
-      if (card && card.dataset.ufcrm) renderCnesDetalhe(card.dataset.ufcrm);
+      if (card && card.dataset.pessoa) renderCnesDetalhe(card.dataset.pessoa);
     });
   }
 }

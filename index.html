@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/style.css?v=37" />
+  <link rel="stylesheet" href="assets/style.css?v=38" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 </head>
 <body>
@@ -292,23 +292,25 @@
         </header>
         <section class="panel cnes-search-panel">
           <div class="cnes-search-bar">
-            <input type="search" id="cnes-q" placeholder="Buscar médico: nome, CRM, CPF ou CNS — ex.: Tiago Szego" autocomplete="off" />
-            <select id="cnes-uf">
-              <option value="">Todos os estados</option>
-              <option>AC</option><option>AL</option><option>AM</option><option>AP</option><option>BA</option>
-              <option>CE</option><option>DF</option><option>ES</option><option>GO</option><option>MA</option>
-              <option>MG</option><option>MS</option><option>MT</option><option>PA</option><option>PB</option>
-              <option>PE</option><option>PI</option><option>PR</option><option>RJ</option><option>RN</option>
-              <option>RO</option><option>RR</option><option>RS</option><option>SC</option><option>SE</option>
-              <option>SP</option><option>TO</option>
-            </select>
-            <label class="cnes-check">
-              <input type="checkbox" id="cnes-novos" />
-              Só médicos novos
-            </label>
-            <strong id="cnes-mes">mês</strong>
-            <button type="button" class="btn" id="cnes-btn">Buscar no CNES</button>
-            <button type="button" class="btn ghost" id="cnes-csv">Baixar vínculos</button>
+            <input type="search" id="cnes-q" placeholder="Nome, CRM, CPF ou CNS" autocomplete="off" />
+            <div class="cnes-search-tools">
+              <select id="cnes-uf">
+                <option value="">Todos os estados</option>
+                <option>AC</option><option>AL</option><option>AM</option><option>AP</option><option>BA</option>
+                <option>CE</option><option>DF</option><option>ES</option><option>GO</option><option>MA</option>
+                <option>MG</option><option>MS</option><option>MT</option><option>PA</option><option>PB</option>
+                <option>PE</option><option>PI</option><option>PR</option><option>RJ</option><option>RN</option>
+                <option>RO</option><option>RR</option><option>RS</option><option>SC</option><option>SE</option>
+                <option>SP</option><option>TO</option>
+              </select>
+              <label class="cnes-check">
+                <input type="checkbox" id="cnes-novos" />
+                Só médicos novos
+              </label>
+              <strong id="cnes-mes">mês</strong>
+              <button type="button" class="btn" id="cnes-btn">Buscar no CNES</button>
+              <button type="button" class="btn ghost" id="cnes-csv">Baixar vínculos</button>
+            </div>
           </div>
           <p class="map-hint">Consulta a base GOLD do CNES: carga horária, hospital em que mais atende, setor público/privado, endereço e tipo de vínculo — no mesmo detalhe da consulta do Datasus.</p>
         </section>
@@ -359,8 +361,8 @@
     });
   </script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="assets/app.js?v=37"></script>
-  <script src="assets/bi.js?v=37"></script>
-  <script src="assets/cnes-tab.js?v=37"></script>
+  <script src="assets/app.js?v=38"></script>
+  <script src="assets/bi.js?v=38"></script>
+  <script src="assets/cnes-tab.js?v=38"></script>
 </body>
 </html>
