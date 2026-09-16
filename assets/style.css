@@ -845,7 +845,9 @@ input, textarea {
 
 .novos-panel { margin-bottom: 24px; }
 
-.table-wrap { overflow: auto; max-height: 420px; }
+.novos-monitor { margin-bottom: 16px; }
+.novos-monitor .map-hint { margin: 0; }
+.table-wrap { overflow: auto; max-height: 520px; }
 
 .novos-table {
   width: 100%;

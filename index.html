@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/style.css?v=35" />
+  <link rel="stylesheet" href="assets/style.css?v=36" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 </head>
 <body>
@@ -234,6 +234,16 @@
           </article>
         </section>
 
+        <section class="panel novos-monitor">
+          <div class="novos-toolbar">
+            <h2>Monitoramento de médicos novos</h2>
+            <strong id="monitor-mes">mês</strong>
+            <span id="monitor-total">Selecione o mês na evolução mensal.</span>
+            <button type="button" class="btn" id="btn-csv-mes">Baixar relatório do mês</button>
+          </div>
+          <p class="map-hint">Baixa a lista completa do mês (ex.: os 2.343 de agosto), com horas CNES, estabelecimento em que mais atende, setor público/privado, município e UF. O arquivo não corta em 8.000 linhas.</p>
+        </section>
+
         <section class="panel novos-panel">
           <div class="novos-toolbar">
             <h2 id="lista-titulo">Médicos · janeiro</h2>
@@ -242,9 +252,9 @@
               <button type="button" class="tab on" data-modo="novos" id="modo-novos">Médicos novos</button>
             </div>
             <strong id="mes-escolhido">janeiro</strong>
-            <input type="search" id="lista-busca" placeholder="Buscar nome, CRM, especialidade, telefone ou e-mail" autocomplete="off" />
+            <input type="search" id="lista-busca" placeholder="Buscar nome, CRM, especialidade, hospital ou e-mail" autocomplete="off" />
             <button type="button" class="btn" id="btn-novos">Buscar</button>
-            <button type="button" class="btn ghost" id="btn-csv">Baixar CSV</button>
+            <button type="button" class="btn ghost" id="btn-csv">Baixar CSV da lista</button>
             <span id="novos-count">0 registros</span>
           </div>
           <p class="map-hint" id="lista-local">Clique num mês na evolução mensal e depois numa cidade.</p>
@@ -257,12 +267,15 @@
                   <th>Especialidade</th>
                   <th>Cidade</th>
                   <th>UF</th>
+                  <th>Horas CNES</th>
+                  <th>Estabelecimento</th>
+                  <th>Setor</th>
                   <th>Telefone</th>
                   <th>E-mail</th>
                 </tr>
               </thead>
               <tbody id="novos-body">
-                <tr><td colspan="7">Clique num mês na evolução mensal e depois em Buscar ou numa cidade.</td></tr>
+                <tr><td colspan="10">Clique num mês na evolução mensal e depois em Buscar ou numa cidade.</td></tr>
               </tbody>
             </table>
           </div>
@@ -280,7 +293,7 @@
     });
   </script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="assets/app.js?v=35"></script>
-  <script src="assets/bi.js?v=35"></script>
+  <script src="assets/app.js?v=36"></script>
+  <script src="assets/bi.js?v=36"></script>
 </body>
 </html>

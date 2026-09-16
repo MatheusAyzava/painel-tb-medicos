@@ -373,6 +373,13 @@ function atualizarTitulo() {
   document.querySelectorAll(".month-col").forEach((col) => {
     col.classList.toggle("on", col.dataset.mes === mesValue());
   });
+  const elMonMes = document.getElementById("monitor-mes");
+  const elMonTot = document.getElementById("monitor-total");
+  if (elMonMes) elMonMes.textContent = mes;
+  if (elMonTot) {
+    const item = ((biState.data && biState.data.mensal) || []).find((m) => m.mes === mesValue());
+    elMonTot.textContent = item ? `${biFmt(item.value)} médicos novos em ${mes}` : `Relatório completo de ${mes}`;
+  }
 }
 
 function setModo(modo) {
@@ -426,11 +433,11 @@ function renderTabela() {
     document.getElementById("novos-count").textContent = `${biFmt(total)} registros`;
   }
   if (!biState.novos.length) {
-    bodyEl.innerHTML = "<tr><td colspan='7'>Nenhum médico encontrado.</td></tr>";
+    bodyEl.innerHTML = "<tr><td colspan='10'>Nenhum médico encontrado.</td></tr>";
     return;
   }
   if (!rows.length) {
-    bodyEl.innerHTML = "<tr><td colspan='7'>Nenhum resultado para essa busca. Aperte Buscar para consultar no Snowflake.</td></tr>";
+    bodyEl.innerHTML = "<tr><td colspan='10'>Nenhum resultado para essa busca. Aperte Buscar para consultar no Snowflake.</td></tr>";
     return;
   }
   bodyEl.innerHTML = rows.map((r) => `
@@ -440,50 +447,149 @@ function renderTabela() {
       <td>${r.especialidade || "—"}</td>
       <td>${r.cidade || "—"}</td>
       <td>${r.uf || "—"}</td>
+      <td>${r.horas_total ? biFmt(r.horas_total) : "—"}</td>
+      <td>${r.estabelecimento || "—"}</td>
+      <td>${r.setor || "—"}</td>
       <td>${r.telefone || "—"}</td>
       <td>${r.email || "—"}</td>
     </tr>
   `).join("");
 }
 
-function downloadNovosCsv() {
-  const rows = listaFiltrada();
-  if (!rows.length) return;
-  const header = "UF_CRM;NOME;ESPECIALIDADE;CIDADE;UF;TELEFONE;EMAIL";
-  const body = rows.map((r) => [r.uf_crm, r.nome, r.especialidade, r.cidade, r.uf, r.telefone, r.email].map(csvEscape).join(";")).join("\n");
-  const blob = new Blob(["\ufeff" + header + "\n" + body], { type: "text/csv;charset=utf-8" });
+function csvHeader() {
+  return [
+    "UF_CRM", "NOME", "ESPECIALIDADE", "CIDADE", "UF", "DATA_INSCRICAO",
+    "TELEFONE", "EMAIL", "HORAS_CNES", "HORAS_AMB", "HORAS_HOSP", "VINCULOS_CNES",
+    "ESTABELECIMENTO", "CNES", "SETOR", "NATUREZA_JURIDICA", "GESTAO", "SUS",
+  ].join(";");
+}
+
+function csvLinha(r) {
+  return [
+    r.uf_crm, r.nome, r.especialidade, r.cidade, r.uf, r.data,
+    r.telefone, r.email, r.horas_total, r.horas_amb, r.horas_hosp, r.vinculos,
+    r.estabelecimento, r.cnes, r.setor, r.natureza, r.gestao, r.sus,
+  ].map((value, idx) => {
+    if (idx === 6 || idx === 13) return `"${String(value || "").replace(/"/g, '""')}"`;
+    return csvEscape(value);
+  }).join(";");
+}
+
+function baixarCsvArquivo(nome, rows) {
+  const blob = new Blob(["\ufeff" + csvHeader() + "\n" + rows.map(csvLinha).join("\n")], { type: "text/csv;charset=utf-8" });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
-  const cidade = (biState.cidade && biState.cidade.municipio) || "lista";
-  a.download = `medicos-${biState.modo}-${cidade}-${mesCurto(mesValue())}.csv`;
+  a.download = nome;
   a.click();
   URL.revokeObjectURL(a.href);
 }
 
-async function buscarLista() {
-  const mes = mesValue();
-  const bodyEl = document.getElementById("novos-body");
-  const buscaEl = document.getElementById("lista-busca");
-  if (buscaEl) biState.busca = buscaEl.value || "";
-  const payload = { modo: biState.modo, mes, q: biState.busca };
-  if (biState.cidade) {
+function payloadLista(extra = {}) {
+  const payload = {
+    modo: extra.modo || biState.modo,
+    mes: mesValue(),
+    q: extra.q != null ? extra.q : (biState.busca || ""),
+    pagina: extra.pagina || 0,
+    tamanho: extra.tamanho || 500,
+  };
+  if (extra.exportar_mes) payload.exportar_mes = true;
+  if (!extra.exportar_mes && extra.ignorar_cidade !== true && biState.cidade) {
     payload.uf = biState.cidade.uf;
     payload.municipio = biState.cidade.municipio;
     payload.ibge = biState.cidade.ibge;
     payload.sem_cidade = Boolean(biState.cidade.sem_cidade);
   }
+  return payload;
+}
+
+async function fetchTodasLinhas(extra = {}) {
+  const linhas = [];
+  let pagina = 0;
+  const tamanho = 2000;
+  let total = Infinity;
+  while (linhas.length < total) {
+    const res = await fetch("/api/medicos-novos", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payloadLista({ ...extra, pagina, tamanho, q: extra.q != null ? extra.q : "" })),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Falha ao exportar médicos");
+    const batch = data.linhas || [];
+    total = Number(data.total_completo || linhas.length + batch.length);
+    linhas.push(...batch);
+    if (!batch.length || batch.length < tamanho) break;
+    pagina += 1;
+    if (pagina > 40) break;
+  }
+  return linhas;
+}
+
+async function downloadNovosCsv() {
+  const btn = document.getElementById("btn-csv");
+  try {
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = "Baixando…";
+    }
+    const rows = await fetchTodasLinhas({ q: biState.busca || "" });
+    if (!rows.length) return;
+    const cidade = (biState.cidade && biState.cidade.municipio) || "lista";
+    baixarCsvArquivo(`medicos-${biState.modo}-${cidade}-${mesCurto(mesValue())}.csv`, rows);
+  } catch (err) {
+    const toast = document.getElementById("toast");
+    if (toast) {
+      toast.hidden = false;
+      toast.textContent = err.message || "Não baixei o CSV.";
+    }
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = "Baixar CSV da lista";
+    }
+  }
+}
+
+async function downloadMesCsv() {
+  const btn = document.getElementById("btn-csv-mes");
+  try {
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = "Baixando mês…";
+    }
+    const rows = await fetchTodasLinhas({ modo: "novos", exportar_mes: true, ignorar_cidade: true, q: "" });
+    if (!rows.length) throw new Error("Nenhum médico novo nesse mês.");
+    baixarCsvArquivo(`medicos-novos-${mesValue()}.csv`, rows);
+  } catch (err) {
+    const toast = document.getElementById("toast");
+    if (toast) {
+      toast.hidden = false;
+      toast.textContent = err.message || "Não baixei o relatório do mês.";
+    }
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = "Baixar relatório do mês";
+    }
+  }
+}
+
+async function buscarLista() {
+  const bodyEl = document.getElementById("novos-body");
+  const buscaEl = document.getElementById("lista-busca");
+  if (buscaEl) biState.busca = buscaEl.value || "";
   atualizarTitulo();
   if (biState.modo === "todos" && !biState.cidade) {
-    bodyEl.innerHTML = "<tr><td colspan='7'>Clique numa cidade no mapa para ver todos os médicos dali.</td></tr>";
+    bodyEl.innerHTML = "<tr><td colspan='10'>Clique numa cidade no mapa para ver todos os médicos dali.</td></tr>";
     document.getElementById("novos-count").textContent = "0 registros";
     return;
   }
-  bodyEl.innerHTML = "<tr><td colspan='7'>Consultando Snowflake…</td></tr>";
+  bodyEl.innerHTML = "<tr><td colspan='10'>Consultando Snowflake…</td></tr>";
   try {
     const res = await fetch("/api/medicos-novos", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
+      body: JSON.stringify(payloadLista({ pagina: 0, tamanho: 500 })),
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || "Falha ao buscar médicos");
@@ -492,12 +598,12 @@ async function buscarLista() {
     atualizarTitulo();
     if (data.aviso && !biState.novos.length) {
       document.getElementById("novos-count").textContent = "0 registros";
-      bodyEl.innerHTML = `<tr><td colspan="7">${data.aviso}</td></tr>`;
+      bodyEl.innerHTML = `<tr><td colspan="10">${data.aviso}</td></tr>`;
       return;
     }
     renderTabela();
   } catch (err) {
-    bodyEl.innerHTML = `<tr><td colspan="7">${err.message}</td></tr>`;
+    bodyEl.innerHTML = `<tr><td colspan="10">${err.message}</td></tr>`;
   }
 }
 
@@ -528,6 +634,8 @@ async function initBi() {
   });
   document.getElementById("btn-novos").addEventListener("click", buscarLista);
   document.getElementById("btn-csv").addEventListener("click", downloadNovosCsv);
+  const btnMes = document.getElementById("btn-csv-mes");
+  if (btnMes) btnMes.addEventListener("click", downloadMesCsv);
   const buscaEl = document.getElementById("lista-busca");
   if (buscaEl) {
     buscaEl.addEventListener("input", () => {

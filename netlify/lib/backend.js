@@ -462,114 +462,56 @@ function citySqlFilter(opts = {}) {
   return { uf, municipio, ibge: ibgeDigits, sql };
 }
 
-function buscaSqlFilter(q, hasCity) {
+function buscaSqlFilter(q, extra) {
   const like = String(q || "").replace(/[%_\\']/g, "").trim().slice(0, 80).toUpperCase();
   if (!like) return "";
-  const cidadeCol = hasCity ? "COALESCE(c.MUNICIPIO, m.UF, '')" : "COALESCE(m.UF, '')";
   return `AND (
-    UPPER(m.NOME) LIKE '%${like}%'
-    OR UPPER(m.UF_CRM) LIKE '%${like}%'
-    OR UPPER(COALESCE(b.ESPECIALIDADE, '')) LIKE '%${like}%'
+    UPPER(COALESCE(m.NOME, '')) LIKE '%${like}%'
+    OR UPPER(COALESCE(m.UF_CRM, '')) LIKE '%${like}%'
     OR UPPER(COALESCE(tel.TELEFONE, '')) LIKE '%${like}%'
     OR UPPER(COALESCE(em.EMAIL, '')) LIKE '%${like}%'
-    OR UPPER(${cidadeCol}) LIKE '%${like}%'
+    OR UPPER(COALESCE(cp.ESTABELECIMENTO, '')) LIKE '%${like}%'
+    OR UPPER(COALESCE(cp.SETOR, '')) LIKE '%${like}%'
+    ${extra || ""}
   )`;
 }
 
-async function queryMedicosNovos(opts = {}) {
-  const modo = String(opts.modo || "").toLowerCase() === "todos" ? "todos" : "novos";
-  const ok = /^\d{4}-\d{2}$/.test(String(opts.mes || ""));
-  const stamp = ok ? String(opts.mes) : new Date().toISOString().slice(0, 7);
-  const [ano, mo] = stamp.split("-").map(Number);
-  const city = citySqlFilter(opts);
-  const { uf, municipio, ibge, sql: cityFilter } = city;
-  if (modo === "todos" && !uf && !municipio && !ibge) {
-    return { modo, mes: stamp, total: 0, total_completo: 0, linhas: [], aviso: "Clique numa cidade no mapa para listar os médicos." };
-  }
+function pageOpts(opts) {
+  const pagina = Math.max(0, Number(opts.pagina) || 0);
+  const tamanho = Math.min(3000, Math.max(1, Number(opts.tamanho) || 500));
+  return { pagina, tamanho, offset: pagina * tamanho };
+}
 
-  const buscaFilter = buscaSqlFilter(opts.q || opts.busca, Boolean(cityFilter) && !opts.sem_cidade);
-  const semCidade = Boolean(opts.sem_cidade) && modo === "novos";
-
-  const dateFilter = modo === "novos"
-    ? `AND b.DT_NOVO >= DATE_FROM_PARTS(${ano}, ${mo}, 1) AND b.DT_NOVO < DATEADD(MONTH, 1, DATE_FROM_PARTS(${ano}, ${mo}, 1))`
-    : "";
-  const joinBase = modo === "novos" ? "JOIN" : "LEFT JOIN";
-  const telJoin = `
-    LEFT JOIN (
-      SELECT UF_CRM, TELEFONE FROM GOLD.TB_MEDICOS_TELEFONES_FREQUENCIA
-      QUALIFY ROW_NUMBER() OVER (PARTITION BY UF_CRM ORDER BY QTDE_REPETICOES DESC NULLS LAST) = 1
-    ) tel ON tel.UF_CRM = m.UF_CRM
-    LEFT JOIN (
-      SELECT UF_CRM, EMAIL FROM GOLD.TB_MEDICOS_EMAILS_FREQUENCIA
-      QUALIFY ROW_NUMBER() OVER (PARTITION BY UF_CRM ORDER BY QTDE_REPETICOES DESC NULLS LAST) = 1
-    ) em ON em.UF_CRM = m.UF_CRM`;
-
-  const sql = semCidade ? `
-    WITH novos AS (
-      SELECT UF_CRM,
-             MIN(COALESCE(TRY_TO_DATE(DT_INSCRICAO, 'DD/MM/YYYY'), TRY_TO_DATE(DT_INSCRICAO))) AS DT_NOVO,
-             MIN(COALESCE(NULLIF(ESPECIALIDADE, ''), NULLIF(ESPECIALIDADE_RQE, ''), 'SEM ESPECIALIDADE')) AS ESPECIALIDADE
-      FROM GOLD.TB_ESPECIALIDADE_X_FONTES
-      WHERE COALESCE(TRY_TO_DATE(DT_INSCRICAO, 'DD/MM/YYYY'), TRY_TO_DATE(DT_INSCRICAO))
-              >= DATE_FROM_PARTS(${ano}, ${mo}, 1)
-        AND COALESCE(TRY_TO_DATE(DT_INSCRICAO, 'DD/MM/YYYY'), TRY_TO_DATE(DT_INSCRICAO))
-              < DATEADD(MONTH, 1, DATE_FROM_PARTS(${ano}, ${mo}, 1))
-      GROUP BY UF_CRM
-    ),
-    cid AS (
-      SELECT p.UF_CRM
-      FROM novos n
-      JOIN GOLD.TB_CNES_PROFISSIONAIS p ON p.UF_CRM = n.UF_CRM
-      WHERE NULLIF(p.MUNICIPIO, '') IS NOT NULL
-      QUALIFY ROW_NUMBER() OVER (PARTITION BY p.UF_CRM ORDER BY p.UPDATE_DATE DESC NULLS LAST) = 1
-    )
-    SELECT COALESCE(m.UF_CRM, n.UF_CRM), COALESCE(m.NOME, ''), 'Sem cidade · ' || COALESCE(m.UF, LEFT(n.UF_CRM, 2)),
-           COALESCE(m.UF, LEFT(n.UF_CRM, 2)), tel.TELEFONE, em.EMAIL, TO_CHAR(n.DT_NOVO, 'YYYY-MM-DD'), n.ESPECIALIDADE, COUNT(*) OVER()
-    FROM novos n
-    LEFT JOIN cid c ON c.UF_CRM = n.UF_CRM
-    LEFT JOIN GOLD.TB_MEDICOS m ON m.UF_CRM = n.UF_CRM
-    ${telJoin.replace(/m\.UF_CRM/g, "n.UF_CRM")}
-    WHERE c.UF_CRM IS NULL
-      AND COALESCE(m.UF, LEFT(n.UF_CRM, 2)) = '${uf || ""}'
-      ${buscaSqlFilter(opts.q || opts.busca, false)}
-    ORDER BY COALESCE(m.NOME, n.UF_CRM) LIMIT 8000
-  ` : cityFilter ? `
-    WITH cid AS (
-      SELECT UF_CRM, MUNICIPIO, UF, IBGE
+function cnesCtes(fromAlias) {
+  return `
+    cnes_horas AS (
+      SELECT p.UF_CRM,
+             SUM(TRY_TO_DOUBLE(TO_VARCHAR(p.CH_TOTAL))) HORAS_TOTAL,
+             SUM(TRY_TO_DOUBLE(TO_VARCHAR(p.CH_AMB_))) HORAS_AMB,
+             SUM(TRY_TO_DOUBLE(TO_VARCHAR(p.CH_HOSP_))) HORAS_HOSP,
+             COUNT(DISTINCT NULLIF(TO_VARCHAR(p.CNES), '')) VINCULOS
       FROM GOLD.TB_CNES_PROFISSIONAIS p
-      WHERE NULLIF(UF_CRM, '') IS NOT NULL AND MUNICIPIO IS NOT NULL
-        ${cityFilter}
-      QUALIFY ROW_NUMBER() OVER (PARTITION BY UF_CRM ORDER BY UPDATE_DATE DESC NULLS LAST) = 1
+      JOIN ${fromAlias} k ON k.UF_CRM = p.UF_CRM
+      GROUP BY 1
     ),
-    base AS (
-      SELECT UF_CRM,
-             MIN(COALESCE(TRY_TO_DATE(DT_INSCRICAO, 'DD/MM/YYYY'), TRY_TO_DATE(DT_INSCRICAO))) AS DT_NOVO,
-             MIN(COALESCE(NULLIF(ESPECIALIDADE, ''), NULLIF(ESPECIALIDADE_RQE, ''), 'SEM ESPECIALIDADE')) AS ESPECIALIDADE
-      FROM GOLD.TB_ESPECIALIDADE_X_FONTES GROUP BY UF_CRM
-    )
-    SELECT m.UF_CRM, m.NOME, c.MUNICIPIO, COALESCE(c.UF, m.UF), tel.TELEFONE, em.EMAIL, TO_CHAR(b.DT_NOVO, 'YYYY-MM-DD'), b.ESPECIALIDADE, COUNT(*) OVER()
-    FROM GOLD.TB_MEDICOS m
-    JOIN cid c ON c.UF_CRM = m.UF_CRM
-    ${joinBase} base b ON b.UF_CRM = m.UF_CRM
-    ${telJoin}
-    WHERE UPPER(m.SITUACAO) = 'ATIVO' ${dateFilter} ${buscaFilter}
-    ORDER BY m.NOME LIMIT 8000
-  ` : `
-    WITH base AS (
-      SELECT UF_CRM,
-             MIN(COALESCE(TRY_TO_DATE(DT_INSCRICAO, 'DD/MM/YYYY'), TRY_TO_DATE(DT_INSCRICAO))) AS DT_NOVO,
-             MIN(COALESCE(NULLIF(ESPECIALIDADE, ''), NULLIF(ESPECIALIDADE_RQE, ''), 'SEM ESPECIALIDADE')) AS ESPECIALIDADE
-      FROM GOLD.TB_ESPECIALIDADE_X_FONTES GROUP BY UF_CRM
-    )
-    SELECT m.UF_CRM, m.NOME, NULL, m.UF, tel.TELEFONE, em.EMAIL, TO_CHAR(b.DT_NOVO, 'YYYY-MM-DD'), b.ESPECIALIDADE, COUNT(*) OVER()
-    FROM GOLD.TB_MEDICOS m
-    JOIN base b ON b.UF_CRM = m.UF_CRM
-    ${telJoin}
-    WHERE UPPER(m.SITUACAO) = 'ATIVO' ${dateFilter} ${buscaFilter}
-    ORDER BY m.NOME LIMIT 8000
-  `;
+    cnes_prin AS (
+      SELECT p.UF_CRM, p.ESTABELECIMENTO, p.CNES, p.MUNICIPIO, p.UF, p.IBGE,
+             p.NATUREZA_JURIDICA, p.GESTAO, p.SUS,
+             CASE
+               WHEN LEFT(REGEXP_REPLACE(COALESCE(TO_VARCHAR(p.NATUREZA_JURIDICA), ''), '[^0-9]', ''), 1) = '1' THEN 'Público'
+               WHEN LEFT(REGEXP_REPLACE(COALESCE(TO_VARCHAR(p.NATUREZA_JURIDICA), ''), '[^0-9]', ''), 1) IN ('2', '3') THEN 'Privado'
+               ELSE 'Não informado'
+             END SETOR
+      FROM GOLD.TB_CNES_PROFISSIONAIS p
+      JOIN ${fromAlias} k ON k.UF_CRM = p.UF_CRM
+      QUALIFY ROW_NUMBER() OVER (
+        PARTITION BY p.UF_CRM
+        ORDER BY TRY_TO_DOUBLE(TO_VARCHAR(p.CH_TOTAL)) DESC NULLS LAST, p.UPDATE_DATE DESC NULLS LAST
+      ) = 1
+    )`;
+}
 
-  const rows = await snowflakeSql(sql);
+function mapMedicoRows(rows) {
   const lista = (rows || []).map((r) => ({
     uf_crm: String(r[0] || ""),
     nome: String(r[1] || ""),
@@ -579,9 +521,164 @@ async function queryMedicosNovos(opts = {}) {
     email: String(r[5] || ""),
     data: String(r[6] || ""),
     especialidade: String(r[7] || ""),
+    horas_total: toNumber(r[8]),
+    horas_amb: toNumber(r[9]),
+    horas_hosp: toNumber(r[10]),
+    vinculos: toNumber(r[11]),
+    estabelecimento: String(r[12] || ""),
+    cnes: String(r[13] || ""),
+    setor: String(r[14] || ""),
+    natureza: String(r[15] || ""),
+    gestao: String(r[16] || ""),
+    sus: String(r[17] || ""),
   }));
-  const totalCompleto = rows && rows.length ? toNumber(rows[0][8]) : 0;
-  return { modo, mes: stamp, uf, municipio, ibge, total: lista.length, total_completo: totalCompleto || lista.length, linhas: lista };
+  const totalCompleto = rows && rows.length ? toNumber(rows[0][18]) : 0;
+  return { lista, totalCompleto: totalCompleto || lista.length };
+}
+
+function telOn(key) {
+  return `
+    LEFT JOIN (
+      SELECT UF_CRM, TELEFONE FROM GOLD.TB_MEDICOS_TELEFONES_FREQUENCIA
+      QUALIFY ROW_NUMBER() OVER (PARTITION BY UF_CRM ORDER BY QTDE_REPETICOES DESC NULLS LAST) = 1
+    ) tel ON tel.UF_CRM = ${key}
+    LEFT JOIN (
+      SELECT UF_CRM, EMAIL FROM GOLD.TB_MEDICOS_EMAILS_FREQUENCIA
+      QUALIFY ROW_NUMBER() OVER (PARTITION BY UF_CRM ORDER BY QTDE_REPETICOES DESC NULLS LAST) = 1
+    ) em ON em.UF_CRM = ${key}`;
+}
+
+async function queryMedicosNovos(opts = {}) {
+  const modo = String(opts.modo || "").toLowerCase() === "todos" ? "todos" : "novos";
+  const ok = /^\d{4}-\d{2}$/.test(String(opts.mes || ""));
+  const stamp = ok ? String(opts.mes) : new Date().toISOString().slice(0, 7);
+  const [ano, mo] = stamp.split("-").map(Number);
+  const exportarMes = Boolean(opts.exportar_mes) || String(opts.exportar_mes || "").toLowerCase() === "true";
+  const city = exportarMes ? { uf: "", municipio: "", ibge: "", sql: "" } : citySqlFilter(opts);
+  const { uf, municipio, ibge, sql: cityFilter } = city;
+  if (modo === "todos" && !uf && !municipio && !ibge) {
+    return { modo, mes: stamp, total: 0, total_completo: 0, linhas: [], aviso: "Clique numa cidade no mapa para listar os médicos." };
+  }
+
+  const semCidade = !exportarMes && Boolean(opts.sem_cidade) && modo === "novos";
+  const { pagina, tamanho, offset } = pageOpts(opts);
+  const dateFilter = modo === "novos"
+    ? `AND b.DT_NOVO >= DATE_FROM_PARTS(${ano}, ${mo}, 1) AND b.DT_NOVO < DATEADD(MONTH, 1, DATE_FROM_PARTS(${ano}, ${mo}, 1))`
+    : "";
+  const joinBase = modo === "novos" ? "JOIN" : "LEFT JOIN";
+  const like = String(opts.q || opts.busca || "").replace(/[%_\\']/g, "").trim().slice(0, 80).toUpperCase();
+  const buscaCity = buscaSqlFilter(opts.q || opts.busca, like ? `OR UPPER(COALESCE(b.ESPECIALIDADE, '')) LIKE '%${like}%' OR UPPER(COALESCE(c.MUNICIPIO, cp.MUNICIPIO, '')) LIKE '%${like}%'` : "");
+  const buscaNovos = buscaSqlFilter(opts.q || opts.busca, like ? `OR UPPER(n.UF_CRM) LIKE '%${like}%' OR UPPER(COALESCE(n.ESPECIALIDADE, '')) LIKE '%${like}%'` : "");
+
+  let sql;
+  if (semCidade) {
+    sql = `
+      WITH novos AS (
+        SELECT UF_CRM,
+               MIN(COALESCE(TRY_TO_DATE(DT_INSCRICAO, 'DD/MM/YYYY'), TRY_TO_DATE(DT_INSCRICAO))) AS DT_NOVO,
+               MIN(COALESCE(NULLIF(ESPECIALIDADE, ''), NULLIF(ESPECIALIDADE_RQE, ''), 'SEM ESPECIALIDADE')) AS ESPECIALIDADE
+        FROM GOLD.TB_ESPECIALIDADE_X_FONTES
+        WHERE COALESCE(TRY_TO_DATE(DT_INSCRICAO, 'DD/MM/YYYY'), TRY_TO_DATE(DT_INSCRICAO))
+                >= DATE_FROM_PARTS(${ano}, ${mo}, 1)
+          AND COALESCE(TRY_TO_DATE(DT_INSCRICAO, 'DD/MM/YYYY'), TRY_TO_DATE(DT_INSCRICAO))
+                < DATEADD(MONTH, 1, DATE_FROM_PARTS(${ano}, ${mo}, 1))
+        GROUP BY UF_CRM
+      ),
+      cid AS (
+        SELECT p.UF_CRM, p.MUNICIPIO, p.UF
+        FROM novos n
+        JOIN GOLD.TB_CNES_PROFISSIONAIS p ON p.UF_CRM = n.UF_CRM
+        WHERE NULLIF(p.MUNICIPIO, '') IS NOT NULL
+        QUALIFY ROW_NUMBER() OVER (PARTITION BY p.UF_CRM ORDER BY p.UPDATE_DATE DESC NULLS LAST) = 1
+      ),
+      ${cnesCtes("novos")}
+      SELECT COALESCE(m.UF_CRM, n.UF_CRM), COALESCE(m.NOME, ''), 'Sem cidade · ' || COALESCE(m.UF, LEFT(n.UF_CRM, 2)),
+             COALESCE(m.UF, LEFT(n.UF_CRM, 2)), tel.TELEFONE, em.EMAIL, TO_CHAR(n.DT_NOVO, 'YYYY-MM-DD'), n.ESPECIALIDADE,
+             COALESCE(ch.HORAS_TOTAL, 0), COALESCE(ch.HORAS_AMB, 0), COALESCE(ch.HORAS_HOSP, 0), COALESCE(ch.VINCULOS, 0),
+             cp.ESTABELECIMENTO, cp.CNES, cp.SETOR, cp.NATUREZA_JURIDICA, cp.GESTAO, cp.SUS, COUNT(*) OVER()
+      FROM novos n
+      LEFT JOIN cid c ON c.UF_CRM = n.UF_CRM
+      LEFT JOIN GOLD.TB_MEDICOS m ON m.UF_CRM = n.UF_CRM
+      ${telOn("n.UF_CRM")}
+      LEFT JOIN cnes_horas ch ON ch.UF_CRM = n.UF_CRM
+      LEFT JOIN cnes_prin cp ON cp.UF_CRM = n.UF_CRM
+      WHERE c.UF_CRM IS NULL
+        AND COALESCE(m.UF, LEFT(n.UF_CRM, 2)) = '${uf || ""}'
+        ${buscaNovos}
+      ORDER BY COALESCE(m.NOME, n.UF_CRM)
+      LIMIT ${tamanho} OFFSET ${offset}
+    `;
+  } else if (cityFilter) {
+    sql = `
+      WITH cid AS (
+        SELECT UF_CRM, MUNICIPIO, UF, IBGE
+        FROM GOLD.TB_CNES_PROFISSIONAIS p
+        WHERE NULLIF(UF_CRM, '') IS NOT NULL AND MUNICIPIO IS NOT NULL
+          ${cityFilter}
+        QUALIFY ROW_NUMBER() OVER (PARTITION BY UF_CRM ORDER BY UPDATE_DATE DESC NULLS LAST) = 1
+      ),
+      base AS (
+        SELECT UF_CRM,
+               MIN(COALESCE(TRY_TO_DATE(DT_INSCRICAO, 'DD/MM/YYYY'), TRY_TO_DATE(DT_INSCRICAO))) AS DT_NOVO,
+               MIN(COALESCE(NULLIF(ESPECIALIDADE, ''), NULLIF(ESPECIALIDADE_RQE, ''), 'SEM ESPECIALIDADE')) AS ESPECIALIDADE
+        FROM GOLD.TB_ESPECIALIDADE_X_FONTES GROUP BY UF_CRM
+      ),
+      ${cnesCtes("cid")}
+      SELECT m.UF_CRM, m.NOME, COALESCE(c.MUNICIPIO, cp.MUNICIPIO), COALESCE(c.UF, cp.UF, m.UF),
+             tel.TELEFONE, em.EMAIL, TO_CHAR(b.DT_NOVO, 'YYYY-MM-DD'), b.ESPECIALIDADE,
+             COALESCE(ch.HORAS_TOTAL, 0), COALESCE(ch.HORAS_AMB, 0), COALESCE(ch.HORAS_HOSP, 0), COALESCE(ch.VINCULOS, 0),
+             cp.ESTABELECIMENTO, cp.CNES, cp.SETOR, cp.NATUREZA_JURIDICA, cp.GESTAO, cp.SUS, COUNT(*) OVER()
+      FROM GOLD.TB_MEDICOS m
+      JOIN cid c ON c.UF_CRM = m.UF_CRM
+      ${joinBase} base b ON b.UF_CRM = m.UF_CRM
+      ${telOn("m.UF_CRM")}
+      LEFT JOIN cnes_horas ch ON ch.UF_CRM = m.UF_CRM
+      LEFT JOIN cnes_prin cp ON cp.UF_CRM = m.UF_CRM
+      WHERE UPPER(m.SITUACAO) = 'ATIVO' ${dateFilter} ${buscaCity}
+      ORDER BY m.NOME
+      LIMIT ${tamanho} OFFSET ${offset}
+    `;
+  } else {
+    sql = `
+      WITH n AS (
+        SELECT UF_CRM,
+               MIN(COALESCE(TRY_TO_DATE(DT_INSCRICAO, 'DD/MM/YYYY'), TRY_TO_DATE(DT_INSCRICAO))) AS DT_NOVO,
+               MIN(COALESCE(NULLIF(ESPECIALIDADE, ''), NULLIF(ESPECIALIDADE_RQE, ''), 'SEM ESPECIALIDADE')) AS ESPECIALIDADE
+        FROM GOLD.TB_ESPECIALIDADE_X_FONTES
+        GROUP BY UF_CRM
+      ),
+      ${cnesCtes("n")}
+      SELECT COALESCE(m.UF_CRM, n.UF_CRM), COALESCE(m.NOME, ''), COALESCE(cp.MUNICIPIO, ''),
+             COALESCE(cp.UF, m.UF, LEFT(n.UF_CRM, 2)), tel.TELEFONE, em.EMAIL, TO_CHAR(n.DT_NOVO, 'YYYY-MM-DD'), n.ESPECIALIDADE,
+             COALESCE(ch.HORAS_TOTAL, 0), COALESCE(ch.HORAS_AMB, 0), COALESCE(ch.HORAS_HOSP, 0), COALESCE(ch.VINCULOS, 0),
+             cp.ESTABELECIMENTO, cp.CNES, cp.SETOR, cp.NATUREZA_JURIDICA, cp.GESTAO, cp.SUS, COUNT(*) OVER()
+      FROM n
+      LEFT JOIN GOLD.TB_MEDICOS m ON m.UF_CRM = n.UF_CRM
+      ${telOn("n.UF_CRM")}
+      LEFT JOIN cnes_horas ch ON ch.UF_CRM = n.UF_CRM
+      LEFT JOIN cnes_prin cp ON cp.UF_CRM = n.UF_CRM
+      WHERE 1=1
+        ${modo === "novos" ? `AND n.DT_NOVO >= DATE_FROM_PARTS(${ano}, ${mo}, 1) AND n.DT_NOVO < DATEADD(MONTH, 1, DATE_FROM_PARTS(${ano}, ${mo}, 1))` : ""}
+        ${buscaNovos}
+      ORDER BY COALESCE(m.NOME, n.UF_CRM)
+      LIMIT ${tamanho} OFFSET ${offset}
+    `;
+  }
+
+  const rows = await snowflakeSql(sql);
+  const mapped = mapMedicoRows(rows);
+  return {
+    modo,
+    mes: stamp,
+    uf,
+    municipio,
+    ibge,
+    pagina,
+    tamanho,
+    total: mapped.lista.length,
+    total_completo: mapped.totalCompleto,
+    linhas: mapped.lista,
+  };
 }
 
 async function queryCidadesNovos(opts = {}) {
