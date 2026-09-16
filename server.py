@@ -902,8 +902,70 @@ def _cnes_busca_sql(parsed: dict, uf: str, novos: bool, ano: int, mo: int) -> st
     """
 
 
-def _cnes_pessoa_key(uf_crm, nome) -> str:
-    return f"{str(uf_crm or '').strip()}::{str(nome or '').strip().upper()}"
+def _cnes_digits(value) -> str:
+    return re.sub(r"\D", "", str(value or ""))
+
+
+def _cnes_uf_crm(uf_crm) -> str:
+    return re.sub(r"[^A-Za-z]", "", str(uf_crm or "")).upper()[:2]
+
+
+def _cnes_pessoa_key(item: dict) -> str:
+    cpf = _cnes_digits(item.get("cpf"))
+    if len(cpf) >= 11:
+        return f"cpf:{cpf}"
+    cns = _cnes_digits(item.get("cns"))
+    if len(cns) >= 14:
+        return f"cns:{cns}"
+    nome = str(item.get("nome") or "").strip().upper()
+    crm = _cnes_digits(item.get("crm")) or re.sub(r"^[A-Za-z]{2}", "", str(item.get("uf_crm") or ""))
+    return f"crm:{nome}::{crm}"
+
+
+def _cnes_agrupar(vinculos: list[dict]) -> tuple[list[dict], list[dict]]:
+    groups: dict[str, list] = {}
+    for item in vinculos:
+        groups.setdefault(_cnes_pessoa_key(item), []).append(item)
+    profissionais = []
+    filtrados = []
+    for pessoa_id, rows in groups.items():
+        by_uf: dict[str, dict] = {}
+        for item in rows:
+            uf = _cnes_uf_crm(item.get("uf_crm")) or "_"
+            cur = by_uf.setdefault(uf, {"horas": 0, "n": 0, "uf_crm": item.get("uf_crm")})
+            cur["horas"] += item.get("horas_total") or 0
+            cur["n"] += 1
+        canon = max(by_uf.values(), key=lambda info: (info["horas"], info["n"]))
+        canon_uf = _cnes_uf_crm(canon["uf_crm"])
+        kept = [item for item in rows if _cnes_uf_crm(item.get("uf_crm")) == canon_uf]
+        doc = {
+            "pessoa_id": pessoa_id, "uf_crm": canon["uf_crm"], "nome": kept[0]["nome"],
+            "cpf": kept[0]["cpf"], "cns": kept[0]["cns"], "crm": kept[0]["crm"], "uf": kept[0]["uf"],
+            "horas_total": 0, "vinculos": 0, "estabelecimento": kept[0]["estabelecimento"],
+            "setor": kept[0]["setor"], "cidades": set(), "_max": -1, "principal_cnes": "",
+        }
+        for item in kept:
+            item["pessoa_id"] = pessoa_id
+            item["uf_crm"] = canon["uf_crm"]
+            filtrados.append(item)
+            doc["horas_total"] += item["horas_total"]
+            doc["vinculos"] += 1
+            if item["municipio"]:
+                doc["cidades"].add(f"{item['municipio']}/{item['uf']}")
+            if item["horas_total"] >= doc["_max"]:
+                doc["_max"] = item["horas_total"]
+                doc["estabelecimento"] = item["estabelecimento"]
+                doc["setor"] = item["setor"]
+                doc["principal_cnes"] = item["cnes"]
+                doc["uf"] = item["uf"]
+        profissionais.append({
+            "pessoa_id": doc["pessoa_id"], "uf_crm": doc["uf_crm"], "nome": doc["nome"],
+            "cpf": doc["cpf"], "cns": doc["cns"], "crm": doc["crm"], "uf": doc["uf"],
+            "horas_total": doc["horas_total"], "vinculos": doc["vinculos"],
+            "estabelecimento": doc["estabelecimento"], "setor": doc["setor"],
+            "cidades": sorted(doc["cidades"]), "principal_cnes": doc.get("principal_cnes") or "",
+        })
+    return profissionais, filtrados
 
 
 def query_cnes_busca(override: dict | None = None) -> dict:
@@ -928,7 +990,6 @@ def query_cnes_busca(override: dict | None = None) -> dict:
         cur.close()
         rows = snowflake_fetch(ctx, _cnes_busca_sql(parsed, uf, novos, ano, mo))[1]
         vinculos = []
-        by_doc = {}
         for r in rows:
             natureza = str(r[9] or "")
             grupo = str(r[32] or "")
@@ -966,33 +1027,8 @@ def query_cnes_busca(override: dict | None = None) -> dict:
                 "competencia": str(r[35] or ""),
                 "setor": _cnes_setor(natureza, grupo),
             }
-            pessoa_id = _cnes_pessoa_key(item["uf_crm"], item["nome"])
-            item["pessoa_id"] = pessoa_id
             vinculos.append(item)
-            doc = by_doc.setdefault(pessoa_id, {
-                "pessoa_id": pessoa_id, "uf_crm": item["uf_crm"], "nome": item["nome"],
-                "cpf": item["cpf"], "cns": item["cns"], "crm": item["crm"], "uf": item["uf"],
-                "horas_total": 0, "vinculos": 0, "estabelecimento": item["estabelecimento"],
-                "setor": item["setor"], "cidades": set(), "_max": -1,
-            })
-            doc["horas_total"] += item["horas_total"]
-            doc["vinculos"] += 1
-            if item["municipio"]:
-                doc["cidades"].add(f"{item['municipio']}/{item['uf']}")
-            if item["horas_total"] >= doc["_max"]:
-                doc["_max"] = item["horas_total"]
-                doc["estabelecimento"] = item["estabelecimento"]
-                doc["setor"] = item["setor"]
-                doc["principal_cnes"] = item["cnes"]
-        profissionais = []
-        for doc in by_doc.values():
-            profissionais.append({
-                "pessoa_id": doc["pessoa_id"], "uf_crm": doc["uf_crm"], "nome": doc["nome"],
-                "cpf": doc["cpf"], "cns": doc["cns"], "crm": doc["crm"], "uf": doc["uf"],
-                "horas_total": doc["horas_total"], "vinculos": doc["vinculos"],
-                "estabelecimento": doc["estabelecimento"], "setor": doc["setor"],
-                "cidades": sorted(doc["cidades"]), "principal_cnes": doc.get("principal_cnes") or "",
-            })
+        profissionais, vinculos = _cnes_agrupar(vinculos)
         aviso = ""
         if not profissionais:
             aviso = (

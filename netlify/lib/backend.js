@@ -811,8 +811,96 @@ function cnesBuscaSql(parsed, { uf, novos, ano, mo }) {
   `;
 }
 
-function cnesPessoaKey(ufCrm, nome) {
-  return `${String(ufCrm || "").trim()}::${String(nome || "").trim().toUpperCase()}`;
+function cnesDigits(value) {
+  return String(value || "").replace(/\D/g, "");
+}
+
+function cnesUfDeCrm(ufCrm) {
+  return String(ufCrm || "").replace(/[^A-Za-z]/g, "").slice(0, 2).toUpperCase();
+}
+
+function cnesPessoaKey(row) {
+  const cpf = cnesDigits(row && row.cpf);
+  if (cpf.length >= 11) return `cpf:${cpf}`;
+  const cns = cnesDigits(row && row.cns);
+  if (cns.length >= 14) return `cns:${cns}`;
+  const nome = String((row && row.nome) || "").trim().toUpperCase();
+  const crm = cnesDigits(row && row.crm) || String((row && row.uf_crm) || "").replace(/^[A-Za-z]{2}/, "");
+  return `crm:${nome}::${crm}`;
+}
+
+function agruparCnes(vinculos) {
+  const groups = new Map();
+  (vinculos || []).forEach((v) => {
+    const id = cnesPessoaKey(v);
+    if (!groups.has(id)) groups.set(id, []);
+    groups.get(id).push(v);
+  });
+  const profissionais = [];
+  const filtrados = [];
+  groups.forEach((rows, id) => {
+    const byUf = new Map();
+    rows.forEach((v) => {
+      const uf = cnesUfDeCrm(v.uf_crm) || "_";
+      const cur = byUf.get(uf) || { horas: 0, n: 0, uf_crm: v.uf_crm };
+      cur.horas += Number(v.horas_total) || 0;
+      cur.n += 1;
+      byUf.set(uf, cur);
+    });
+    let canon = null;
+    byUf.forEach((info) => {
+      if (!canon || info.horas > canon.horas || (info.horas === canon.horas && info.n > canon.n)) canon = info;
+    });
+    const canonUf = cnesUfDeCrm(canon.uf_crm);
+    const kept = rows.filter((v) => cnesUfDeCrm(v.uf_crm) === canonUf);
+    const doc = {
+      pessoa_id: id,
+      uf_crm: canon.uf_crm,
+      nome: kept[0].nome,
+      cpf: kept[0].cpf,
+      cns: kept[0].cns,
+      crm: kept[0].crm,
+      uf: kept[0].uf,
+      horas_total: 0,
+      vinculos: 0,
+      estabelecimento: kept[0].estabelecimento,
+      setor: kept[0].setor,
+      cidades: new Set(),
+      _max: -1,
+      principal_cnes: "",
+    };
+    kept.forEach((v) => {
+      v.pessoa_id = id;
+      v.uf_crm = canon.uf_crm;
+      filtrados.push(v);
+      doc.horas_total += Number(v.horas_total) || 0;
+      doc.vinculos += 1;
+      if (v.municipio) doc.cidades.add(`${v.municipio}/${v.uf}`);
+      if ((Number(v.horas_total) || 0) >= doc._max) {
+        doc._max = Number(v.horas_total) || 0;
+        doc.estabelecimento = v.estabelecimento;
+        doc.setor = v.setor;
+        doc.principal_cnes = v.cnes;
+        doc.uf = v.uf;
+      }
+    });
+    profissionais.push({
+      pessoa_id: doc.pessoa_id,
+      uf_crm: doc.uf_crm,
+      nome: doc.nome,
+      cpf: doc.cpf,
+      cns: doc.cns,
+      crm: doc.crm,
+      uf: doc.uf,
+      horas_total: doc.horas_total,
+      vinculos: doc.vinculos,
+      estabelecimento: doc.estabelecimento,
+      setor: doc.setor,
+      cidades: [...doc.cidades],
+      principal_cnes: doc.principal_cnes || "",
+    });
+  });
+  return { profissionais, vinculos: filtrados };
 }
 
 function mapCnesVinculos(rows) {
@@ -824,7 +912,6 @@ function mapCnesVinculos(rows) {
     const nome = String(r[1] || "");
     const ufCrm = String(r[0] || "");
     return {
-      pessoa_id: cnesPessoaKey(ufCrm, nome),
       uf_crm: ufCrm,
       nome,
       cpf: String(r[2] || ""),
@@ -874,59 +961,13 @@ async function queryCnesBusca(opts = {}) {
   const stamp = ok ? String(opts.mes) : new Date().toISOString().slice(0, 7);
   const [ano, mo] = stamp.split("-").map(Number);
   const rows = await snowflakeSql(cnesBuscaSql(parsed, { uf, novos, ano, mo }), { timeout: 18, maxWait: 18000, poll: 400 });
-  const vinculos = mapCnesVinculos(rows);
-  const byDoc = new Map();
-  vinculos.forEach((v) => {
-    const id = cnesPessoaKey(v.uf_crm, v.nome);
-    v.pessoa_id = id;
-    if (!byDoc.has(id)) {
-      byDoc.set(id, {
-        pessoa_id: id,
-        uf_crm: v.uf_crm,
-        nome: v.nome,
-        cpf: v.cpf,
-        cns: v.cns,
-        crm: v.crm,
-        uf: v.uf,
-        horas_total: 0,
-        vinculos: 0,
-        estabelecimento: v.estabelecimento,
-        setor: v.setor,
-        cidades: new Set(),
-      });
-    }
-    const doc = byDoc.get(id);
-    doc.horas_total += v.horas_total;
-    doc.vinculos += 1;
-    if (v.municipio) doc.cidades.add(`${v.municipio}/${v.uf}`);
-    if (v.horas_total >= (doc._max || 0)) {
-      doc._max = v.horas_total;
-      doc.estabelecimento = v.estabelecimento;
-      doc.setor = v.setor;
-      doc.principal_cnes = v.cnes;
-    }
-  });
-  const profissionais = [...byDoc.values()].map((d) => ({
-    pessoa_id: d.pessoa_id,
-    uf_crm: d.uf_crm,
-    nome: d.nome,
-    cpf: d.cpf,
-    cns: d.cns,
-    crm: d.crm,
-    uf: d.uf,
-    horas_total: d.horas_total,
-    vinculos: d.vinculos,
-    estabelecimento: d.estabelecimento,
-    setor: d.setor,
-    cidades: [...d.cidades],
-    principal_cnes: d.principal_cnes || "",
-  }));
-  const aviso = profissionais.length
+  const grouped = agruparCnes(mapCnesVinculos(rows));
+  const aviso = grouped.profissionais.length
     ? ""
     : (novos
       ? "Nenhum médico novo deste mês corresponde à busca. Desmarque a opção para consultar a base completa."
       : "Nenhum profissional encontrado no CNES para essa busca.");
-  return { q, mes: stamp, novos, total: profissionais.length, aviso, profissionais, vinculos };
+  return { q, mes: stamp, novos, total: grouped.profissionais.length, aviso, profissionais: grouped.profissionais, vinculos: grouped.vinculos };
 }
 
 function queryCnes() {

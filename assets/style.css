@@ -907,7 +907,7 @@ input, textarea {
 .cnes-check input { width: auto; margin: 0; }
 .cnes-layout {
   display: grid;
-  grid-template-columns: 280px minmax(0, 1fr);
+  grid-template-columns: 260px minmax(0, 1fr);
   gap: 16px;
   margin-bottom: 24px;
   align-items: start;
@@ -1014,29 +1014,33 @@ input, textarea {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.cnes-table-wrap { max-height: min(58vh, 640px); }
+.cnes-table-wrap { max-height: min(62vh, 680px); overflow: auto; }
 .cnes-table {
-  min-width: 1100px;
-  table-layout: fixed;
+  min-width: 1320px;
+  width: max-content;
+  table-layout: auto;
   font-size: 13px;
 }
 .cnes-col-cnes { width: 88px; }
-.cnes-col-est { width: 22%; }
-.cnes-col-cid { width: 110px; }
+.cnes-col-est { min-width: 220px; }
+.cnes-col-cid { min-width: 110px; }
 .cnes-col-uf { width: 44px; }
-.cnes-col-setor { width: 78px; }
+.cnes-col-setor { min-width: 78px; }
 .cnes-col-h { width: 58px; }
-.cnes-col-cbo { width: 18%; }
-.cnes-col-vinc { width: 140px; }
-.cnes-col-end { width: auto; }
+.cnes-col-cbo { min-width: 200px; }
+.cnes-col-vinc { min-width: 150px; }
+.cnes-col-end { min-width: 280px; }
 .cnes-table th, .cnes-table td {
-  vertical-align: middle;
+  vertical-align: top;
   padding: 9px 10px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
-.cnes-table td.hrs { text-align: right; font-variant-numeric: tabular-nums; }
+.cnes-table td.hrs { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.cnes-table td.num, .cnes-table td.uf, .cnes-table td.setor { white-space: nowrap; }
+.cnes-table td.est, .cnes-table td.cbo, .cnes-table td.vinc, .cnes-table td.end {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.35;
+}
 .cnes-table td.cbo em {
   font-style: normal;
   color: var(--muted);
@@ -1075,11 +1079,11 @@ input, textarea {
 
 .novos-table.cnes-table th,
 .novos-table.cnes-table td {
-  vertical-align: middle;
+  vertical-align: top;
   padding: 9px 10px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow: visible;
+  text-overflow: unset;
+  white-space: inherit;
 }
 
 @media (max-width: 1180px) {
