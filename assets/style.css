@@ -890,12 +890,6 @@ input, textarea {
   font-size: 14px;
 }
 .cnes-search-bar .btn.ghost { margin-top: 0; }
-#cnes-mes {
-  font-size: 13px;
-  color: var(--muted);
-  text-transform: lowercase;
-  min-width: 4.5rem;
-}
 .cnes-check {
   display: flex;
   align-items: center;
@@ -987,45 +981,6 @@ input, textarea {
   line-height: 1.1;
   color: var(--green);
 }
-.cnes-meses {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin: 0 0 14px;
-}
-.cnes-meses[hidden] { display: none; }
-.cnes-mes {
-  min-width: 92px;
-  padding: 10px 12px;
-  border: 1px solid var(--line);
-  background: #0c1218;
-  border-radius: 10px;
-  color: inherit;
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-}
-.cnes-mes.on {
-  border-color: #1a7a45;
-  background: #102016;
-}
-.cnes-mes b {
-  display: block;
-  font-family: Outfit, sans-serif;
-  font-size: 20px;
-  font-weight: 600;
-  letter-spacing: -0.03em;
-  color: var(--green);
-  line-height: 1.1;
-}
-.cnes-mes span {
-  display: block;
-  margin-top: 4px;
-  color: var(--muted);
-  font-size: 12px;
-  text-transform: capitalize;
-}
-.cnes-mes.on span { color: #d7e6d9; }
 .cnes-kpis span { color: var(--muted); font-size: 12px; margin-top: 4px; }
 .cnes-cbo-grid {
   display: grid;

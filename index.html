@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/style.css?v=46" />
+  <link rel="stylesheet" href="assets/style.css?v=47" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 </head>
 <body>
@@ -307,14 +307,13 @@
                 <input type="checkbox" id="cnes-novos" />
                 Só médicos novos
               </label>
-              <strong id="cnes-mes">mês</strong>
               <div class="cnes-search-actions">
                 <button type="button" class="btn" id="cnes-btn">Buscar no CNES</button>
                 <button type="button" class="btn ghost" id="cnes-csv">Baixar vínculos</button>
               </div>
             </div>
           </div>
-          <p class="map-hint">Consulta o CNES mais recente no Snowflake (carga Datasus FTP) e o cadastro de médicos. Clique no mês para ver as horas daquele período. A busca usa nome, CRM ou CNS — CPF não entra na consulta nem no resultado.</p>
+          <p class="map-hint">Consulta o CNES mais recente no Snowflake e o cadastro de médicos. A busca usa nome, CRM ou CNS — CPF não entra na consulta nem no resultado.</p>
         </section>
         <section class="cnes-layout">
           <article class="panel cnes-list-panel">
@@ -327,7 +326,6 @@
               <h2 id="cnes-detail-title">Detalhe do profissional</h2>
               <p class="map-hint" id="cnes-detail-local">Selecione um médico à esquerda para ver todos os estabelecimentos.</p>
             </header>
-            <div class="cnes-meses" id="cnes-meses" hidden></div>
             <div class="cnes-kpis" id="cnes-kpis"></div>
             <div class="cnes-cbo-grid" id="cnes-cbos" hidden></div>
             <p class="cnes-principal" id="cnes-principal" hidden></p>
@@ -364,8 +362,8 @@
     });
   </script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="assets/app.js?v=46"></script>
-  <script src="assets/bi.js?v=46"></script>
-  <script src="assets/cnes-tab.js?v=46"></script>
+  <script src="assets/app.js?v=47"></script>
+  <script src="assets/bi.js?v=47"></script>
+  <script src="assets/cnes-tab.js?v=47"></script>
 </body>
 </html>
