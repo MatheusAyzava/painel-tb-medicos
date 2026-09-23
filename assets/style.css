@@ -1070,7 +1070,7 @@ input, textarea {
   padding: 9px 10px;
 }
 .cnes-table td.hrs { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.cnes-table td.uf { white-space: nowrap; }
+.cnes-table td.uf, .cnes-table td.mes { white-space: nowrap; }
 .cnes-table td.est, .cnes-table td.cbo {
   white-space: normal;
   overflow-wrap: anywhere;

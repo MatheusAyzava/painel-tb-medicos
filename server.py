@@ -833,6 +833,14 @@ def _cnes_setor(natureza, grupo) -> str:
     return "Não informado"
 
 
+CNES_NOME_COMUM = {
+    "ANA", "ANDRE", "ANTONIO", "BRUNO", "CARLOS", "DANIEL", "DIEGO", "EDUARDO",
+    "FELIPE", "FERNANDO", "FRANCISCO", "GABRIEL", "GUSTAVO", "JOAO", "JOSE",
+    "LEONARDO", "LUCAS", "LUIZ", "MARCOS", "MARIA", "MATEUS", "MATHEUS",
+    "PAULA", "PAULO", "PEDRO", "RAFAEL", "RICARDO", "RODRIGO", "THIAGO", "TIAGO",
+}
+
+
 def _cnes_busca_parse(q: str) -> dict:
     like = re.sub(r"[%_\\']", "", q)[:80].upper()
     compact = re.sub(r"\s", "", like)
@@ -840,6 +848,10 @@ def _cnes_busca_parse(q: str) -> dict:
     tokens = [t for t in re.split(r"[\s,;./-]+", like) if len(t) >= 2 and not t.isdigit()][:6]
     is_crm = bool(re.match(r"^[A-Z]{2}\d{3,}", compact)) or bool(re.fullmatch(r"\d{4,8}[A-Z]?", compact))
     return {"compact": compact, "digits": digits, "tokens": tokens, "is_crm": is_crm}
+
+
+def _cnes_allow_blank_crm(tokens: list[str]) -> bool:
+    return any(len(t) >= 5 and t not in CNES_NOME_COMUM for t in tokens)
 
 
 def _cnes_name_sql(alias: str, tokens: list[str], col: str = "NOME") -> str:
@@ -852,36 +864,87 @@ def _cnes_cidade(value) -> str:
     return re.sub(r"^\d+\s*[-–]\s*", "", str(value or "")).strip()
 
 
-def _cnes_busca_sql(parsed: dict, uf: str, novos: bool, ano: int, mo: int) -> str:
-    compact = parsed["compact"][:20]
-    digits = (parsed["digits"] or compact)[:20]
-    tokens = parsed["tokens"]
-    parts = []
-    if parsed["is_crm"]:
-        parts.append(f"(c.UF_CRM = '{compact}' OR c.UF_CRM ILIKE '%{digits}' OR TO_VARCHAR(c.CRM) = '{digits}')")
-    elif tokens:
-        parts.append(f"({_cnes_name_sql('c', tokens, 'NOME_PROFISSIONAL')})")
-    if len(parsed["digits"]) >= 8 and len(parsed["digits"]) != 11:
-        parts.append(f"TO_VARCHAR(c.CNS) LIKE '%{parsed['digits']}%'")
-    where = " OR ".join(parts) if parts else "1=0"
-    novos_sql = ""
-    if novos:
-        novos_sql = f"""
+def _cnes_fmt_comp(value) -> str:
+    digits = re.sub(r"\D", "", str(value or ""))
+    if len(digits) >= 6:
+        return f"{digits[4:6]}/{digits[:4]}"
+    return str(value or "").strip()
+
+
+def _cnes_novos_sql(alias: str, ano: int, mo: int) -> str:
+    return f"""
         AND EXISTS (
           SELECT 1 FROM GOLD.TB_ESPECIALIDADE_X_FONTES nv
-          WHERE nv.UF_CRM = c.UF_CRM
+          WHERE nv.UF_CRM = {alias}.UF_CRM
             AND COALESCE(TRY_TO_DATE(nv.DT_INSCRICAO, 'DD/MM/YYYY'), TRY_TO_DATE(nv.DT_INSCRICAO))
                   >= DATE_FROM_PARTS({ano}, {mo}, 1)
             AND COALESCE(TRY_TO_DATE(nv.DT_INSCRICAO, 'DD/MM/YYYY'), TRY_TO_DATE(nv.DT_INSCRICAO))
                   < DATEADD(MONTH, 1, DATE_FROM_PARTS({ano}, {mo}, 1))
         )
-        """
+    """
+
+
+def _cnes_medicos_sql(parsed: dict, uf: str, novos: bool, ano: int, mo: int) -> str:
+    compact = parsed["compact"][:20]
+    digits = re.sub(r"\D", "", parsed["digits"] or compact)[:20]
+    tokens = parsed["tokens"]
+    parts = []
+    if parsed["is_crm"]:
+        parts.append(f"(m.UF_CRM = '{compact}' OR m.UF_CRM ILIKE '%{digits}')")
+    elif tokens:
+        parts.append(f"({_cnes_name_sql('m', tokens, 'NOME')})")
+    where = " OR ".join(parts) if parts else "1=0"
+    uf_sql = f"AND m.UF_CRM ILIKE '{uf}%'" if uf else ""
+    novos_sql = _cnes_novos_sql("m", ano, mo) if novos else ""
+    return f"""
+        SELECT m.UF_CRM, m.NOME,
+          IFF(LENGTH(REGEXP_REPLACE(TO_VARCHAR(m.CPF), '[^0-9]', '')) >= 11,
+              LOWER(SHA2(REGEXP_REPLACE(TO_VARCHAR(m.CPF), '[^0-9]', ''), 256)), NULL)
+        FROM GOLD.TB_MEDICOS m
+        WHERE ({where})
+          {uf_sql}
+          {novos_sql}
+        QUALIFY DENSE_RANK() OVER (ORDER BY m.NOME, m.UF_CRM) <= 40
+    """
+
+
+def _cnes_busca_sql(parsed: dict, uf: str, novos: bool, ano: int, mo: int, allow_blank: bool = False, uf_crms: list | None = None, hashes: list | None = None) -> str:
+    compact = parsed["compact"][:20]
+    digits = re.sub(r"\D", "", parsed["digits"] or compact)[:20]
+    tokens = parsed["tokens"]
+    parts = []
+    if parsed["is_crm"]:
+        if re.match(r"^[A-Z]{2}", compact):
+            parts.append(f"c.UF_CRM = '{compact}'")
+        else:
+            parts.append(f"(c.UF_CRM ILIKE '%{digits}' OR TO_VARCHAR(c.CRM) = '{digits}')")
+    elif tokens:
+        parts.append(f"({_cnes_name_sql('c', tokens, 'NOME_PROFISSIONAL')})")
+    if len(parsed["digits"]) >= 8 and len(parsed["digits"]) != 11:
+        parts.append(f"TO_VARCHAR(c.CNS) LIKE '%{parsed['digits']}%'")
+    safe_crms = [re.sub(r"[^A-Za-z0-9]", "", str(v)) for v in (uf_crms or []) if re.sub(r"[^A-Za-z0-9]", "", str(v))][:40]
+    safe_hashes = [str(v).lower() for v in (hashes or []) if re.fullmatch(r"[a-f0-9]{64}", str(v).lower())][:40]
+    crm_nums = sorted({re.sub(r"\D", "", v) for v in safe_crms if re.sub(r"\D", "", v)})
+    if safe_crms:
+        parts.append("c.UF_CRM IN (" + ",".join(f"'{v}'" for v in safe_crms) + ")")
+    if safe_hashes and crm_nums:
+        parts.append(
+            "(REGEXP_REPLACE(TO_VARCHAR(c.UF_CRM), '[^0-9]', '') IN ("
+            + ",".join(f"'{v}'" for v in crm_nums)
+            + ") AND IFF(LENGTH(REGEXP_REPLACE(TO_VARCHAR(c.CPF), '[^0-9]', '')) >= 11, "
+            + "LOWER(SHA2(REGEXP_REPLACE(TO_VARCHAR(c.CPF), '[^0-9]', ''), 256)), NULL) IN ("
+            + ",".join(f"'{v}'" for v in safe_hashes)
+            + "))"
+        )
+    where = " OR ".join(parts) if parts else "1=0"
+    blank_sql = " OR 1=1" if allow_blank else ""
+    novos_sql = _cnes_novos_sql("c", ano, mo) if novos else ""
     uf_sql = f"AND (c.UF_ESTABELECIMENTO = '{uf}' OR c.UF_CRM ILIKE '{uf}%')" if uf else ""
     return f"""
         SELECT
           c.UF_CRM, c.NOME_PROFISSIONAL,
           IFF(LENGTH(REGEXP_REPLACE(TO_VARCHAR(c.CPF), '[^0-9]', '')) >= 11,
-              SHA2(REGEXP_REPLACE(TO_VARCHAR(c.CPF), '[^0-9]', ''), 256),
+              LOWER(SHA2(REGEXP_REPLACE(TO_VARCHAR(c.CPF), '[^0-9]', ''), 256)),
               NULL),
           c.CNS, c.CRM, c.CBO, c.CNES,
           COALESCE(c.NOME_ESTABELECIMENTO, c.ESTABELECIMENTO),
@@ -894,16 +957,16 @@ def _cnes_busca_sql(parsed: dict, uf: str, novos: bool, ano: int, mo: int) -> st
           c.MUNICIPIO_ESTABELECIMENTO, c.UF_ESTABELECIMENTO, c.CEP, c.TELEFONE, c.EMAIL,
           c.GRUPO_NATUREZA_JURIDICA, c.TIPO_ESTABELECIMENTO, c.TIPO_UNIDADE, c.ANOMES
         FROM GOLD.TB_CNES_PROFISSIONAIS_ESTABELECIMENTOS c
-        WHERE NULLIF(c.UF_CRM, '') IS NOT NULL
-          AND ({where})
+        WHERE ({where})
+          AND (NULLIF(c.UF_CRM, '') IS NOT NULL{blank_sql})
           {uf_sql}
           {novos_sql}
         QUALIFY ROW_NUMBER() OVER (
-          PARTITION BY c.UF_CRM, c.NOME_PROFISSIONAL,
+          PARTITION BY COALESCE(NULLIF(c.UF_CRM, ''), TO_VARCHAR(c.CNS), c.NOME_PROFISSIONAL),
             COALESCE(TO_VARCHAR(c.CNES), c.ESTABELECIMENTO), COALESCE(c.CBO, '')
           ORDER BY c.UPDATE_DATE DESC NULLS LAST, c.ANOMES DESC NULLS LAST
         ) = 1
-        AND DENSE_RANK() OVER (ORDER BY c.NOME_PROFISSIONAL, c.UF_CRM) <= 25
+        AND DENSE_RANK() OVER (ORDER BY c.NOME_PROFISSIONAL, c.UF_CRM) <= 40
         ORDER BY c.NOME_PROFISSIONAL, TRY_TO_DOUBLE(TO_VARCHAR(c.CH_TOTAL)) DESC NULLS LAST
     """
 
@@ -938,7 +1001,9 @@ def _cnes_pessoa_key(item: dict) -> str:
     return f"crm:{nome}::{crm}"
 
 
-def _cnes_public_id(item: dict, grouped_id: str) -> str:
+def _cnes_public_id(item: dict, grouped_id: str, medico: dict | None = None) -> str:
+    if medico and medico.get("uf_crm"):
+        return f"crm:{medico['uf_crm']}"
     cns = _cnes_digits(item.get("cns"))
     if len(cns) >= 14:
         return f"cns:{cns}"
@@ -946,11 +1011,11 @@ def _cnes_public_id(item: dict, grouped_id: str) -> str:
     return f"crm:{crm}" if crm else grouped_id
 
 
-def _cnes_public_vinculo(item: dict, public_id: str, uf_crm: str) -> dict:
+def _cnes_public_vinculo(item: dict, public_id: str, uf_crm: str, nome: str = "") -> dict:
     return {
         "pessoa_id": public_id,
         "uf_crm": uf_crm,
-        "nome": item.get("nome") or "",
+        "nome": nome or item.get("nome") or "",
         "cns": item.get("cns") or "",
         "crm": item.get("crm") or "",
         "cbo": item.get("cbo") or "",
@@ -959,6 +1024,7 @@ def _cnes_public_vinculo(item: dict, public_id: str, uf_crm: str) -> dict:
         "municipio": item.get("municipio") or "",
         "uf": item.get("uf") or "",
         "horas_total": item.get("horas_total") or 0,
+        "competencia": _cnes_fmt_comp(item.get("competencia")),
     }
 
 
@@ -981,35 +1047,58 @@ def _cnes_horas_cbo(rows: list[dict]) -> list[dict]:
     return out
 
 
-def _cnes_agrupar(vinculos: list[dict]) -> tuple[list[dict], list[dict]]:
+def _cnes_agrupar(vinculos: list[dict], medicos: list[dict] | None = None) -> tuple[list[dict], list[dict]]:
+    by_hash = {}
+    by_crm = {}
+    for medico in medicos or []:
+        hashed = str(medico.get("cpf_hash") or "").lower()
+        if re.fullmatch(r"[a-f0-9]{64}", hashed):
+            by_hash[hashed] = medico
+        if medico.get("uf_crm"):
+            by_crm[str(medico["uf_crm"]).upper()] = medico
     groups: dict[str, list] = {}
     for item in vinculos:
         groups.setdefault(_cnes_pessoa_key(item), []).append(item)
     profissionais = []
     filtrados = []
     for pessoa_id, rows in groups.items():
+        medico = by_hash.get(str((rows[0] or {}).get("cpf_hash") or "").lower())
+        if not medico:
+            for item in rows:
+                medico = by_crm.get(str(item.get("uf_crm") or "").upper())
+                if medico:
+                    break
         by_uf: dict[str, dict] = {}
         for item in rows:
             uf = _cnes_uf_crm(item.get("uf_crm")) or "_"
             cur = by_uf.setdefault(uf, {"horas": 0, "n": 0, "uf_crm": item.get("uf_crm")})
             cur["horas"] += item.get("horas_total") or 0
             cur["n"] += 1
-        canon = max(by_uf.values(), key=lambda info: (info["horas"], info["n"]))
-        canon_uf = _cnes_uf_crm(canon["uf_crm"])
-        kept = [item for item in rows if _cnes_uf_crm(item.get("uf_crm")) == canon_uf]
-        public_id = _cnes_public_id(kept[0], pessoa_id)
+        if medico:
+            canon = {"uf_crm": medico["uf_crm"], "horas": 0, "n": 0}
+        elif by_uf:
+            canon = max(by_uf.values(), key=lambda info: (info["horas"], info["n"]))
+        else:
+            canon = {"uf_crm": (rows[0] or {}).get("uf_crm") or "", "horas": 0, "n": 0}
+        kept = rows
+        nome = (medico or {}).get("nome") or kept[0]["nome"]
+        public_id = _cnes_public_id(kept[0], pessoa_id, medico)
         horas_cbo = _cnes_horas_cbo(kept)
+        competencias: set[str] = set()
         doc = {
-            "pessoa_id": public_id, "uf_crm": canon["uf_crm"], "nome": kept[0]["nome"],
-            "cns": kept[0]["cns"], "crm": kept[0]["crm"], "uf": kept[0]["uf"],
+            "pessoa_id": public_id, "uf_crm": canon["uf_crm"], "nome": nome,
+            "cns": kept[0]["cns"], "crm": kept[0].get("crm") or re.sub(r"^[A-Za-z]{2}", "", str(canon["uf_crm"] or "")),
+            "uf": kept[0]["uf"],
             "horas_total": 0, "vinculos": 0, "estabelecimento": kept[0]["estabelecimento"],
             "setor": kept[0]["setor"], "cidades": set(), "horas_cbo": horas_cbo, "_max": -1, "principal_cnes": "",
         }
         for item in kept:
-            pub = _cnes_public_vinculo(item, public_id, canon["uf_crm"])
+            pub = _cnes_public_vinculo(item, public_id, canon["uf_crm"], nome)
             filtrados.append(pub)
             doc["horas_total"] += pub["horas_total"]
             doc["vinculos"] += 1
+            if pub.get("competencia"):
+                competencias.add(pub["competencia"])
             if pub["municipio"]:
                 doc["cidades"].add(f"{pub['municipio']}/{pub['uf']}")
             if pub["horas_total"] >= doc["_max"]:
@@ -1023,10 +1112,38 @@ def _cnes_agrupar(vinculos: list[dict]) -> tuple[list[dict], list[dict]]:
             "cns": doc["cns"], "crm": doc["crm"], "uf": doc["uf"],
             "horas_total": doc["horas_total"], "vinculos": doc["vinculos"],
             "estabelecimento": doc["estabelecimento"], "setor": doc["setor"],
-            "cidades": sorted(doc["cidades"]), "horas_cbo": doc["horas_cbo"],
+            "cidades": sorted(doc["cidades"]), "competencias": sorted(competencias),
+            "horas_cbo": doc["horas_cbo"],
             "principal_cnes": doc.get("principal_cnes") or "",
         })
     return profissionais, filtrados
+
+
+def _cnes_merge_medicos(profissionais: list[dict], medicos: list[dict]) -> list[dict]:
+    seen = {str(p.get("uf_crm") or "").upper() for p in profissionais if p.get("uf_crm")}
+    for medico in medicos:
+        key = str(medico.get("uf_crm") or "").upper()
+        if not key or key in seen:
+            continue
+        seen.add(key)
+        profissionais.append({
+            "pessoa_id": f"crm:{medico['uf_crm']}",
+            "uf_crm": medico["uf_crm"],
+            "nome": medico.get("nome") or "",
+            "cns": "",
+            "crm": re.sub(r"^[A-Za-z]{2}", "", str(medico.get("uf_crm") or "")),
+            "uf": _cnes_uf_crm(medico.get("uf_crm")),
+            "horas_total": 0,
+            "vinculos": 0,
+            "estabelecimento": "",
+            "setor": "—",
+            "cidades": [],
+            "competencias": [],
+            "horas_cbo": [],
+            "principal_cnes": "",
+        })
+    profissionais.sort(key=lambda p: str(p.get("nome") or ""))
+    return profissionais
 
 
 def query_cnes_busca(override: dict | None = None) -> dict:
@@ -1051,7 +1168,20 @@ def query_cnes_busca(override: dict | None = None) -> dict:
         cur.execute(f"USE WAREHOUSE {warehouse}")
         cur.execute("USE DATABASE DADOSFERA_PRD_DIGITALSOLVERS")
         cur.close()
-        rows = snowflake_fetch(ctx, _cnes_busca_sql(parsed, uf, novos, ano, mo))[1]
+        allow_blank = _cnes_allow_blank_crm(parsed["tokens"])
+        med_rows = snowflake_fetch(ctx, _cnes_medicos_sql(parsed, uf, novos, ano, mo))[1]
+        medicos = []
+        for r in med_rows:
+            medicos.append({
+                "uf_crm": str(r[0] or ""),
+                "nome": str(r[1] or ""),
+                "cpf_hash": str(r[2] or "").lower(),
+            })
+        rows = snowflake_fetch(ctx, _cnes_busca_sql(
+            parsed, uf, novos, ano, mo, allow_blank,
+            [m["uf_crm"] for m in medicos],
+            [m["cpf_hash"] for m in medicos],
+        ))[1]
         vinculos = []
         for r in rows:
             natureza = str(r[9] or "")
@@ -1091,7 +1221,8 @@ def query_cnes_busca(override: dict | None = None) -> dict:
                 "setor": _cnes_setor(natureza, grupo),
             }
             vinculos.append(item)
-        profissionais, vinculos = _cnes_agrupar(vinculos)
+        profissionais, vinculos = _cnes_agrupar(vinculos, medicos)
+        profissionais = _cnes_merge_medicos(profissionais, medicos)
         aviso = ""
         if not profissionais:
             aviso = (

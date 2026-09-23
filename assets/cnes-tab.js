@@ -66,7 +66,7 @@ function renderCnesDocs() {
   box.innerHTML = docs.map((d) => `
     <button type="button" class="cnes-doc${cnesState.selecionado === cnesPessoaId(d) ? " on" : ""}" data-pessoa="${cnesEsc(cnesPessoaId(d))}">
       <strong>${cnesEsc(d.nome || d.uf_crm)}</strong>
-      <span>${cnesEsc(d.uf_crm)} · ${cnesFmt(d.vinculos)} vínculo(s) · ${cnesFmt(d.horas_total)}h · ${cnesEsc(d.setor || "—")}</span>
+      <span>${cnesEsc(d.uf_crm || "sem CRM")} · ${cnesFmt(d.vinculos)} vínculo(s) · ${cnesFmt(d.horas_total)}h · ${cnesEsc(d.setor || "—")}</span>
     </button>
   `).join("");
 }
@@ -95,11 +95,12 @@ function renderCnesDetalhe(pessoaId) {
       principal.hidden = true;
       principal.innerHTML = "";
     }
-    body.innerHTML = "<tr><td colspan='7'>Nenhum vínculo carregado.</td></tr>";
+    body.innerHTML = "<tr><td colspan='8'>Nenhum vínculo carregado.</td></tr>";
     return;
   }
   title.textContent = doc.nome || doc.uf_crm;
-  local.textContent = `${doc.uf_crm} · CNS ${doc.cns || "—"} · ${((doc.cidades) || []).join(" · ") || "sem cidade"}`;
+  const meses = (doc.competencias || []).filter(Boolean);
+  local.textContent = `${doc.uf_crm || "sem CRM"} · CNS ${doc.cns || "—"} · ${meses.length ? `Competência ${meses.join(", ")}` : "sem competência"} · ${((doc.cidades) || []).join(" · ") || "sem cidade"}`;
   kpis.innerHTML = `
     <div><b>${cnesFmt(doc.horas_total)}h</b><span>Total geral</span></div>
     <div><b>${cnesFmt((doc.horas_cbo || []).length)}</b><span>CBOs</span></div>
@@ -123,7 +124,7 @@ function renderCnesDetalhe(pessoaId) {
       : "";
   }
   if (!rows.length) {
-    body.innerHTML = "<tr><td colspan='7'>Sem vínculos CNES para este CRM.</td></tr>";
+    body.innerHTML = "<tr><td colspan='8'>Sem vínculos CNES para este profissional.</td></tr>";
     return;
   }
   const ordered = [...rows].sort((a, b) => String(a.cbo || "").localeCompare(String(b.cbo || ""), "pt-BR") || (Number(b.horas_total) || 0) - (Number(a.horas_total) || 0));
@@ -135,10 +136,11 @@ function renderCnesDetalhe(pessoaId) {
       <td>${cnesEsc(v.municipio || "—")}</td>
       <td class="cbo" title="${cnesEsc(v.cbo || "")}">${cnesCbo(v.cbo)}</td>
       <td class="est" title="${cnesEsc(v.estabelecimento || "")}">${cnesEsc(v.estabelecimento || "—")}</td>
+      <td class="mes">${cnesEsc(v.competencia || "—")}</td>
       <td class="hrs">${cnesFmt(v.horas_total)}</td>
     </tr>`).join("") + `
     <tr class="cnes-total">
-      <td colspan="6">Total geral</td>
+      <td colspan="7">Total geral</td>
       <td class="hrs">${cnesFmt(doc.horas_total)}</td>
     </tr>`;
 }
@@ -181,7 +183,7 @@ function baixarCnesCsv() {
     : ((cnesState.data && cnesState.data.vinculos) || []);
   if (!rows.length) return;
   const header = [
-    "CNS", "NOME", "UF", "MUNICIPIO", "CBO", "ESTABELECIMENTO", "HORAS",
+    "CNS", "NOME", "UF", "MUNICIPIO", "CBO", "ESTABELECIMENTO", "COMPETENCIA", "HORAS",
   ].join(";");
   const esc = (v) => {
     const t = String(v == null ? "" : v);
@@ -189,7 +191,7 @@ function baixarCnesCsv() {
     return t;
   };
   const body = rows.map((v) => [
-    v.cns, v.nome, v.uf, v.municipio, v.cbo, v.estabelecimento, v.horas_total,
+    v.cns, v.nome, v.uf, v.municipio, v.cbo, v.estabelecimento, v.competencia, v.horas_total,
   ].map(esc).join(";")).join("\n");
   const blob = new Blob(["\ufeff" + header + "\n" + body], { type: "text/csv;charset=utf-8" });
   const a = document.createElement("a");
