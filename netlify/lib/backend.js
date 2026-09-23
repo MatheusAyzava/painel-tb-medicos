@@ -773,9 +773,11 @@ function cnesCidade(value) {
 }
 
 function cnesFmtComp(value) {
-  const d = String(value || "").replace(/\D/g, "");
-  if (d.length >= 6) return `${d.slice(4, 6)}/${d.slice(0, 4)}`;
-  return String(value || "").trim();
+  const raw = String(value || "").trim();
+  if (/^\d{4}-\d{2}$/.test(raw)) return raw;
+  const d = raw.replace(/\D/g, "");
+  if (d.length >= 6) return `${d.slice(0, 4)}-${d.slice(4, 6)}`;
+  return raw;
 }
 
 function cnesNovosSql(alias, ano, mo) {
@@ -865,9 +867,14 @@ function cnesBuscaSql(parsed, { uf, novos, ano, mo, allowBlankCrm, ufCrms = [], 
       ${novos ? cnesNovosSql("c", ano, mo) : ""}
     QUALIFY ROW_NUMBER() OVER (
       PARTITION BY COALESCE(NULLIF(c.UF_CRM, ''), TO_VARCHAR(c.CNS), c.NOME_PROFISSIONAL),
-        COALESCE(TO_VARCHAR(c.CNES), c.ESTABELECIMENTO), COALESCE(c.CBO, '')
-      ORDER BY c.UPDATE_DATE DESC NULLS LAST, c.ANOMES DESC NULLS LAST
+        COALESCE(TO_VARCHAR(c.CNES), c.ESTABELECIMENTO), COALESCE(c.CBO, ''),
+        TO_VARCHAR(c.ANOMES)
+      ORDER BY c.UPDATE_DATE DESC NULLS LAST
     ) = 1
+    AND DENSE_RANK() OVER (
+      PARTITION BY COALESCE(NULLIF(c.UF_CRM, ''), TO_VARCHAR(c.CNS), c.NOME_PROFISSIONAL)
+      ORDER BY TO_VARCHAR(c.ANOMES) DESC NULLS LAST
+    ) <= 18
     AND DENSE_RANK() OVER (ORDER BY c.NOME_PROFISSIONAL, c.UF_CRM) <= 40
     ORDER BY c.NOME_PROFISSIONAL, TRY_TO_DOUBLE(TO_VARCHAR(c.CH_TOTAL)) DESC NULLS LAST
   `;

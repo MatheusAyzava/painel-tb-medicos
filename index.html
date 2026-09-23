@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/style.css?v=44" />
+  <link rel="stylesheet" href="assets/style.css?v=45" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 </head>
 <body>
@@ -314,7 +314,7 @@
               </div>
             </div>
           </div>
-          <p class="map-hint">Consulta a base GOLD do CNES e o cadastro de médicos: horas por CBO, estabelecimento, competência (mês trabalhado) e total geral. A busca usa nome, CRM ou CNS — CPF não entra na consulta nem no resultado.</p>
+          <p class="map-hint">Consulta a base GOLD do CNES e o cadastro de médicos: clique no mês para ver as horas, o CBO e o estabelecimento daquele período. A busca usa nome, CRM ou CNS — CPF não entra na consulta nem no resultado.</p>
         </section>
         <section class="cnes-layout">
           <article class="panel cnes-list-panel">
@@ -327,6 +327,7 @@
               <h2 id="cnes-detail-title">Detalhe do profissional</h2>
               <p class="map-hint" id="cnes-detail-local">Selecione um médico à esquerda para ver todos os estabelecimentos.</p>
             </header>
+            <div class="cnes-meses" id="cnes-meses" hidden></div>
             <div class="cnes-kpis" id="cnes-kpis"></div>
             <div class="cnes-cbo-grid" id="cnes-cbos" hidden></div>
             <p class="cnes-principal" id="cnes-principal" hidden></p>
@@ -340,12 +341,11 @@
                     <th>Município</th>
                     <th>CBO</th>
                     <th>Estabelecimento</th>
-                    <th>Competência</th>
                     <th>Total horas</th>
                   </tr>
                 </thead>
                 <tbody id="cnes-vinculos">
-                  <tr><td colspan="8">Nenhum vínculo carregado.</td></tr>
+                  <tr><td colspan="7">Nenhum vínculo carregado.</td></tr>
                 </tbody>
               </table>
             </div>
@@ -364,8 +364,8 @@
     });
   </script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="assets/app.js?v=44"></script>
-  <script src="assets/bi.js?v=44"></script>
-  <script src="assets/cnes-tab.js?v=44"></script>
+  <script src="assets/app.js?v=45"></script>
+  <script src="assets/bi.js?v=45"></script>
+  <script src="assets/cnes-tab.js?v=45"></script>
 </body>
 </html>

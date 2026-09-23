@@ -865,10 +865,13 @@ def _cnes_cidade(value) -> str:
 
 
 def _cnes_fmt_comp(value) -> str:
-    digits = re.sub(r"\D", "", str(value or ""))
+    raw = str(value or "").strip()
+    if re.fullmatch(r"\d{4}-\d{2}", raw):
+        return raw
+    digits = re.sub(r"\D", "", raw)
     if len(digits) >= 6:
-        return f"{digits[4:6]}/{digits[:4]}"
-    return str(value or "").strip()
+        return f"{digits[:4]}-{digits[4:6]}"
+    return raw
 
 
 def _cnes_novos_sql(alias: str, ano: int, mo: int) -> str:
@@ -963,9 +966,14 @@ def _cnes_busca_sql(parsed: dict, uf: str, novos: bool, ano: int, mo: int, allow
           {novos_sql}
         QUALIFY ROW_NUMBER() OVER (
           PARTITION BY COALESCE(NULLIF(c.UF_CRM, ''), TO_VARCHAR(c.CNS), c.NOME_PROFISSIONAL),
-            COALESCE(TO_VARCHAR(c.CNES), c.ESTABELECIMENTO), COALESCE(c.CBO, '')
-          ORDER BY c.UPDATE_DATE DESC NULLS LAST, c.ANOMES DESC NULLS LAST
+            COALESCE(TO_VARCHAR(c.CNES), c.ESTABELECIMENTO), COALESCE(c.CBO, ''),
+            TO_VARCHAR(c.ANOMES)
+          ORDER BY c.UPDATE_DATE DESC NULLS LAST
         ) = 1
+        AND DENSE_RANK() OVER (
+          PARTITION BY COALESCE(NULLIF(c.UF_CRM, ''), TO_VARCHAR(c.CNS), c.NOME_PROFISSIONAL)
+          ORDER BY TO_VARCHAR(c.ANOMES) DESC NULLS LAST
+        ) <= 18
         AND DENSE_RANK() OVER (ORDER BY c.NOME_PROFISSIONAL, c.UF_CRM) <= 40
         ORDER BY c.NOME_PROFISSIONAL, TRY_TO_DOUBLE(TO_VARCHAR(c.CH_TOTAL)) DESC NULLS LAST
     """
