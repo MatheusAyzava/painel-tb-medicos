@@ -911,7 +911,14 @@ def _cnes_medicos_sql(parsed: dict, uf: str, novos: bool, ano: int, mo: int) -> 
     """
 
 
-def _cnes_busca_sql(parsed: dict, uf: str, novos: bool, ano: int, mo: int, allow_blank: bool = False, uf_crms: list | None = None, hashes: list | None = None) -> str:
+def _cnes_ftp_mes_sql() -> str:
+    return """
+        SELECT MAX(REGEXP_SUBSTR(FILE_PATH, 'PF[A-Z]{2}([0-9]{4})', 1, 1, 'e', 1))
+        FROM (SELECT DISTINCT FILE_PATH FROM GOLD.TB_CNES_PROFISSIONAIS_FTP)
+    """
+
+
+def _cnes_busca_sql(parsed: dict, uf: str, novos: bool, ano: int, mo: int, allow_blank: bool = False, uf_crms: list | None = None, hashes: list | None = None, ftp_mes: str = "") -> str:
     compact = parsed["compact"][:20]
     digits = re.sub(r"\D", "", parsed["digits"] or compact)[:20]
     tokens = parsed["tokens"]
@@ -922,60 +929,51 @@ def _cnes_busca_sql(parsed: dict, uf: str, novos: bool, ano: int, mo: int, allow
         else:
             parts.append(f"(c.UF_CRM ILIKE '%{digits}' OR TO_VARCHAR(c.CRM) = '{digits}')")
     elif tokens:
-        parts.append(f"({_cnes_name_sql('c', tokens, 'NOME_PROFISSIONAL')})")
+        parts.append(f"({_cnes_name_sql('c', tokens, 'NOME')})")
     if len(parsed["digits"]) >= 8 and len(parsed["digits"]) != 11:
         parts.append(f"TO_VARCHAR(c.CNS) LIKE '%{parsed['digits']}%'")
     safe_crms = [re.sub(r"[^A-Za-z0-9]", "", str(v)) for v in (uf_crms or []) if re.sub(r"[^A-Za-z0-9]", "", str(v))][:40]
-    safe_hashes = [str(v).lower() for v in (hashes or []) if re.fullmatch(r"[a-f0-9]{64}", str(v).lower())][:40]
     crm_nums = sorted({re.sub(r"\D", "", v) for v in safe_crms if re.sub(r"\D", "", v)})
-    if safe_crms:
-        parts.append("c.UF_CRM IN (" + ",".join(f"'{v}'" for v in safe_crms) + ")")
-    if safe_hashes and crm_nums:
-        parts.append(
-            "(REGEXP_REPLACE(TO_VARCHAR(c.UF_CRM), '[^0-9]', '') IN ("
-            + ",".join(f"'{v}'" for v in crm_nums)
-            + ") AND IFF(LENGTH(REGEXP_REPLACE(TO_VARCHAR(c.CPF), '[^0-9]', '')) >= 11, "
-            + "LOWER(SHA2(REGEXP_REPLACE(TO_VARCHAR(c.CPF), '[^0-9]', ''), 256)), NULL) IN ("
-            + ",".join(f"'{v}'" for v in safe_hashes)
-            + "))"
-        )
+    crm_vars = list(dict.fromkeys(safe_crms + [f"AM{n}" for n in crm_nums] + [f"SP{n}" for n in crm_nums]))[:80]
+    if crm_vars:
+        parts.append("c.UF_CRM IN (" + ",".join(f"'{v}'" for v in crm_vars) + ")")
     where = " OR ".join(parts) if parts else "1=0"
     blank_sql = " OR 1=1" if allow_blank else ""
     novos_sql = _cnes_novos_sql("c", ano, mo) if novos else ""
-    uf_sql = f"AND (c.UF_ESTABELECIMENTO = '{uf}' OR c.UF_CRM ILIKE '{uf}%')" if uf else ""
+    uf_sql = f"AND (c.UF = '{uf}' OR c.UF_CRM ILIKE '{uf}%')" if uf else ""
+    anomes = "('20' || REGEXP_SUBSTR(c.FILE_PATH, 'PF[A-Z]{2}([0-9]{4})', 1, 1, 'e', 1))"
+    ftp_mes = re.sub(r"\D", "", str(ftp_mes or ""))[:4]
+    ftp_sql = f"AND c.FILE_PATH ILIKE '%{ftp_mes}.csv'" if re.fullmatch(r"\d{4}", ftp_mes) else ""
     return f"""
         SELECT
-          c.UF_CRM, c.NOME_PROFISSIONAL,
+          c.UF_CRM, c.NOME,
           IFF(LENGTH(REGEXP_REPLACE(TO_VARCHAR(c.CPF), '[^0-9]', '')) >= 11,
               LOWER(SHA2(REGEXP_REPLACE(TO_VARCHAR(c.CPF), '[^0-9]', ''), 256)),
               NULL),
           c.CNS, c.CRM, c.CBO, c.CNES,
-          COALESCE(c.NOME_ESTABELECIMENTO, c.ESTABELECIMENTO),
-          COALESCE(c.CNPJ_ESTABELECIMENTO, c.CNPJ_PROFISSIONAL),
-          COALESCE(c.NATUREZA_JURIDICA_PROFISSIONAL, c.NATUREZA_JURIDICA_ESTABELECIMENTO),
-          c.GESTAO_PROFISSIONAL, c.SUS, c.VINCULO_ESTABELECIMENTO, c.VINCULO_EMPREGADOR,
+          c.ESTABELECIMENTO,
+          c.CNPJ,
+          c.NATUREZA_JURIDICA,
+          c.GESTAO, c.SUS, c.VINCULO_ESTABELECIMENTO, c.VINCULO_EMPREGADOR,
           c.CH_OUTROS, c.CH_AMB_, c.CH_HOSP_, c.CH_TOTAL,
-          c.MUNICIPIO_ESTABELECIMENTO, c.UF_ESTABELECIMENTO, c.IBGE, c.TURNO_PROFISSIONAL,
-          c.NOME_ESTABELECIMENTO, c.LOGRADOURO, c.NUMERO, c.COMPLEMENTO, c.BAIRRO,
-          c.MUNICIPIO_ESTABELECIMENTO, c.UF_ESTABELECIMENTO, c.CEP, c.TELEFONE, c.EMAIL,
-          c.GRUPO_NATUREZA_JURIDICA, c.TIPO_ESTABELECIMENTO, c.TIPO_UNIDADE, c.ANOMES
-        FROM GOLD.TB_CNES_PROFISSIONAIS_ESTABELECIMENTOS c
+          c.MUNICIPIO, c.UF, c.IBGE, c.TURNO,
+          c.ESTABELECIMENTO, NULL, NULL, NULL, NULL,
+          c.MUNICIPIO, c.UF, NULL, NULL, NULL,
+          NULL, NULL, NULL, {anomes}
+        FROM GOLD.TB_CNES_PROFISSIONAIS_FTP c
         WHERE ({where})
           AND (NULLIF(c.UF_CRM, '') IS NOT NULL{blank_sql})
+          {ftp_sql}
           {uf_sql}
           {novos_sql}
         QUALIFY ROW_NUMBER() OVER (
-          PARTITION BY COALESCE(NULLIF(c.UF_CRM, ''), TO_VARCHAR(c.CNS), c.NOME_PROFISSIONAL),
+          PARTITION BY COALESCE(NULLIF(c.UF_CRM, ''), TO_VARCHAR(c.CNS), c.NOME),
             COALESCE(TO_VARCHAR(c.CNES), c.ESTABELECIMENTO), COALESCE(c.CBO, ''),
-            TO_VARCHAR(c.ANOMES)
+            {anomes}
           ORDER BY c.UPDATE_DATE DESC NULLS LAST
         ) = 1
-        AND DENSE_RANK() OVER (
-          PARTITION BY COALESCE(NULLIF(c.UF_CRM, ''), TO_VARCHAR(c.CNS), c.NOME_PROFISSIONAL)
-          ORDER BY TO_VARCHAR(c.ANOMES) DESC NULLS LAST
-        ) <= 18
-        AND DENSE_RANK() OVER (ORDER BY c.NOME_PROFISSIONAL, c.UF_CRM) <= 40
-        ORDER BY c.NOME_PROFISSIONAL, TRY_TO_DOUBLE(TO_VARCHAR(c.CH_TOTAL)) DESC NULLS LAST
+        AND DENSE_RANK() OVER (ORDER BY c.NOME, c.UF_CRM) <= 40
+        ORDER BY c.NOME, TRY_TO_DOUBLE(TO_VARCHAR(c.CH_TOTAL)) DESC NULLS LAST
     """
 
 
@@ -1178,6 +1176,8 @@ def query_cnes_busca(override: dict | None = None) -> dict:
         cur.close()
         allow_blank = _cnes_allow_blank_crm(parsed["tokens"])
         med_rows = snowflake_fetch(ctx, _cnes_medicos_sql(parsed, uf, novos, ano, mo))[1]
+        mes_rows = snowflake_fetch(ctx, _cnes_ftp_mes_sql())[1]
+        ftp_mes = str((mes_rows[0][0] if mes_rows else "") or "")
         medicos = []
         for r in med_rows:
             medicos.append({
@@ -1189,6 +1189,7 @@ def query_cnes_busca(override: dict | None = None) -> dict:
             parsed, uf, novos, ano, mo, allow_blank,
             [m["uf_crm"] for m in medicos],
             [m["cpf_hash"] for m in medicos],
+            ftp_mes,
         ))[1]
         vinculos = []
         for r in rows:

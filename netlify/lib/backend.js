@@ -816,7 +816,14 @@ function cnesMedicosSql(parsed, { uf, novos, ano, mo }) {
   `;
 }
 
-function cnesBuscaSql(parsed, { uf, novos, ano, mo, allowBlankCrm, ufCrms = [], hashes = [] }) {
+function cnesFtpMesSql() {
+  return `
+    SELECT MAX(REGEXP_SUBSTR(FILE_PATH, 'PF[A-Z]{2}([0-9]{4})', 1, 1, 'e', 1))
+    FROM (SELECT DISTINCT FILE_PATH FROM GOLD.TB_CNES_PROFISSIONAIS_FTP)
+  `;
+}
+
+function cnesBuscaSql(parsed, { uf, novos, ano, mo, allowBlankCrm, ufCrms = [], hashes = [], ftpMes = "" }) {
   const { compact, digits, tokens, isCrm } = parsed;
   const parts = [];
   if (isCrm) {
@@ -826,57 +833,47 @@ function cnesBuscaSql(parsed, { uf, novos, ano, mo, allowBlankCrm, ufCrms = [], 
       ? `c.UF_CRM = '${key}'`
       : `(c.UF_CRM ILIKE '%${num}' OR TO_VARCHAR(c.CRM) = '${num}')`);
   } else if (tokens.length) {
-    parts.push(`(${cnesNameSql("c", tokens, "NOME_PROFISSIONAL")})`);
+    parts.push(`(${cnesNameSql("c", tokens, "NOME")})`);
   }
   if (digits.length >= 8 && digits.length !== 11) {
     parts.push(`TO_VARCHAR(c.CNS) LIKE '%${digits}%'`);
   }
   const safeCrms = (ufCrms || []).map((v) => String(v).replace(/[^A-Za-z0-9]/g, "")).filter(Boolean).slice(0, 40);
-  const safeHashes = (hashes || []).map((v) => String(v).toLowerCase()).filter((v) => /^[a-f0-9]{64}$/.test(v)).slice(0, 40);
   const crmNums = [...new Set(safeCrms.map((v) => v.replace(/\D/g, "")).filter(Boolean))];
-  if (safeCrms.length) parts.push(`c.UF_CRM IN (${safeCrms.map((v) => `'${v}'`).join(",")})`);
-  if (safeHashes.length && crmNums.length) {
-    parts.push(`(
-      REGEXP_REPLACE(TO_VARCHAR(c.UF_CRM), '[^0-9]', '') IN (${crmNums.map((v) => `'${v}'`).join(",")})
-      AND IFF(LENGTH(REGEXP_REPLACE(TO_VARCHAR(c.CPF), '[^0-9]', '')) >= 11,
-          LOWER(SHA2(REGEXP_REPLACE(TO_VARCHAR(c.CPF), '[^0-9]', ''), 256)), NULL)
-        IN (${safeHashes.map((v) => `'${v}'`).join(",")})
-    )`);
-  }
+  const crmVars = [...new Set(safeCrms.concat(crmNums.flatMap((num) => [`AM${num}`, `SP${num}`])))].slice(0, 80);
+  if (crmVars.length) parts.push(`c.UF_CRM IN (${crmVars.map((v) => `'${v}'`).join(",")})`);
   const where = parts.length ? parts.join(" OR ") : "1=0";
+  const anomes = "('20' || REGEXP_SUBSTR(c.FILE_PATH, 'PF[A-Z]{2}([0-9]{4})', 1, 1, 'e', 1))";
   return `
     SELECT
-      c.UF_CRM, c.NOME_PROFISSIONAL,
+      c.UF_CRM, c.NOME,
       IFF(LENGTH(REGEXP_REPLACE(TO_VARCHAR(c.CPF), '[^0-9]', '')) >= 11,
           LOWER(SHA2(REGEXP_REPLACE(TO_VARCHAR(c.CPF), '[^0-9]', ''), 256)),
           NULL),
       c.CNS, c.CRM, c.CBO, c.CNES,
-      COALESCE(c.NOME_ESTABELECIMENTO, c.ESTABELECIMENTO),
-      COALESCE(c.CNPJ_ESTABELECIMENTO, c.CNPJ_PROFISSIONAL),
-      COALESCE(c.NATUREZA_JURIDICA_PROFISSIONAL, c.NATUREZA_JURIDICA_ESTABELECIMENTO),
-      c.GESTAO_PROFISSIONAL, c.SUS, c.VINCULO_ESTABELECIMENTO, c.VINCULO_EMPREGADOR,
+      c.ESTABELECIMENTO,
+      c.CNPJ,
+      c.NATUREZA_JURIDICA,
+      c.GESTAO, c.SUS, c.VINCULO_ESTABELECIMENTO, c.VINCULO_EMPREGADOR,
       c.CH_OUTROS, c.CH_AMB_, c.CH_HOSP_, c.CH_TOTAL,
-      c.MUNICIPIO_ESTABELECIMENTO, c.UF_ESTABELECIMENTO, c.IBGE, c.TURNO_PROFISSIONAL,
-      c.NOME_ESTABELECIMENTO, c.LOGRADOURO, c.NUMERO, c.COMPLEMENTO, c.BAIRRO,
-      c.MUNICIPIO_ESTABELECIMENTO, c.UF_ESTABELECIMENTO, c.CEP, c.TELEFONE, c.EMAIL,
-      c.GRUPO_NATUREZA_JURIDICA, c.TIPO_ESTABELECIMENTO, c.TIPO_UNIDADE, c.ANOMES
-    FROM GOLD.TB_CNES_PROFISSIONAIS_ESTABELECIMENTOS c
+      c.MUNICIPIO, c.UF, c.IBGE, c.TURNO,
+      c.ESTABELECIMENTO, NULL, NULL, NULL, NULL,
+      c.MUNICIPIO, c.UF, NULL, NULL, NULL,
+      NULL, NULL, NULL, ${anomes}
+    FROM GOLD.TB_CNES_PROFISSIONAIS_FTP c
     WHERE (${where})
       AND (NULLIF(c.UF_CRM, '') IS NOT NULL${allowBlankCrm ? " OR 1=1" : ""})
-      ${uf ? `AND (c.UF_ESTABELECIMENTO = '${uf}' OR c.UF_CRM ILIKE '${uf}%')` : ""}
+      ${/^\d{4}$/.test(String(ftpMes || "")) ? `AND c.FILE_PATH ILIKE '%${ftpMes}.csv'` : ""}
+      ${uf ? `AND (c.UF = '${uf}' OR c.UF_CRM ILIKE '${uf}%')` : ""}
       ${novos ? cnesNovosSql("c", ano, mo) : ""}
     QUALIFY ROW_NUMBER() OVER (
-      PARTITION BY COALESCE(NULLIF(c.UF_CRM, ''), TO_VARCHAR(c.CNS), c.NOME_PROFISSIONAL),
+      PARTITION BY COALESCE(NULLIF(c.UF_CRM, ''), TO_VARCHAR(c.CNS), c.NOME),
         COALESCE(TO_VARCHAR(c.CNES), c.ESTABELECIMENTO), COALESCE(c.CBO, ''),
-        TO_VARCHAR(c.ANOMES)
+        ${anomes}
       ORDER BY c.UPDATE_DATE DESC NULLS LAST
     ) = 1
-    AND DENSE_RANK() OVER (
-      PARTITION BY COALESCE(NULLIF(c.UF_CRM, ''), TO_VARCHAR(c.CNS), c.NOME_PROFISSIONAL)
-      ORDER BY TO_VARCHAR(c.ANOMES) DESC NULLS LAST
-    ) <= 18
-    AND DENSE_RANK() OVER (ORDER BY c.NOME_PROFISSIONAL, c.UF_CRM) <= 40
-    ORDER BY c.NOME_PROFISSIONAL, TRY_TO_DOUBLE(TO_VARCHAR(c.CH_TOTAL)) DESC NULLS LAST
+    AND DENSE_RANK() OVER (ORDER BY c.NOME, c.UF_CRM) <= 40
+    ORDER BY c.NOME, TRY_TO_DOUBLE(TO_VARCHAR(c.CH_TOTAL)) DESC NULLS LAST
   `;
 }
 
@@ -1130,7 +1127,11 @@ async function queryCnesBusca(opts = {}) {
   const stamp = ok ? String(opts.mes) : new Date().toISOString().slice(0, 7);
   const [ano, mo] = stamp.split("-").map(Number);
   const allowBlankCrm = cnesAllowBlankCrm(parsed.tokens);
-  const medRows = await snowflakeSql(cnesMedicosSql(parsed, { uf, novos, ano, mo }), { timeout: 12, maxWait: 12000, poll: 400 });
+  const [medRows, mesRows] = await Promise.all([
+    snowflakeSql(cnesMedicosSql(parsed, { uf, novos, ano, mo }), { timeout: 12, maxWait: 12000, poll: 400 }),
+    snowflakeSql(cnesFtpMesSql(), { timeout: 12, maxWait: 12000, poll: 400 }),
+  ]);
+  const ftpMes = String((mesRows && mesRows[0] && mesRows[0][0]) || "").replace(/\D/g, "").slice(0, 4);
   const medicos = (medRows || []).map((r) => ({
     uf_crm: String(r[0] || ""),
     nome: String(r[1] || ""),
@@ -1140,7 +1141,8 @@ async function queryCnesBusca(opts = {}) {
     uf, novos, ano, mo, allowBlankCrm,
     ufCrms: medicos.map((m) => m.uf_crm),
     hashes: medicos.map((m) => m.cpf_hash),
-  }), { timeout: 18, maxWait: 18000, poll: 400 });
+    ftpMes,
+  }), { timeout: 24, maxWait: 24000, poll: 400 });
   const grouped = mergeMedicosSemCnes(agruparCnes(mapCnesVinculos(rows), medicos), medicos);
   const aviso = grouped.profissionais.length
     ? ""
