@@ -134,7 +134,25 @@ function drawBiPie(slices, total) {
   });
 }
 
+const FILTRO_KEYS = ["uf_kpis", "uf_genero", "uf_faixa", "uf_esp_ds", "uf_esp_cfm", "uf_mensal"];
+
+function mergeFiltros(data, filtros) {
+  if (!data || !filtros) return data;
+  FILTRO_KEYS.forEach((key) => {
+    if (Array.isArray(filtros[key]) && filtros[key].length) data[key] = filtros[key];
+  });
+  return data;
+}
+
+function applyFiltros(filtros) {
+  if (!filtros) return;
+  if (!biState.data) biState.data = {};
+  mergeFiltros(biState.data, filtros);
+  renderVisao(biState.data);
+}
+
 function renderBi(data) {
+  if (biState.data) mergeFiltros(data, biState.data);
   biState.data = data;
   document.getElementById("bi-crm").textContent = biFmt(data.crm);
   document.getElementById("bi-medicos").textContent = biFmt(data.medicos);
@@ -307,14 +325,30 @@ async function loadBi() {
   try {
     const snap = await fetch("assets/snapshot-bi.json", { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
     if (snap) renderBi(snap);
-    const res = await fetch("/api/dadosfera-bi", {
+    const filtrosP = fetch("/api/dadosfera-bi-filtros", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: "{}",
+    }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+    const biP = fetch("/api/dadosfera-bi", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: "{}",
+    }).then(async (res) => {
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Falha no painel Dadosfera");
+      return data;
+    }).catch((err) => {
+      if (!biState.data) throw err;
+      return null;
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "Falha no painel Dadosfera");
-    renderBi(data);
+    const filtros = await filtrosP;
+    applyFiltros(filtros);
+    const data = await biP;
+    if (data) {
+      mergeFiltros(data, filtros);
+      renderBi(data);
+    }
   } catch (err) {
     const toast = document.getElementById("toast");
     if (toast) {
@@ -604,22 +638,24 @@ function drawPbiPie(slices, total) {
   const svg = document.getElementById("pbi-donut");
   if (!svg) return;
   while (svg.firstChild) svg.removeChild(svg.firstChild);
-  const cx = 60, cy = 60, r0 = 34, r1 = 54;
-  let angle = -Math.PI / 2;
+  const sum = slices.reduce((a, s) => a + s.value, 0);
+  if (!sum) return;
+  const r = 62;
+  const c = 2 * Math.PI * r;
+  let offset = 0;
   slices.forEach((s) => {
-    const sweep = (s.value / total) * 2 * Math.PI;
-    const next = angle + sweep;
-    const large = next - angle > Math.PI ? 1 : 0;
-    const p = (r, a) => [cx + r * Math.cos(a), cy + r * Math.sin(a)];
-    const [x0, y0] = p(r1, angle);
-    const [x1, y1] = p(r1, next);
-    const [x2, y2] = p(r0, next);
-    const [x3, y3] = p(r0, angle);
-    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-    path.setAttribute("d", `M ${x0} ${y0} A ${r1} ${r1} 0 ${large} 1 ${x1} ${y1} L ${x2} ${y2} A ${r0} ${r0} 0 ${large} 0 ${x3} ${y3} Z`);
-    path.setAttribute("fill", s.color);
-    svg.appendChild(path);
-    angle = next;
+    const len = (s.value / sum) * c;
+    const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    circle.setAttribute("cx", "80");
+    circle.setAttribute("cy", "80");
+    circle.setAttribute("r", String(r));
+    circle.setAttribute("fill", "none");
+    circle.setAttribute("stroke", s.color);
+    circle.setAttribute("stroke-width", "22");
+    circle.setAttribute("stroke-dasharray", `${len} ${c - len}`);
+    circle.setAttribute("stroke-dashoffset", String(-offset));
+    svg.appendChild(circle);
+    offset += len;
   });
 }
 
@@ -681,10 +717,10 @@ function visaoFiltrada(data) {
       especialidades: data.especialidades,
       genero: data.genero || [],
       faixa: data.faixa || [],
-      especialidade_ds: (data.especialidade_ds || []).slice(0, 16),
-      especialidade_cfm: (data.especialidade_cfm || []).slice(0, 16),
+      especialidade_ds: (data.especialidade_ds || []).slice(0, 10),
+      especialidade_cfm: (data.especialidade_cfm || []).slice(0, 10),
       regioes: data.regioes || [],
-      ufs: data.ufs || [],
+      ufs: (data.ufs || []).slice(0, 12),
       mensal: data.mensal || [],
       cidades: data.cidades || [],
     };
@@ -711,8 +747,8 @@ function visaoFiltrada(data) {
     especialidades,
     genero: has("uf_genero") ? somarPorChave(data.uf_genero, ufs, "label") : data.genero || [],
     faixa: has("uf_faixa") ? somarPorChave(data.uf_faixa, ufs, "label") : data.faixa || [],
-    especialidade_ds: (has("uf_esp_ds") ? somarPorChave(data.uf_esp_ds, ufs, "label") : data.especialidade_ds || []).slice(0, 16),
-    especialidade_cfm: (has("uf_esp_cfm") ? somarPorChave(data.uf_esp_cfm, ufs, "label") : data.especialidade_cfm || []).slice(0, 16),
+    especialidade_ds: (has("uf_esp_ds") ? somarPorChave(data.uf_esp_ds, ufs, "label") : data.especialidade_ds || []).slice(0, 10),
+    especialidade_cfm: (has("uf_esp_cfm") ? somarPorChave(data.uf_esp_cfm, ufs, "label") : data.especialidade_cfm || []).slice(0, 10),
     regioes: data.regioes || [],
     ufs: ufsRows,
     mensal: has("uf_mensal")
@@ -835,10 +871,10 @@ function renderVisao(data) {
     ? `Atualizado em: ${upd.toLocaleDateString("pt-BR")}`
     : `Atualizado em: ${data.atualizado_em || "—"}`);
 
-  const genderColors = { feminino: "#f54963", masculino: "#51e02e", "não informado": "#f4f7fb", "nao informado": "#f4f7fb" };
+  const genderColors = { feminino: "#f54963", masculino: "#51e02e", "não informado": "#f0d4d6", "nao informado": "#f0d4d6" };
   const slices = (view.genero || []).map((g) => ({
     key: g.label,
-    color: genderColors[foldText(g.label)] || "#f4f7fb",
+    color: genderColors[foldText(g.label)] || "#f0d4d6",
     value: g.value,
   }));
   const total = slices.reduce((s, g) => s + g.value, 0) || 1;
@@ -848,12 +884,12 @@ function renderVisao(data) {
   if (legend) {
     legend.innerHTML = slices.map((g) => {
       const pct = ((g.value / total) * 100).toFixed(2).replace(".", ",");
-      return `<li><i style="background:${g.color}"></i><span>${escHtml(g.key)} · ${biFmt(g.value)} (${pct}%)</span></li>`;
+      return `<li><i style="background:${g.color}"></i><span>${escHtml(g.key)} · <b>${biFmt(g.value)}</b> (${pct}%)</span></li>`;
     }).join("");
   }
 
   const mensalOk = (view.mensal || []).filter((m) => mesValido(m.mes));
-  const rows = [...mensalOk].sort((a, b) => String(b.mes).localeCompare(String(a.mes)));
+  const rows = [...mensalOk].sort((a, b) => String(a.mes).localeCompare(String(b.mes)));
   const maxM = Math.max(...rows.map((m) => m.value), 1);
   const grupos = [];
   rows.forEach((m) => {
@@ -861,21 +897,24 @@ function renderVisao(data) {
     if (!grupos.length || grupos[grupos.length - 1].year !== year) grupos.push({ year, items: [] });
     grupos[grupos.length - 1].items.push(m);
   });
+  grupos.reverse();
+  grupos.forEach((grupo) => grupo.items.reverse());
   const mensalEl = document.getElementById("pbi-mensal");
   if (mensalEl) {
-    mensalEl.innerHTML = grupos.map((grupo) => `
-      <div class="month-year">
-        <div class="month-year-bars">
+    mensalEl.innerHTML = `<div class="pbi-evo-inner" style="min-width:${Math.max(720, rows.length * 36)}px">${grupos.map((grupo) => `
+      <div class="pbi-evo-year" style="flex-grow:${Math.max(grupo.items.length, 1)}">
+        <div class="pbi-evo-bars">
           ${grupo.items.map((m) => `
-            <div class="month-col" title="${mesLabel(m.mes)} ${grupo.year} · ${biFmt(m.value)}">
-              <span class="month-track"><i style="height:${Math.max(4, (m.value / maxM) * 100)}%"><em>${biFmt(m.value)}</em></i></span>
-              <span class="month-name">${mesEixo(m.mes)}</span>
+            <div class="pbi-evo-col" title="${mesLabel(m.mes)} ${grupo.year} · ${biFmt(m.value)}">
+              <span class="pbi-evo-val">${biFmt(m.value)}</span>
+              <i style="height:${Math.max(2, (m.value / maxM) * 180)}px"></i>
+              <span class="pbi-evo-name">${mesEixo(m.mes)}</span>
             </div>
           `).join("")}
         </div>
-        <strong>${grupo.year}</strong>
+        <p class="pbi-evo-ano">${grupo.year}</p>
       </div>
-    `).join("");
+    `).join("")}</div>`;
   }
 
   fillPbiBars("pbi-regiao", view.regioes || [], { tipo: "regiao" });

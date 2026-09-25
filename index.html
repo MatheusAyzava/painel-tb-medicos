@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Open+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/style.css?v=56" />
+  <link rel="stylesheet" href="assets/style.css?v=65" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 </head>
 <body>
@@ -67,7 +67,7 @@
         <div class="tab-bar">
           <button type="button" class="tab on" data-tab="comparativo">Comparativo</button>
           <button type="button" class="tab" data-tab="visao">Visão</button>
-          <button type="button" class="tab" data-tab="dadosfera">Dadosfera CFM</button>
+          <button type="button" class="tab" data-tab="dadosfera">Mapa médicos novos</button>
           <button type="button" class="tab" data-tab="cnes">CNES</button>
         </div>
         <div class="pbi-kpis" id="pbi-kpis-nav">
@@ -178,20 +178,20 @@
         <section class="pbi-row pbi-row-1">
           <article class="panel pbi-card">
             <h2>Gênero</h2>
-            <div class="donut-body pbi-donut-body">
-              <div class="donut-wrap pbi-donut-wrap">
-                <svg id="pbi-donut" viewBox="0 0 120 120" aria-hidden="true"></svg>
+            <div class="pbi-donut-body">
+              <div class="pbi-donut-wrap">
+                <svg id="pbi-donut" viewBox="0 0 160 160" aria-hidden="true"></svg>
                 <div class="donut-center">
                   <strong id="pbi-donut-total">0</strong>
                   <span>ativos</span>
                 </div>
               </div>
-              <ul class="legend" id="pbi-legend"></ul>
+              <ul class="pbi-legend" id="pbi-legend"></ul>
             </div>
           </article>
           <article class="panel pbi-card">
             <h2>Evolução mensal</h2>
-            <div class="month-chart pbi-month" id="pbi-mensal"></div>
+            <div class="pbi-month" id="pbi-mensal"></div>
           </article>
           <article class="panel pbi-card">
             <h2>Região</h2>
@@ -215,18 +215,20 @@
             <h2>UF</h2>
             <div class="bars uf" id="pbi-ufs"></div>
           </article>
+        </section>
+        <section class="pbi-map-row">
           <article class="panel pbi-card pbi-map-card">
             <div id="map-pbi"></div>
-            <p class="pbi-updated" id="pbi-updated">Atualizado em: —</p>
           </article>
         </section>
+        <p class="pbi-updated" id="pbi-updated">Atualizado em: —</p>
       </div>
 
       <div id="view-dadosfera" hidden>
         <header class="bi-head">
           <div>
             <p class="eyebrow">Digital Solvers · Dadosfera</p>
-            <h1>Médicos novos</h1>
+            <h1>Mapa de médicos novos</h1>
           </div>
           <div class="bi-kpis">
             <div><b id="bi-crm">0</b><span>CRM</span></div>
@@ -348,8 +350,8 @@
     });
   </script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="assets/app.js?v=56"></script>
-  <script src="assets/bi.js?v=56"></script>
-  <script src="assets/cnes-tab.js?v=56"></script>
+  <script src="assets/app.js?v=65"></script>
+  <script src="assets/bi.js?v=65"></script>
+  <script src="assets/cnes-tab.js?v=65"></script>
 </body>
 </html>

@@ -402,6 +402,99 @@ const UF_REGIAO = {
   DF: "Centro-Oeste", GO: "Centro-Oeste", MS: "Centro-Oeste", MT: "Centro-Oeste",
 };
 
+async function snowflakeSqlSafe(sql) {
+  try {
+    return await snowflakeSql(sql);
+  } catch {
+    return [];
+  }
+}
+
+function mapUfFiltros(ufKpis, ufGenero, ufFaixa, ufEspDs, ufEspCfm, ufMensal) {
+  return {
+    uf_kpis: (ufKpis || []).filter((r) => r && r[0]).map((r) => ({
+      uf: String(r[0]).toUpperCase(),
+      crm: toNumber(r[1]),
+      medicos: toNumber(r[2]),
+    })),
+    uf_genero: (ufGenero || []).filter((r) => r && r[0]).map((r) => ({
+      uf: String(r[0]).toUpperCase(),
+      label: String(r[1] || "Não informado"),
+      value: toNumber(r[2]),
+    })),
+    uf_faixa: (ufFaixa || []).filter((r) => r && r[0]).map((r) => ({
+      uf: String(r[0]).toUpperCase(),
+      label: String(r[1] || "Não definida"),
+      value: toNumber(r[2]),
+    })),
+    uf_esp_ds: (ufEspDs || []).filter((r) => r && r[0]).map((r) => ({
+      uf: String(r[0]).toUpperCase(),
+      label: String(r[1] || "SEM ESPECIALIDADE"),
+      value: toNumber(r[2]),
+    })),
+    uf_esp_cfm: (ufEspCfm || []).filter((r) => r && r[0]).map((r) => ({
+      uf: String(r[0]).toUpperCase(),
+      label: String(r[1] || "SEM ESPECIALIDADE"),
+      value: toNumber(r[2]),
+    })),
+    uf_mensal: (ufMensal || []).filter((r) => r && r[0] && r[1]).map((r) => ({
+      uf: String(r[0]).toUpperCase(),
+      mes: String(r[1]),
+      value: toNumber(r[2]),
+    })),
+  };
+}
+
+async function queryDadosferaBiFiltros() {
+  const [ufKpis, ufGenero, ufFaixa, ufEspDs, ufEspCfm, ufMensal] = await Promise.all([
+    snowflakeSqlSafe(`
+      SELECT UF, COUNT(DISTINCT UF_CRM), COUNT(DISTINCT CPF)
+      FROM GOLD.TB_MEDICOS
+      WHERE UPPER(SITUACAO) = 'ATIVO' AND UF IS NOT NULL
+      GROUP BY UF
+    `),
+    snowflakeSqlSafe(`
+      SELECT UF, COALESCE(GENERO, 'Não informado'), COUNT(*)
+      FROM GOLD.TB_MEDICOS
+      WHERE UPPER(SITUACAO) = 'ATIVO' AND UF IS NOT NULL
+      GROUP BY 1, 2
+    `),
+    snowflakeSqlSafe(`
+      SELECT LEFT(UF_CRM, 2), COALESCE(FAIXA_ETARIA, 'Não definida'), COUNT(DISTINCT UF_CRM)
+      FROM GOLD.TB_ESPECIALIDADE_X_FONTES
+      WHERE UPPER(SITUACAO) = 'ATIVO' AND LENGTH(UF_CRM) >= 2
+      GROUP BY 1, 2
+    `),
+    snowflakeSqlSafe(`
+      SELECT LEFT(UF_CRM, 2), COALESCE(NULLIF(ESPECIALIDADE, ''), 'SEM ESPECIALIDADE'), COUNT(DISTINCT UF_CRM)
+      FROM GOLD.TB_ESPECIALIDADE_X_FONTES
+      WHERE UPPER(SITUACAO) = 'ATIVO' AND LENGTH(UF_CRM) >= 2
+      GROUP BY 1, 2
+    `),
+    snowflakeSqlSafe(`
+      SELECT LEFT(UF_CRM, 2), COALESCE(NULLIF(ESPECIALIDADE_RQE, ''), 'SEM ESPECIALIDADE'), COUNT(DISTINCT UF_CRM)
+      FROM GOLD.TB_ESPECIALIDADE_X_FONTES
+      WHERE UPPER(SITUACAO) = 'ATIVO' AND LENGTH(UF_CRM) >= 2
+      GROUP BY 1, 2
+    `),
+    snowflakeSqlSafe(`
+      SELECT LEFT(UF_CRM, 2),
+             TO_CHAR(DATE_TRUNC('MONTH', COALESCE(TRY_TO_DATE(DT_INSCRICAO, 'DD/MM/YYYY'), TRY_TO_DATE(DT_INSCRICAO))), 'YYYY-MM'),
+             COUNT(DISTINCT UF_CRM)
+      FROM GOLD.TB_ESPECIALIDADE_X_FONTES
+      WHERE COALESCE(TRY_TO_DATE(DT_INSCRICAO, 'DD/MM/YYYY'), TRY_TO_DATE(DT_INSCRICAO))
+              >= DATEADD(MONTH, -35, DATE_TRUNC('MONTH', CURRENT_DATE()))
+        AND COALESCE(TRY_TO_DATE(DT_INSCRICAO, 'DD/MM/YYYY'), TRY_TO_DATE(DT_INSCRICAO))
+              < DATEADD(MONTH, 1, DATE_TRUNC('MONTH', CURRENT_DATE()))
+        AND YEAR(COALESCE(TRY_TO_DATE(DT_INSCRICAO, 'DD/MM/YYYY'), TRY_TO_DATE(DT_INSCRICAO)))
+              BETWEEN 2000 AND YEAR(CURRENT_DATE())
+        AND LENGTH(UF_CRM) >= 2
+      GROUP BY 1, 2
+    `),
+  ]);
+  return mapUfFiltros(ufKpis, ufGenero, ufFaixa, ufEspDs, ufEspCfm, ufMensal);
+}
+
 async function queryDadosferaBi() {
   const kpis = (await snowflakeSql(`
     SELECT
@@ -411,7 +504,7 @@ async function queryDadosferaBi() {
       (SELECT TO_CHAR(MAX(UPDATE_DATE), 'YYYY-MM-DD HH24:MI:SS') FROM GOLD.TB_MEDICOS)
   `))[0] || [];
 
-  const [genero, faixa, especialidadeDs, especialidadeCfm, ufsRaw, mensal, cidadesRaw, ufKpis, ufGenero, ufFaixa, ufEspDs, ufEspCfm, ufMensal] = await Promise.all([
+  const [genero, faixa, especialidadeDs, especialidadeCfm, ufsRaw, mensal, cidadesRaw, filtros] = await Promise.all([
     snowflakeSql(`
       SELECT COALESCE(GENERO, 'Não informado'), COUNT(*)
       FROM GOLD.TB_MEDICOS
@@ -471,50 +564,7 @@ async function queryDadosferaBi() {
       WHERE RN <= 40 OR UF = 'SP'
       ORDER BY N DESC
     `),
-    snowflakeSql(`
-      SELECT UF, COUNT(DISTINCT UF_CRM), COUNT(DISTINCT CPF)
-      FROM GOLD.TB_MEDICOS
-      WHERE UPPER(SITUACAO) = 'ATIVO' AND UF IS NOT NULL
-      GROUP BY UF
-    `),
-    snowflakeSql(`
-      SELECT UF, COALESCE(GENERO, 'Não informado'), COUNT(*)
-      FROM GOLD.TB_MEDICOS
-      WHERE UPPER(SITUACAO) = 'ATIVO' AND UF IS NOT NULL
-      GROUP BY 1, 2
-    `),
-    snowflakeSql(`
-      SELECT LEFT(UF_CRM, 2), COALESCE(FAIXA_ETARIA, 'Não definida'), COUNT(DISTINCT UF_CRM)
-      FROM GOLD.TB_ESPECIALIDADE_X_FONTES
-      WHERE UPPER(SITUACAO) = 'ATIVO' AND LENGTH(UF_CRM) >= 2
-      GROUP BY 1, 2
-    `),
-    snowflakeSql(`
-      SELECT LEFT(UF_CRM, 2), COALESCE(NULLIF(ESPECIALIDADE, ''), 'SEM ESPECIALIDADE'), COUNT(DISTINCT UF_CRM)
-      FROM GOLD.TB_ESPECIALIDADE_X_FONTES
-      WHERE UPPER(SITUACAO) = 'ATIVO' AND LENGTH(UF_CRM) >= 2
-      GROUP BY 1, 2
-    `),
-    snowflakeSql(`
-      SELECT LEFT(UF_CRM, 2), COALESCE(NULLIF(ESPECIALIDADE_RQE, ''), 'SEM ESPECIALIDADE'), COUNT(DISTINCT UF_CRM)
-      FROM GOLD.TB_ESPECIALIDADE_X_FONTES
-      WHERE UPPER(SITUACAO) = 'ATIVO' AND LENGTH(UF_CRM) >= 2
-      GROUP BY 1, 2
-    `),
-    snowflakeSql(`
-      SELECT LEFT(UF_CRM, 2),
-             TO_CHAR(DATE_TRUNC('MONTH', COALESCE(TRY_TO_DATE(DT_INSCRICAO, 'DD/MM/YYYY'), TRY_TO_DATE(DT_INSCRICAO))), 'YYYY-MM'),
-             COUNT(DISTINCT UF_CRM)
-      FROM GOLD.TB_ESPECIALIDADE_X_FONTES
-      WHERE COALESCE(TRY_TO_DATE(DT_INSCRICAO, 'DD/MM/YYYY'), TRY_TO_DATE(DT_INSCRICAO))
-              >= DATEADD(MONTH, -35, DATE_TRUNC('MONTH', CURRENT_DATE()))
-        AND COALESCE(TRY_TO_DATE(DT_INSCRICAO, 'DD/MM/YYYY'), TRY_TO_DATE(DT_INSCRICAO))
-              < DATEADD(MONTH, 1, DATE_TRUNC('MONTH', CURRENT_DATE()))
-        AND YEAR(COALESCE(TRY_TO_DATE(DT_INSCRICAO, 'DD/MM/YYYY'), TRY_TO_DATE(DT_INSCRICAO)))
-              BETWEEN 2000 AND YEAR(CURRENT_DATE())
-        AND LENGTH(UF_CRM) >= 2
-      GROUP BY 1, 2
-    `),
+    queryDadosferaBiFiltros().catch(() => ({})),
   ]);
 
   const ufs = ufsRaw.filter((r) => r && r[0]).map((r) => ({ uf: String(r[0]), value: toNumber(r[1]) }));
@@ -548,36 +598,7 @@ async function queryDadosferaBi() {
       ibge: String(r[2] || ""),
       value: toNumber(r[3]),
     })),
-    uf_kpis: (ufKpis || []).filter((r) => r && r[0]).map((r) => ({
-      uf: String(r[0]).toUpperCase(),
-      crm: toNumber(r[1]),
-      medicos: toNumber(r[2]),
-    })),
-    uf_genero: (ufGenero || []).filter((r) => r && r[0]).map((r) => ({
-      uf: String(r[0]).toUpperCase(),
-      label: String(r[1] || "Não informado"),
-      value: toNumber(r[2]),
-    })),
-    uf_faixa: (ufFaixa || []).filter((r) => r && r[0]).map((r) => ({
-      uf: String(r[0]).toUpperCase(),
-      label: String(r[1] || "Não definida"),
-      value: toNumber(r[2]),
-    })),
-    uf_esp_ds: (ufEspDs || []).filter((r) => r && r[0]).map((r) => ({
-      uf: String(r[0]).toUpperCase(),
-      label: String(r[1] || "SEM ESPECIALIDADE"),
-      value: toNumber(r[2]),
-    })),
-    uf_esp_cfm: (ufEspCfm || []).filter((r) => r && r[0]).map((r) => ({
-      uf: String(r[0]).toUpperCase(),
-      label: String(r[1] || "SEM ESPECIALIDADE"),
-      value: toNumber(r[2]),
-    })),
-    uf_mensal: (ufMensal || []).filter((r) => r && r[0] && r[1]).map((r) => ({
-      uf: String(r[0]).toUpperCase(),
-      mes: String(r[1]),
-      value: toNumber(r[2]),
-    })),
+    ...(filtros || {}),
   };
 }
 
@@ -1375,6 +1396,7 @@ module.exports = {
   queryDatabricks,
   queryCnes,
   queryDadosferaBi,
+  queryDadosferaBiFiltros,
   queryMedicosNovos,
   queryCidadesNovos,
   queryCnesBusca,
