@@ -582,6 +582,82 @@ def query_dadosfera_bi(override: dict | None = None) -> dict:
                 """
             )
         ]
+        uf_kpis, uf_genero, uf_faixa, uf_esp_ds, uf_esp_cfm, uf_mensal = [], [], [], [], [], []
+        def uf_pairs(sql: str, three: bool = True):
+            out = []
+            for r in q(sql):
+                if not r or r[0] is None:
+                    continue
+                item = {"uf": str(r[0]).upper(), "label": str(r[1] or ""), "value": as_int([r[2] if three else r[1]])}
+                if not three:
+                    item = {"uf": str(r[0]).upper(), "crm": as_int([r[1]]), "medicos": as_int([r[2]])}
+                out.append(item)
+            return out
+
+        try:
+            uf_kpis = uf_pairs(
+                """
+                SELECT UF, COUNT(DISTINCT UF_CRM), COUNT(DISTINCT CPF)
+                FROM GOLD.TB_MEDICOS
+                WHERE UPPER(SITUACAO) = 'ATIVO' AND UF IS NOT NULL
+                GROUP BY UF
+                """,
+                False,
+            )
+            uf_genero = uf_pairs(
+                """
+                SELECT UF, COALESCE(GENERO, 'Não informado'), COUNT(*)
+                FROM GOLD.TB_MEDICOS
+                WHERE UPPER(SITUACAO) = 'ATIVO' AND UF IS NOT NULL
+                GROUP BY 1, 2
+                """
+            )
+            uf_faixa = uf_pairs(
+                """
+                SELECT LEFT(UF_CRM, 2), COALESCE(FAIXA_ETARIA, 'Não definida'), COUNT(DISTINCT UF_CRM)
+                FROM GOLD.TB_ESPECIALIDADE_X_FONTES
+                WHERE UPPER(SITUACAO) = 'ATIVO' AND LENGTH(UF_CRM) >= 2
+                GROUP BY 1, 2
+                """
+            )
+            uf_esp_ds = uf_pairs(
+                """
+                SELECT LEFT(UF_CRM, 2), COALESCE(NULLIF(ESPECIALIDADE, ''), 'SEM ESPECIALIDADE'), COUNT(DISTINCT UF_CRM)
+                FROM GOLD.TB_ESPECIALIDADE_X_FONTES
+                WHERE UPPER(SITUACAO) = 'ATIVO' AND LENGTH(UF_CRM) >= 2
+                GROUP BY 1, 2
+                """
+            )
+            uf_esp_cfm = uf_pairs(
+                """
+                SELECT LEFT(UF_CRM, 2), COALESCE(NULLIF(ESPECIALIDADE_RQE, ''), 'SEM ESPECIALIDADE'), COUNT(DISTINCT UF_CRM)
+                FROM GOLD.TB_ESPECIALIDADE_X_FONTES
+                WHERE UPPER(SITUACAO) = 'ATIVO' AND LENGTH(UF_CRM) >= 2
+                GROUP BY 1, 2
+                """
+            )
+            uf_mensal = []
+            for r in q(
+                """
+                SELECT LEFT(UF_CRM, 2),
+                       TO_CHAR(DATE_TRUNC('MONTH', COALESCE(TRY_TO_DATE(DT_INSCRICAO, 'DD/MM/YYYY'), TRY_TO_DATE(DT_INSCRICAO))), 'YYYY-MM'),
+                       COUNT(DISTINCT UF_CRM)
+                FROM GOLD.TB_ESPECIALIDADE_X_FONTES
+                WHERE COALESCE(TRY_TO_DATE(DT_INSCRICAO, 'DD/MM/YYYY'), TRY_TO_DATE(DT_INSCRICAO))
+                        >= DATEADD(MONTH, -35, DATE_TRUNC('MONTH', CURRENT_DATE()))
+                  AND COALESCE(TRY_TO_DATE(DT_INSCRICAO, 'DD/MM/YYYY'), TRY_TO_DATE(DT_INSCRICAO))
+                        < DATEADD(MONTH, 1, DATE_TRUNC('MONTH', CURRENT_DATE()))
+                  AND YEAR(COALESCE(TRY_TO_DATE(DT_INSCRICAO, 'DD/MM/YYYY'), TRY_TO_DATE(DT_INSCRICAO)))
+                        BETWEEN 2000 AND YEAR(CURRENT_DATE())
+                  AND LENGTH(UF_CRM) >= 2
+                GROUP BY 1, 2
+                """
+            ):
+                if r and r[0] and r[1]:
+                    uf_mensal.append({"uf": str(r[0]).upper(), "mes": str(r[1]), "value": as_int([r[2]])})
+        except Exception:
+            uf_kpis, uf_genero, uf_faixa, uf_esp_ds, uf_esp_cfm, uf_mensal = [], [], [], [], [], []
+
         payload = {
             "fonte": "dadosfera",
             "crm": as_int([kpis[0]]),
@@ -596,6 +672,12 @@ def query_dadosfera_bi(override: dict | None = None) -> dict:
             "regioes": [{"label": k, "value": v} for k, v in sorted(regioes.items(), key=lambda x: -x[1])],
             "mensal": mensal,
             "cidades": cidades,
+            "uf_kpis": uf_kpis,
+            "uf_genero": uf_genero,
+            "uf_faixa": uf_faixa,
+            "uf_esp_ds": uf_esp_ds,
+            "uf_esp_cfm": uf_esp_cfm,
+            "uf_mensal": uf_mensal,
         }
         SNAPSHOT_BI = ROOT / "assets" / "snapshot-bi.json"
         SNAPSHOT_BI.write_text(json.dumps(payload, ensure_ascii=False, default=str, indent=2), encoding="utf-8")

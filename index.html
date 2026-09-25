@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Open+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/style.css?v=50" />
+  <link rel="stylesheet" href="assets/style.css?v=52" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 </head>
 <body>
@@ -69,6 +69,11 @@
           <button type="button" class="tab" data-tab="visao">Visão</button>
           <button type="button" class="tab" data-tab="dadosfera">Dadosfera CFM</button>
           <button type="button" class="tab" data-tab="cnes">CNES</button>
+        </div>
+        <div class="pbi-kpis" id="pbi-kpis-nav">
+          <div><b id="pbi-crm">0</b><span>CRM</span></div>
+          <div><b id="pbi-medicos">0</b><span>Médicos</span></div>
+          <div><b id="pbi-esp">0</b><span>Especialidades</span></div>
         </div>
       </nav>
       <div id="view-comparativo">
@@ -170,23 +175,6 @@
       </div>
 
       <div id="view-visao" hidden>
-        <header class="pbi-top">
-          <div class="pbi-brand">
-            <svg class="brand-icon" viewBox="0 0 48 48" aria-hidden="true">
-              <polygon points="24,5 41,14.5 41,33.5 24,43 7,33.5 7,14.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
-              <path d="M24 5 L24 43 M7 14.5 L41 33.5 M41 14.5 L7 33.5 M7 14.5 L41 14.5 M7 33.5 L41 33.5" fill="none" stroke="currentColor" stroke-width="1.4"/>
-            </svg>
-            <div>
-              <strong>Digital Solvers</strong>
-              <span>by <em>LLYC</em></span>
-            </div>
-          </div>
-          <div class="pbi-kpis">
-            <div><b id="pbi-crm">0</b><span>CRM</span></div>
-            <div><b id="pbi-medicos">0</b><span>Médicos</span></div>
-            <div><b id="pbi-esp">0</b><span>Especialidades</span></div>
-          </div>
-        </header>
         <section class="pbi-row pbi-row-1">
           <article class="panel pbi-card">
             <h2>Gênero</h2>
@@ -449,8 +437,8 @@
     });
   </script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="assets/app.js?v=50"></script>
-  <script src="assets/bi.js?v=50"></script>
-  <script src="assets/cnes-tab.js?v=50"></script>
+  <script src="assets/app.js?v=52"></script>
+  <script src="assets/bi.js?v=52"></script>
+  <script src="assets/cnes-tab.js?v=52"></script>
 </body>
 </html>

@@ -8,6 +8,23 @@ const UF_CENTRO = {
   SE: [-10.57, -37.45], SP: [-22.19, -48.79], TO: [-9.46, -48.26],
 };
 
+const UF_REGIAO = {
+  AC: "Norte", AP: "Norte", AM: "Norte", PA: "Norte", RO: "Norte", RR: "Norte", TO: "Norte",
+  AL: "Nordeste", BA: "Nordeste", CE: "Nordeste", MA: "Nordeste", PB: "Nordeste",
+  PE: "Nordeste", PI: "Nordeste", RN: "Nordeste", SE: "Nordeste",
+  ES: "Sudeste", MG: "Sudeste", RJ: "Sudeste", SP: "Sudeste",
+  PR: "Sul", RS: "Sul", SC: "Sul",
+  DF: "Centro-Oeste", GO: "Centro-Oeste", MS: "Centro-Oeste", MT: "Centro-Oeste",
+};
+
+const REGIAO_VIEW = {
+  Sudeste: { center: [-20.4, -44.6], zoom: 6 },
+  Sul: { center: [-27.6, -51.1], zoom: 6 },
+  Nordeste: { center: [-8.6, -40.4], zoom: 5.4 },
+  Norte: { center: [-4.2, -58.4], zoom: 5 },
+  "Centro-Oeste": { center: [-15.6, -54.4], zoom: 5.4 },
+};
+
 const biState = {
   data: null,
   munis: [],
@@ -20,6 +37,7 @@ const biState = {
   cidadesNovos: {},
   busca: "",
   totalCompleto: 0,
+  pbiFiltro: null,
 };
 let mapaReq = 0;
 
@@ -631,20 +649,6 @@ function drawPbiPie(slices, total) {
     path.setAttribute("d", `M ${x0} ${y0} A ${r1} ${r1} 0 ${large} 1 ${x1} ${y1} L ${x2} ${y2} A ${r0} ${r0} 0 ${large} 0 ${x3} ${y3} Z`);
     path.setAttribute("fill", s.color);
     svg.appendChild(path);
-    if (sweep > 0.12) {
-      const mid = angle + sweep / 2;
-      const lr = (r0 + r1) / 2;
-      const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-      text.setAttribute("x", String(cx + lr * Math.cos(mid)));
-      text.setAttribute("y", String(cy + lr * Math.sin(mid)));
-      text.setAttribute("text-anchor", "middle");
-      text.setAttribute("dominant-baseline", "middle");
-      text.setAttribute("fill", /fem|n.o inf/i.test(s.key) ? "#fff7f9" : "#07110c");
-      text.setAttribute("font-size", "7");
-      text.setAttribute("font-weight", "700");
-      text.textContent = `${((s.value / total) * 100).toFixed(1).replace(".", ",")}%`;
-      svg.appendChild(text);
-    }
     angle = next;
   });
 }
@@ -660,9 +664,136 @@ function ensurePbiMap() {
   return biState.mapPbi;
 }
 
-function drawPbiMap(data) {
+function escHtml(value) {
+  return String(value == null ? "" : value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function nomeRegiao(label) {
+  const t = foldText(label);
+  if (t.includes("sudeste")) return "Sudeste";
+  if (t.includes("nordeste")) return "Nordeste";
+  if (t === "norte" || t.startsWith("norte")) return "Norte";
+  if (t === "sul" || t.startsWith("sul")) return "Sul";
+  if (t.includes("centro")) return "Centro-Oeste";
+  return String(label || "");
+}
+
+function ufsDoFiltro() {
+  const f = biState.pbiFiltro;
+  if (!f) return null;
+  if (f.tipo === "uf") return [String(f.valor || "").toUpperCase()];
+  const reg = nomeRegiao(f.valor);
+  return Object.keys(UF_REGIAO).filter((uf) => UF_REGIAO[uf] === reg);
+}
+
+function somarPorChave(rows, ufs, key) {
+  const set = ufs ? new Set(ufs) : null;
+  const map = new Map();
+  (rows || []).forEach((r) => {
+    if (set && !set.has(String(r.uf || "").toUpperCase())) return;
+    const label = r[key] || r.label || r.mes;
+    if (!label) return;
+    map.set(label, (map.get(label) || 0) + (Number(r.value) || 0));
+  });
+  return [...map.entries()].map(([label, value]) => ({ label, value })).sort((a, b) => b.value - a.value);
+}
+
+function visaoFiltrada(data) {
+  const ufs = ufsDoFiltro();
+  if (!ufs) {
+    return {
+      crm: data.crm,
+      medicos: data.medicos,
+      especialidades: data.especialidades,
+      genero: data.genero || [],
+      faixa: data.faixa || [],
+      especialidade_ds: (data.especialidade_ds || []).slice(0, 10),
+      especialidade_cfm: (data.especialidade_cfm || []).slice(0, 10),
+      regioes: data.regioes || [],
+      ufs: (data.ufs || []).slice(0, 12),
+      mensal: data.mensal || [],
+      cidades: data.cidades || [],
+    };
+  }
+  const set = new Set(ufs);
+  const kpis = (data.uf_kpis || []).filter((k) => set.has(String(k.uf || "").toUpperCase()));
+  const ufsRows = (data.ufs || []).filter((u) => set.has(String(u.uf || "").toUpperCase()));
+  const crm = kpis.length
+    ? kpis.reduce((s, k) => s + (Number(k.crm) || 0), 0)
+    : ufsRows.reduce((s, u) => s + (Number(u.value) || 0), 0);
+  const medicos = kpis.length
+    ? kpis.reduce((s, k) => s + (Number(k.medicos) || 0), 0)
+    : crm;
+  const has = (key) => Array.isArray(data[key]) && data[key].length;
+  const especialidades = has("uf_esp_ds")
+    ? new Set((data.uf_esp_ds || [])
+      .filter((r) => set.has(String(r.uf || "").toUpperCase()) && r.value > 0)
+      .map((r) => String(r.label || "").trim())
+      .filter((label) => label && label !== "SEM ESPECIALIDADE")).size
+    : data.especialidades;
+  return {
+    crm,
+    medicos,
+    especialidades,
+    genero: has("uf_genero") ? somarPorChave(data.uf_genero, ufs, "label") : data.genero || [],
+    faixa: has("uf_faixa") ? somarPorChave(data.uf_faixa, ufs, "label") : data.faixa || [],
+    especialidade_ds: (has("uf_esp_ds") ? somarPorChave(data.uf_esp_ds, ufs, "label") : data.especialidade_ds || []).slice(0, 10),
+    especialidade_cfm: (has("uf_esp_cfm") ? somarPorChave(data.uf_esp_cfm, ufs, "label") : data.especialidade_cfm || []).slice(0, 10),
+    regioes: data.regioes || [],
+    ufs: ufsRows,
+    mensal: has("uf_mensal")
+      ? somarPorChave(data.uf_mensal, ufs, "mes").map((r) => ({ mes: r.label, value: r.value }))
+      : data.mensal || [],
+    cidades: (data.cidades || []).filter((c) => set.has(String(c.uf || "").toUpperCase())),
+  };
+}
+
+function fillPbiBars(id, rows, opts = {}) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const list = rows || [];
+  const max = Math.max(...list.map((r) => r.value), 1);
+  const filtro = biState.pbiFiltro;
+  const tipo = opts.tipo || "";
+  el.innerHTML = list.map((r) => {
+    const key = tipo === "uf" ? String(r.uf || r.label || "").toUpperCase() : String(r.label || r.uf || "");
+    const label = tipo === "uf" ? key : key;
+    let on = false;
+    if (filtro && tipo === "regiao") {
+      on = nomeRegiao(filtro.tipo === "regiao" ? filtro.valor : UF_REGIAO[String(filtro.valor || "").toUpperCase()] || "") === nomeRegiao(key);
+    } else if (filtro && tipo === "uf") {
+      on = filtro.tipo === "uf" && String(filtro.valor).toUpperCase() === key;
+    }
+    const dim = Boolean(filtro && tipo === "regiao" && !on);
+    const cls = `bar-row${on ? " on" : ""}${dim ? " dim" : ""}`;
+    const data = tipo ? ` data-pbi-tipo="${escHtml(tipo)}" data-pbi-valor="${escHtml(key)}"` : "";
+    return `<div class="${cls}"${data} title="${escHtml(label)}">
+      <span>${escHtml(label)}</span>
+      <i><b class="${opts.coral ? "coral" : ""}" style="width:${(r.value / max) * 100}%"></b></i>
+      <em>${biFmt(r.value)}</em>
+    </div>`;
+  }).join("");
+}
+
+function escolherFiltroPbi(tipo, valor) {
+  if (!tipo || !valor) return;
+  const atual = biState.pbiFiltro;
+  const mesmo = atual
+    && atual.tipo === tipo
+    && foldText(atual.valor) === foldText(valor);
+  biState.pbiFiltro = mesmo
+    ? null
+    : { tipo, valor: tipo === "uf" ? String(valor).toUpperCase() : nomeRegiao(valor) };
+  if (biState.data) renderVisao(biState.data);
+}
+
+function drawPbiMap(cidades, ufsFiltro) {
   const map = ensurePbiMap();
-  if (!map || !data) return;
+  if (!map) return;
   if (biState.layerPbi) {
     map.removeLayer(biState.layerPbi);
     biState.layerPbi = null;
@@ -676,13 +807,16 @@ function drawPbiMap(data) {
     if (code.length >= 6) byIbge.set(code.slice(0, 6), m);
     byName.set(`${String(m.u || "").toUpperCase()}|${foldText(m.n)}`, m);
   });
-  const cidades = data.cidades || [];
-  const max = Math.max(...cidades.map((c) => c.value), 1);
-  cidades.forEach((c) => {
+  const lista = cidades || [];
+  const max = Math.max(...lista.map((c) => c.value), 1);
+  const bounds = [];
+  lista.forEach((c) => {
     const geo = lookupGeo(c, byIbge, byName);
     if (!geo) return;
     const t = c.value / max;
-    L.circleMarker([geo.lat, geo.lng], {
+    const ll = [geo.lat, geo.lng];
+    bounds.push(ll);
+    L.circleMarker(ll, {
       radius: 3 + Math.sqrt(t) * 10,
       color: "#f54963",
       fillColor: "#f54963",
@@ -692,19 +826,32 @@ function drawPbiMap(data) {
   });
   group.addTo(map);
   biState.layerPbi = group;
-  map.setView([-14.2, -54], 4);
+  if (ufsFiltro && ufsFiltro.length === 1 && UF_CENTRO[ufsFiltro[0]]) {
+    map.setView(UF_CENTRO[ufsFiltro[0]], 6.2);
+  } else if (ufsFiltro && ufsFiltro.length && bounds.length) {
+    map.fitBounds(bounds, { padding: [28, 28], maxZoom: 6.5 });
+  } else if (ufsFiltro && ufsFiltro.length) {
+    const reg = biState.pbiFiltro && biState.pbiFiltro.tipo === "regiao"
+      ? nomeRegiao(biState.pbiFiltro.valor)
+      : UF_REGIAO[ufsFiltro[0]];
+    const view = REGIAO_VIEW[reg];
+    if (view) map.setView(view.center, view.zoom);
+  } else {
+    map.setView([-14.2, -54], 4);
+  }
   setTimeout(() => map.invalidateSize(), 80);
 }
 
 function renderVisao(data) {
   if (!data || !document.getElementById("view-visao")) return;
+  const view = visaoFiltrada(data);
   const set = (id, value) => {
     const el = document.getElementById(id);
     if (el) el.textContent = value;
   };
-  set("pbi-crm", biFmt(data.crm));
-  set("pbi-medicos", biFmt(data.medicos));
-  set("pbi-esp", biFmt(data.especialidades));
+  set("pbi-crm", biFmt(view.crm));
+  set("pbi-medicos", biFmt(view.medicos));
+  set("pbi-esp", biFmt(view.especialidades));
   const updRaw = data.atualizado_em;
   let upd = null;
   if (updRaw != null && /^\d+(\.\d+)?$/.test(String(updRaw).trim()) && Number(updRaw) >= 1e9) {
@@ -719,9 +866,9 @@ function renderVisao(data) {
     : `Atualizado em: ${data.atualizado_em || "—"}`);
 
   const genderColors = { feminino: "#f54963", masculino: "#51e02e", "não informado": "#f4f7fb", "nao informado": "#f4f7fb" };
-  const slices = (data.genero || []).map((g) => ({
+  const slices = (view.genero || []).map((g) => ({
     key: g.label,
-    color: genderColors[String(g.label).toLowerCase()] || "#f4f7fb",
+    color: genderColors[foldText(g.label)] || "#f4f7fb",
     value: g.value,
   }));
   const total = slices.reduce((s, g) => s + g.value, 0) || 1;
@@ -730,12 +877,12 @@ function renderVisao(data) {
   const legend = document.getElementById("pbi-legend");
   if (legend) {
     legend.innerHTML = slices.map((g) => {
-      const pct = ((g.value / total) * 100).toFixed(1).replace(".", ",");
-      return `<li><i style="background:${g.color}"></i><span>${g.key} · ${biFmt(g.value)} (${pct}%)</span></li>`;
+      const pct = ((g.value / total) * 100).toFixed(2).replace(".", ",");
+      return `<li><i style="background:${g.color}"></i><span>${escHtml(g.key)} · ${biFmt(g.value)} (${pct}%)</span></li>`;
     }).join("");
   }
 
-  const mensalOk = (data.mensal || []).filter((m) => mesValido(m.mes));
+  const mensalOk = (view.mensal || []).filter((m) => mesValido(m.mes));
   const rows = [...mensalOk].sort((a, b) => String(a.mes).localeCompare(String(b.mes)));
   const maxM = Math.max(...rows.map((m) => m.value), 1);
   const grupos = [];
@@ -761,12 +908,12 @@ function renderVisao(data) {
     `).join("");
   }
 
-  fillBars("pbi-regiao", data.regioes || []);
-  fillBars("pbi-faixa", data.faixa || []);
-  fillBars("pbi-esp-ds", (data.especialidade_ds || []).slice(0, 10));
-  fillBars("pbi-esp-cfm", (data.especialidade_cfm || []).slice(0, 10));
-  fillBars("pbi-ufs", (data.ufs || []).slice(0, 12), "uf");
-  drawPbiMap(data);
+  fillPbiBars("pbi-regiao", view.regioes || [], { tipo: "regiao" });
+  fillPbiBars("pbi-faixa", view.faixa || []);
+  fillPbiBars("pbi-esp-ds", view.especialidade_ds || []);
+  fillPbiBars("pbi-esp-cfm", view.especialidade_cfm || [], { coral: true });
+  fillPbiBars("pbi-ufs", view.ufs || [], { tipo: "uf" });
+  drawPbiMap(view.cidades, ufsDoFiltro());
 }
 
 function switchTab(tab) {
@@ -827,6 +974,14 @@ async function initBi() {
     const col = event.target.closest(".month-col");
     if (col && col.dataset.mes) escolherMes(col.dataset.mes);
   });
+  const visaoEl = document.getElementById("view-visao");
+  if (visaoEl) {
+    visaoEl.addEventListener("click", (event) => {
+      const row = event.target.closest(".bar-row[data-pbi-tipo]");
+      if (!row) return;
+      escolherFiltroPbi(row.dataset.pbiTipo, row.dataset.pbiValor);
+    });
+  }
   biState.modo = "novos";
   atualizarTitulo();
   try {
