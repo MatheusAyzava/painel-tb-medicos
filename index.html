@@ -7,13 +7,19 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Open+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/style.css?v=49" />
+  <link rel="stylesheet" href="assets/style.css?v=50" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 </head>
 <body>
   <div class="keys-backdrop" id="keys-backdrop" hidden></div>
   <div class="app">
     <aside class="keys" id="keys">
+      <div class="keys-rail" aria-hidden="true">
+        <svg class="brand-icon" viewBox="0 0 48 48">
+          <polygon points="24,5 41,14.5 41,33.5 24,43 7,33.5 7,14.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+          <path d="M24 5 L24 43 M7 14.5 L41 33.5 M41 14.5 L7 33.5 M7 14.5 L41 14.5 M7 33.5 L41 33.5" fill="none" stroke="currentColor" stroke-width="1.4"/>
+        </svg>
+      </div>
       <div class="keys-panel">
       <header class="keys-head">
         <div class="brand-mark">
@@ -60,6 +66,7 @@
         <p class="brand-inline">Digital Solvers <span>by LLYC</span></p>
         <div class="tab-bar">
           <button type="button" class="tab on" data-tab="comparativo">Comparativo</button>
+          <button type="button" class="tab" data-tab="visao">Visão</button>
           <button type="button" class="tab" data-tab="dadosfera">Dadosfera CFM</button>
           <button type="button" class="tab" data-tab="cnes">CNES</button>
         </div>
@@ -126,6 +133,7 @@
         </article>
       </section>
 
+      <section class="gaps" id="gap-cards"></section>
       <section class="kpis" id="kpis"></section>
 
       <section class="charts charts-single">
@@ -159,6 +167,71 @@
           </div>
         </article>
       </section>
+      </div>
+
+      <div id="view-visao" hidden>
+        <header class="pbi-top">
+          <div class="pbi-brand">
+            <svg class="brand-icon" viewBox="0 0 48 48" aria-hidden="true">
+              <polygon points="24,5 41,14.5 41,33.5 24,43 7,33.5 7,14.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+              <path d="M24 5 L24 43 M7 14.5 L41 33.5 M41 14.5 L7 33.5 M7 14.5 L41 14.5 M7 33.5 L41 33.5" fill="none" stroke="currentColor" stroke-width="1.4"/>
+            </svg>
+            <div>
+              <strong>Digital Solvers</strong>
+              <span>by <em>LLYC</em></span>
+            </div>
+          </div>
+          <div class="pbi-kpis">
+            <div><b id="pbi-crm">0</b><span>CRM</span></div>
+            <div><b id="pbi-medicos">0</b><span>Médicos</span></div>
+            <div><b id="pbi-esp">0</b><span>Especialidades</span></div>
+          </div>
+        </header>
+        <section class="pbi-row pbi-row-1">
+          <article class="panel pbi-card">
+            <h2>Gênero</h2>
+            <div class="donut-body pbi-donut-body">
+              <div class="donut-wrap pbi-donut-wrap">
+                <svg id="pbi-donut" viewBox="0 0 120 120" aria-hidden="true"></svg>
+                <div class="donut-center">
+                  <strong id="pbi-donut-total">0</strong>
+                  <span>ativos</span>
+                </div>
+              </div>
+              <ul class="legend" id="pbi-legend"></ul>
+            </div>
+          </article>
+          <article class="panel pbi-card">
+            <h2>Evolução mensal</h2>
+            <div class="month-chart pbi-month" id="pbi-mensal"></div>
+          </article>
+          <article class="panel pbi-card">
+            <h2>Região</h2>
+            <div class="bars" id="pbi-regiao"></div>
+          </article>
+        </section>
+        <section class="pbi-row pbi-row-2">
+          <article class="panel pbi-card">
+            <h2>Faixa etária</h2>
+            <div class="bars" id="pbi-faixa"></div>
+          </article>
+          <article class="panel pbi-card">
+            <h2>Especialidade DS</h2>
+            <div class="bars" id="pbi-esp-ds"></div>
+          </article>
+          <article class="panel pbi-card">
+            <h2>Especialidade CFM</h2>
+            <div class="bars" id="pbi-esp-cfm"></div>
+          </article>
+          <article class="panel pbi-card">
+            <h2>UF</h2>
+            <div class="bars uf" id="pbi-ufs"></div>
+          </article>
+          <article class="panel pbi-card pbi-map-card">
+            <div id="map-pbi"></div>
+            <p class="pbi-updated" id="pbi-updated">Atualizado em: —</p>
+          </article>
+        </section>
       </div>
 
       <div id="view-dadosfera" hidden>
@@ -376,8 +449,8 @@
     });
   </script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="assets/app.js?v=49"></script>
-  <script src="assets/bi.js?v=49"></script>
-  <script src="assets/cnes-tab.js?v=49"></script>
+  <script src="assets/app.js?v=50"></script>
+  <script src="assets/bi.js?v=50"></script>
+  <script src="assets/cnes-tab.js?v=50"></script>
 </body>
 </html>

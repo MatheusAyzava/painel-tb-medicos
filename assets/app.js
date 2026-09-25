@@ -8,6 +8,7 @@ const state = {
   genero: [],
   tipoInscricao: [],
   ufs: [],
+  lacunas: { sem_cpf: 0, sem_telefone: 0, sem_email: 0, sem_genero: 0, sem_nasc: 0 },
 };
 
 const $ = (id) => document.getElementById(id);
@@ -188,6 +189,22 @@ function render() {
   if (source) {
     const day = formatDate(fontes.dadosfera.atualizado_cfm || fontes.dadosfera.atualizado_em).split(" ")[0];
     source.textContent = `Fonte: Dadosfera · CFM · ${day}.`;
+  }
+
+  const gaps = state.lacunas || {};
+  if ($("gap-cards")) {
+    $("gap-cards").innerHTML = [
+      ["sem_cpf", "UF+CRM sem CPF"],
+      ["sem_telefone", "UF+CRM sem telefone"],
+      ["sem_email", "UF+CRM sem e-mail"],
+      ["sem_genero", "UF+CRM sem gênero"],
+      ["sem_nasc", "UF+CRM sem data nasc."],
+    ].map(([key, label]) => `
+      <article class="gap">
+        <strong>${formatMi(gaps[key])}</strong>
+        <span>${label}</span>
+      </article>
+    `).join("");
   }
 
   $("kpis").innerHTML = [
@@ -512,6 +529,7 @@ function applyFonte(name, data, layer) {
   if (Array.isArray(data.tipo_inscricao) && data.tipo_inscricao.length && (name === "dadosfera" || !state.tipoInscricao.length)) {
     state.tipoInscricao = data.tipo_inscricao;
   }
+  if (data.lacunas && name === "dadosfera") state.lacunas = { ...state.lacunas, ...data.lacunas };
 }
 
 async function pullSnowflake() {
@@ -579,6 +597,7 @@ async function loadSnapshot() {
   if (Array.isArray(data.genero)) state.genero = data.genero;
   if (Array.isArray(data.tipoInscricao)) state.tipoInscricao = data.tipoInscricao;
   if (Array.isArray(data.ufs)) state.ufs = data.ufs;
+  if (data.lacunas) state.lacunas = { ...state.lacunas, ...data.lacunas };
   render();
   return true;
 }

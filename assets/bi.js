@@ -179,6 +179,7 @@ function renderBi(data) {
   fillBars("bi-esp-ds", data.especialidade_ds || []);
   fillBars("bi-esp-cfm", data.especialidade_cfm || []);
   fillBars("bi-ufs", (data.ufs || []).slice(0, 16), "uf");
+  renderVisao(data);
 
   const sel = document.getElementById("map-uf");
   const current = sel.value;
@@ -611,19 +612,183 @@ async function buscarLista() {
   }
 }
 
+function drawPbiPie(slices, total) {
+  const svg = document.getElementById("pbi-donut");
+  if (!svg) return;
+  while (svg.firstChild) svg.removeChild(svg.firstChild);
+  const cx = 60, cy = 60, r0 = 34, r1 = 54;
+  let angle = -Math.PI / 2;
+  slices.forEach((s) => {
+    const sweep = (s.value / total) * 2 * Math.PI;
+    const next = angle + sweep;
+    const large = next - angle > Math.PI ? 1 : 0;
+    const p = (r, a) => [cx + r * Math.cos(a), cy + r * Math.sin(a)];
+    const [x0, y0] = p(r1, angle);
+    const [x1, y1] = p(r1, next);
+    const [x2, y2] = p(r0, next);
+    const [x3, y3] = p(r0, angle);
+    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    path.setAttribute("d", `M ${x0} ${y0} A ${r1} ${r1} 0 ${large} 1 ${x1} ${y1} L ${x2} ${y2} A ${r0} ${r0} 0 ${large} 0 ${x3} ${y3} Z`);
+    path.setAttribute("fill", s.color);
+    svg.appendChild(path);
+    if (sweep > 0.12) {
+      const mid = angle + sweep / 2;
+      const lr = (r0 + r1) / 2;
+      const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+      text.setAttribute("x", String(cx + lr * Math.cos(mid)));
+      text.setAttribute("y", String(cy + lr * Math.sin(mid)));
+      text.setAttribute("text-anchor", "middle");
+      text.setAttribute("dominant-baseline", "middle");
+      text.setAttribute("fill", /fem|n.o inf/i.test(s.key) ? "#fff7f9" : "#07110c");
+      text.setAttribute("font-size", "7");
+      text.setAttribute("font-weight", "700");
+      text.textContent = `${((s.value / total) * 100).toFixed(1).replace(".", ",")}%`;
+      svg.appendChild(text);
+    }
+    angle = next;
+  });
+}
+
+function ensurePbiMap() {
+  if (biState.mapPbi || typeof L === "undefined") return biState.mapPbi;
+  const el = document.getElementById("map-pbi");
+  if (!el) return null;
+  biState.mapPbi = L.map("map-pbi", { zoomControl: false, attributionControl: false }).setView([-14.2, -54], 4);
+  L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}", {
+    maxZoom: 12,
+  }).addTo(biState.mapPbi);
+  return biState.mapPbi;
+}
+
+function drawPbiMap(data) {
+  const map = ensurePbiMap();
+  if (!map || !data) return;
+  if (biState.layerPbi) {
+    map.removeLayer(biState.layerPbi);
+    biState.layerPbi = null;
+  }
+  const group = L.layerGroup();
+  const byIbge = new Map();
+  const byName = new Map();
+  (biState.munis || []).forEach((m) => {
+    const code = String(m.i || "");
+    byIbge.set(code, m);
+    if (code.length >= 6) byIbge.set(code.slice(0, 6), m);
+    byName.set(`${String(m.u || "").toUpperCase()}|${foldText(m.n)}`, m);
+  });
+  const cidades = data.cidades || [];
+  const max = Math.max(...cidades.map((c) => c.value), 1);
+  cidades.forEach((c) => {
+    const geo = lookupGeo(c, byIbge, byName);
+    if (!geo) return;
+    const t = c.value / max;
+    L.circleMarker([geo.lat, geo.lng], {
+      radius: 3 + Math.sqrt(t) * 10,
+      color: "#f54963",
+      fillColor: "#f54963",
+      fillOpacity: 0.72,
+      weight: 0,
+    }).bindTooltip(`${c.municipio}${c.uf ? " · " + c.uf : ""}: ${biFmt(c.value)}`).addTo(group);
+  });
+  group.addTo(map);
+  biState.layerPbi = group;
+  map.setView([-14.2, -54], 4);
+  setTimeout(() => map.invalidateSize(), 80);
+}
+
+function renderVisao(data) {
+  if (!data || !document.getElementById("view-visao")) return;
+  const set = (id, value) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = value;
+  };
+  set("pbi-crm", biFmt(data.crm));
+  set("pbi-medicos", biFmt(data.medicos));
+  set("pbi-esp", biFmt(data.especialidades));
+  const updRaw = data.atualizado_em;
+  let upd = null;
+  if (updRaw != null && /^\d+(\.\d+)?$/.test(String(updRaw).trim()) && Number(updRaw) >= 1e9) {
+    const n = Number(updRaw);
+    const ms = n >= 1e18 ? n / 1e6 : n >= 1e14 ? n / 1e3 : n >= 1e12 ? n : n * 1000;
+    upd = new Date(ms);
+  } else if (updRaw) {
+    upd = new Date(String(updRaw).includes("T") ? updRaw : String(updRaw).replace(" ", "T"));
+  }
+  set("pbi-updated", upd && !Number.isNaN(upd.getTime())
+    ? `Atualizado em: ${upd.toLocaleDateString("pt-BR")}`
+    : `Atualizado em: ${data.atualizado_em || "—"}`);
+
+  const genderColors = { feminino: "#f54963", masculino: "#51e02e", "não informado": "#f4f7fb", "nao informado": "#f4f7fb" };
+  const slices = (data.genero || []).map((g) => ({
+    key: g.label,
+    color: genderColors[String(g.label).toLowerCase()] || "#f4f7fb",
+    value: g.value,
+  }));
+  const total = slices.reduce((s, g) => s + g.value, 0) || 1;
+  set("pbi-donut-total", biFmt(total));
+  drawPbiPie(slices, total);
+  const legend = document.getElementById("pbi-legend");
+  if (legend) {
+    legend.innerHTML = slices.map((g) => {
+      const pct = ((g.value / total) * 100).toFixed(1).replace(".", ",");
+      return `<li><i style="background:${g.color}"></i><span>${g.key} · ${biFmt(g.value)} (${pct}%)</span></li>`;
+    }).join("");
+  }
+
+  const mensalOk = (data.mensal || []).filter((m) => mesValido(m.mes));
+  const rows = [...mensalOk].sort((a, b) => String(a.mes).localeCompare(String(b.mes)));
+  const maxM = Math.max(...rows.map((m) => m.value), 1);
+  const grupos = [];
+  rows.forEach((m) => {
+    const year = mesAno(m.mes);
+    if (!grupos.length || grupos[grupos.length - 1].year !== year) grupos.push({ year, items: [] });
+    grupos[grupos.length - 1].items.push(m);
+  });
+  const mensalEl = document.getElementById("pbi-mensal");
+  if (mensalEl) {
+    mensalEl.innerHTML = grupos.map((grupo) => `
+      <div class="month-year">
+        <div class="month-year-bars">
+          ${grupo.items.map((m) => `
+            <div class="month-col" title="${mesLabel(m.mes)} ${grupo.year} · ${biFmt(m.value)}">
+              <span class="month-track"><i style="height:${Math.max(4, (m.value / maxM) * 100)}%"><em>${biFmt(m.value)}</em></i></span>
+              <span class="month-name">${mesEixo(m.mes)}</span>
+            </div>
+          `).join("")}
+        </div>
+        <strong>${grupo.year}</strong>
+      </div>
+    `).join("");
+  }
+
+  fillBars("pbi-regiao", data.regioes || []);
+  fillBars("pbi-faixa", data.faixa || []);
+  fillBars("pbi-esp-ds", (data.especialidade_ds || []).slice(0, 10));
+  fillBars("pbi-esp-cfm", (data.especialidade_cfm || []).slice(0, 10));
+  fillBars("pbi-ufs", (data.ufs || []).slice(0, 12), "uf");
+  drawPbiMap(data);
+}
+
 function switchTab(tab) {
   const comparativo = document.getElementById("view-comparativo");
+  const visao = document.getElementById("view-visao");
   const dadosfera = document.getElementById("view-dadosfera");
   const cnes = document.getElementById("view-cnes");
   comparativo.hidden = tab !== "comparativo";
+  if (visao) visao.hidden = tab !== "visao";
   dadosfera.hidden = tab !== "dadosfera";
   if (cnes) cnes.hidden = tab !== "cnes";
+  document.body.classList.toggle("screen-visao", tab === "visao");
   document.querySelectorAll("[data-tab]").forEach((btn) => btn.classList.toggle("on", btn.dataset.tab === tab));
-  if (tab === "dadosfera" || tab === "cnes") {
+  if (tab === "dadosfera" || tab === "cnes" || tab === "visao") {
     location.hash = tab;
-    if (tab === "dadosfera" && !biState.data) loadBi();
-    setTimeout(() => biState.map && biState.map.invalidateSize(), 120);
-  } else if (["dadosfera", "cnes"].includes(location.hash.replace("#", ""))) {
+    if ((tab === "dadosfera" || tab === "visao") && !biState.data) loadBi();
+    setTimeout(() => {
+      if (biState.map) biState.map.invalidateSize();
+      if (biState.mapPbi) biState.mapPbi.invalidateSize();
+      if (tab === "visao" && biState.data) renderVisao(biState.data);
+    }, 120);
+  } else if (["dadosfera", "cnes", "visao"].includes(location.hash.replace("#", ""))) {
     location.hash = "";
   }
 }
@@ -632,8 +797,8 @@ async function initBi() {
   document.querySelectorAll("[data-tab]").forEach((btn) => {
     btn.addEventListener("click", () => switchTab(btn.dataset.tab));
   });
-  if (location.hash.replace("#", "") === "dadosfera") switchTab("dadosfera");
-  if (location.hash.replace("#", "") === "cnes") switchTab("cnes");
+  const start = location.hash.replace("#", "");
+  if (start === "dadosfera" || start === "cnes" || start === "visao") switchTab(start);
   document.getElementById("map-uf").addEventListener("change", () => atualizarMapa());
   document.getElementById("map-reset").addEventListener("click", () => {
     document.getElementById("map-uf").value = "BR";
@@ -669,7 +834,10 @@ async function initBi() {
   } catch {
     biState.munis = [];
   }
-  if (biState.data) atualizarMapa();
+  if (biState.data) {
+    atualizarMapa();
+    renderVisao(biState.data);
+  }
 }
 
 initBi();

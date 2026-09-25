@@ -374,6 +374,63 @@ def query_snowflake(override: dict | None = None) -> dict:
         if especialidades:
             extras.append({"label": "Especialidades", "value": especialidades})
 
+        lacunas = {"sem_cpf": 0, "sem_telefone": 0, "sem_email": 0, "sem_genero": 0, "sem_nasc": 0}
+        try:
+            grows = snowflake_fetch(
+                ctx,
+                """
+                WITH ativos AS (
+                  SELECT
+                    UF_CRM,
+                    TO_VARCHAR(CPF) AS CPF,
+                    REGEXP_REPLACE(TO_VARCHAR(CPF), '[^0-9]', '') AS CPF_DIG,
+                    TRIM(TO_VARCHAR(GENERO)) AS GENERO,
+                    DATA_NASCIMENTO,
+                    ANO_NASCIMENTO
+                  FROM GOLD.TB_MEDICOS
+                  WHERE UPPER(SITUACAO) = 'ATIVO'
+                ),
+                tels AS (
+                  SELECT DISTINCT TO_VARCHAR(CPF) AS CPF
+                  FROM GOLD.TB_MEDICOS_TELEFONES_FREQUENCIA
+                  WHERE NULLIF(REGEXP_REPLACE(TO_VARCHAR(TELEFONE), '[^0-9]', ''), '') IS NOT NULL
+                ),
+                mails AS (
+                  SELECT DISTINCT TO_VARCHAR(CPF) AS CPF
+                  FROM GOLD.TB_MEDICOS_EMAILS_FREQUENCIA
+                  WHERE NULLIF(TRIM(TO_VARCHAR(EMAIL)), '') IS NOT NULL
+                    AND TO_VARCHAR(EMAIL) ILIKE '%@%'
+                )
+                SELECT
+                  COUNT(DISTINCT CASE
+                    WHEN CPF_DIG IS NULL OR LENGTH(CPF_DIG) < 11 OR REGEXP_LIKE(CPF_DIG, '^(.)\\1{10}$')
+                    THEN UF_CRM END),
+                  COUNT(DISTINCT CASE WHEN t.CPF IS NULL THEN a.UF_CRM END),
+                  COUNT(DISTINCT CASE WHEN e.CPF IS NULL THEN a.UF_CRM END),
+                  COUNT(DISTINCT CASE
+                    WHEN NULLIF(a.GENERO, '') IS NULL
+                      OR UPPER(a.GENERO) IN ('NAO INFORMADO', 'NÃO INFORMADO')
+                    THEN a.UF_CRM END),
+                  COUNT(DISTINCT CASE
+                    WHEN a.DATA_NASCIMENTO IS NULL
+                     AND NULLIF(TRIM(TO_VARCHAR(a.ANO_NASCIMENTO)), '') IS NULL
+                    THEN a.UF_CRM END)
+                FROM ativos a
+                LEFT JOIN tels t ON t.CPF = a.CPF
+                LEFT JOIN mails e ON e.CPF = a.CPF
+                """,
+            )[1]
+            if grows:
+                lacunas = {
+                    "sem_cpf": as_int([grows[0][0]]),
+                    "sem_telefone": as_int([grows[0][1]]),
+                    "sem_email": as_int([grows[0][2]]),
+                    "sem_genero": as_int([grows[0][3]]),
+                    "sem_nasc": as_int([grows[0][4]]),
+                }
+        except Exception:
+            lacunas = {"sem_cpf": 0, "sem_telefone": 0, "sem_email": 0, "sem_genero": 0, "sem_nasc": 0}
+
         payload = {
             "valor": crm_unicos,
             "crm_unicos": crm_unicos,
@@ -387,6 +444,7 @@ def query_snowflake(override: dict | None = None) -> dict:
             "ufs": ufs,
             "genero": genero,
             "tipo_inscricao": tipo,
+            "lacunas": lacunas,
             "extras": extras,
             "atualizado_em": atualizado_gold,
             "atualizado_cnes": atualizado_cnes,

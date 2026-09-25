@@ -214,6 +214,61 @@ async function querySnowflake() {
     `),
   ]);
 
+  let gapRow = [];
+  try {
+    const gaps = await snowflakeSql(`
+      WITH ativos AS (
+        SELECT
+          UF_CRM,
+          TO_VARCHAR(CPF) AS CPF,
+          REGEXP_REPLACE(TO_VARCHAR(CPF), '[^0-9]', '') AS CPF_DIG,
+          TRIM(TO_VARCHAR(GENERO)) AS GENERO,
+          DATA_NASCIMENTO,
+          ANO_NASCIMENTO
+        FROM GOLD.TB_MEDICOS
+        WHERE UPPER(SITUACAO) = 'ATIVO'
+      ),
+      tels AS (
+        SELECT DISTINCT TO_VARCHAR(CPF) AS CPF
+        FROM GOLD.TB_MEDICOS_TELEFONES_FREQUENCIA
+        WHERE NULLIF(REGEXP_REPLACE(TO_VARCHAR(TELEFONE), '[^0-9]', ''), '') IS NOT NULL
+      ),
+      mails AS (
+        SELECT DISTINCT TO_VARCHAR(CPF) AS CPF
+        FROM GOLD.TB_MEDICOS_EMAILS_FREQUENCIA
+        WHERE NULLIF(TRIM(TO_VARCHAR(EMAIL)), '') IS NOT NULL
+          AND TO_VARCHAR(EMAIL) ILIKE '%@%'
+      )
+      SELECT
+        COUNT(DISTINCT CASE
+          WHEN CPF_DIG IS NULL OR LENGTH(CPF_DIG) < 11 OR REGEXP_LIKE(CPF_DIG, '^(.)\\1{10}$')
+          THEN UF_CRM END),
+        COUNT(DISTINCT CASE WHEN t.CPF IS NULL THEN a.UF_CRM END),
+        COUNT(DISTINCT CASE WHEN e.CPF IS NULL THEN a.UF_CRM END),
+        COUNT(DISTINCT CASE
+          WHEN NULLIF(a.GENERO, '') IS NULL
+            OR UPPER(a.GENERO) IN ('NAO INFORMADO', 'NÃO INFORMADO')
+          THEN a.UF_CRM END),
+        COUNT(DISTINCT CASE
+          WHEN a.DATA_NASCIMENTO IS NULL
+           AND NULLIF(TRIM(TO_VARCHAR(a.ANO_NASCIMENTO)), '') IS NULL
+          THEN a.UF_CRM END)
+      FROM ativos a
+      LEFT JOIN tels t ON t.CPF = a.CPF
+      LEFT JOIN mails e ON e.CPF = a.CPF
+    `);
+    gapRow = (gaps && gaps[0]) || [];
+  } catch {
+    gapRow = [];
+  }
+  const lacunas = {
+    sem_cpf: toNumber(gapRow[0]),
+    sem_telefone: toNumber(gapRow[1]),
+    sem_email: toNumber(gapRow[2]),
+    sem_genero: toNumber(gapRow[3]),
+    sem_nasc: toNumber(gapRow[4]),
+  };
+
   return {
     valor: crm,
     crm_unicos: crm,
@@ -223,6 +278,7 @@ async function querySnowflake() {
     especialidades,
     fonte: "dadosfera",
     tabela: "DADOSFERA_PRD_DIGITALSOLVERS.GOLD.TB_MEDICOS",
+    lacunas,
     ufs: ufs.filter((r) => r && r[0] != null).map((r) => ({ uf: String(r[0]), value: toNumber(r[1]) })),
     genero: genero.map((r) => ({ label: String(r[0] || "Não informado"), value: toNumber(r[1]) })),
     tipo_inscricao: tipo.map((r) => ({ label: String(r[0] || "Other"), value: toNumber(r[1]) })),
