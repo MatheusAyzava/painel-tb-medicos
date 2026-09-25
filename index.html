@@ -3,62 +3,61 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TB Médicos · comparativo</title>
+  <title>TB Médicos · Digital Solvers</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/style.css?v=47" />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Open+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/style.css?v=49" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 </head>
 <body>
   <div class="keys-backdrop" id="keys-backdrop" hidden></div>
   <div class="app">
     <aside class="keys" id="keys">
-      <span class="keys-tab" aria-hidden="true">☰</span>
       <div class="keys-panel">
       <header class="keys-head">
+        <div class="brand-mark">
+          <svg class="brand-icon" viewBox="0 0 48 48" aria-hidden="true">
+            <polygon points="24,5 41,14.5 41,33.5 24,43 7,33.5 7,14.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+            <path d="M24 5 L24 43 M7 14.5 L41 33.5 M41 14.5 L7 33.5 M7 14.5 L41 14.5 M7 33.5 L41 33.5" fill="none" stroke="currentColor" stroke-width="1.4"/>
+          </svg>
+          <div>
+            <strong>Digital Solvers</strong>
+            <span>by <em>LLYC</em></span>
+          </div>
+        </div>
         <p>Conexões</p>
-        <h1>Chaves e arquivos</h1>
       </header>
 
       <section class="ready-card">
-        <div>
-          <h2>Dadosfera · Snowflake</h2>
-          <p id="sf-ready">Chave RSA + COMPUTE_WH</p>
+        <div class="ready-top">
+          <h2>Dadosfera</h2>
+          <em data-status-for="dadosfera">off</em>
         </div>
-        <em data-status-for="dadosfera">off</em>
-        <button type="button" class="btn" id="btn-snowflake">Atualizar Dadosfera</button>
+        <button type="button" class="btn" id="btn-snowflake">Atualizar</button>
       </section>
 
       <section class="ready-card">
-        <div>
-          <h2>Databricks · API</h2>
-          <p id="dbx-ready">Token salvo no servidor</p>
+        <div class="ready-top">
+          <h2>Databricks</h2>
+          <em data-status-for="databricks">off</em>
         </div>
-        <em data-status-for="databricks">off</em>
-        <button type="button" class="btn alt" id="btn-databricks">Atualizar Databricks</button>
+        <button type="button" class="btn alt" id="btn-databricks">Atualizar</button>
       </section>
 
       <section class="ready-card">
-        <div>
-          <h2>Manual · TXT CNES</h2>
-          <p id="cnes-ready">Pasta Base de dados CNES</p>
+        <div class="ready-top">
+          <h2>Manual</h2>
+          <em data-status-for="manual">off</em>
         </div>
-        <em data-status-for="manual">off</em>
-        <button type="button" class="btn ghost" id="btn-cnes">Ler TOTAL.zip</button>
-        <label class="drop" id="dropzone" for="file-input">
-          <input id="file-input" type="file" accept=".zip,.csv,.txt,.tsv,.ZIP,.CSV,.TXT" />
-          <strong>Solte o ZIP TOTAL (TXT por UF)</strong>
-          <span>AC.txt … SP.txt, separados por ! — conta CRM únicos ativos</span>
-        </label>
-        <p class="file-name" id="file-name"></p>
+        <button type="button" class="btn ghost" id="btn-cnes">Atualizar</button>
       </section>
       </div>
     </aside>
 
     <main class="viz">
       <nav class="top-nav">
-        <img class="brand-logo" src="assets/logo-ds.png" alt="Digital Solvers by LLYC" />
+        <p class="brand-inline">Digital Solvers <span>by LLYC</span></p>
         <div class="tab-bar">
           <button type="button" class="tab on" data-tab="comparativo">Comparativo</button>
           <button type="button" class="tab" data-tab="dadosfera">Dadosfera CFM</button>
@@ -72,8 +71,8 @@
             <span></span><span></span><span></span>
           </button>
           <div>
-            <p class="eyebrow">TB Médicos</p>
-            <h1>Comparativo das 3 fontes</h1>
+            <p class="eyebrow">Base de médicos · Brasil</p>
+            <h1>Comparativo de 3 fontes</h1>
           </div>
         </div>
         <div class="stamps" id="stamps"></div>
@@ -81,25 +80,26 @@
 
       <section class="sources" id="source-cards">
         <article class="card dadosfera">
-          <p class="label">Dadosfera</p>
+          <p class="label">Dadosfera · CFM</p>
           <p class="value" id="qty-dadosfera">0</p>
-          <p class="sub" id="sub-dadosfera">CRMs únicos ativos · GOLD.TB_MEDICOS</p>
+          <p class="sub" id="sub-dadosfera">CRMs únicos ativos</p>
         </article>
         <article class="card databricks">
           <p class="label">Databricks</p>
-          <p class="value gold" id="qty-databricks">0</p>
-          <p class="sub" id="sub-databricks">CRMs únicos ativos · gold.tb_medicos</p>
+          <p class="value" id="qty-databricks">0</p>
+          <p class="sub" id="sub-databricks">CRMs únicos ativos</p>
         </article>
         <article class="card manual">
           <p class="label">TXT Manual</p>
           <p class="value" id="qty-manual">0</p>
-          <p class="sub" id="sub-manual">TXT Manual · Bronze</p>
+          <p class="sub" id="sub-manual">TXT Manual</p>
         </article>
       </section>
 
       <section class="charts">
         <article class="panel">
-          <h2>Valor camada por fonte</h2>
+          <p class="panel-kicker">Volume por fonte</p>
+          <h2>CRMs e registros comparados</h2>
           <div class="bars" id="bars">
             <div class="bar-row"><span>Databricks · Gold</span><i><b style="width:100%"></b></i><em>0</em></div>
             <div class="bar-row"><span>Databricks · Silver</span><i><b style="width:0%"></b></i><em>0</em></div>
@@ -109,15 +109,19 @@
           </div>
         </article>
         <article class="panel donut-panel">
+          <p class="panel-kicker">Distribuição</p>
           <h2>Médicos por gênero</h2>
-          <div class="donut-wrap">
-            <svg id="donut" viewBox="0 0 120 120" aria-hidden="true"></svg>
-            <div class="donut-center">
-              <strong id="donut-total">0</strong>
-              <span id="donut-label">ativos</span>
+          <div class="donut-body">
+            <div class="donut-wrap">
+              <svg id="donut" viewBox="0 0 120 120" aria-hidden="true"></svg>
+              <div class="donut-center">
+                <strong id="donut-total">0</strong>
+                <span id="donut-label">ativos</span>
+              </div>
             </div>
+            <ul class="legend" id="legend"></ul>
           </div>
-          <ul class="legend" id="legend"></ul>
+          <p class="donut-source" id="donut-source">Fonte: Dadosfera · CFM</p>
           <div class="pie-tip" id="pie-tip" hidden></div>
         </article>
       </section>
@@ -126,6 +130,7 @@
 
       <section class="charts charts-single">
         <article class="panel">
+          <p class="panel-kicker">Inscrição</p>
           <h2>Médicos por tipo de inscrição</h2>
           <div class="bars" id="tipo-bars"></div>
         </article>
@@ -133,6 +138,7 @@
 
       <section class="bottom">
         <article class="panel" id="uf-panel" hidden>
+          <p class="panel-kicker">Território</p>
           <h2>Ativos Gold por UF</h2>
           <div class="bars uf" id="uf-bars">
             <div class="bar-row"><span>SP</span><i><b style="width:100%"></b></i><em>211 Mil</em></div>
@@ -143,6 +149,7 @@
           </div>
         </article>
         <article class="panel dates-panel">
+          <p class="panel-kicker">Linha do tempo</p>
           <h2>Últimas atualizações</h2>
           <div class="date-grid" id="date-grid">
             <div class="date-box"><b>11/09/2026 10:53</b><span>Última atualização Databricks · CNES</span></div>
@@ -170,15 +177,18 @@
 
         <section class="bi-grid bi-top">
           <article class="panel donut-panel">
+            <p class="panel-kicker">Distribuição</p>
             <h2>Gênero</h2>
-            <div class="donut-wrap">
-              <svg id="bi-donut" viewBox="0 0 120 120" aria-hidden="true"></svg>
-              <div class="donut-center">
-                <strong id="bi-donut-total">0</strong>
-                <span>ativos</span>
+            <div class="donut-body">
+              <div class="donut-wrap">
+                <svg id="bi-donut" viewBox="0 0 120 120" aria-hidden="true"></svg>
+                <div class="donut-center">
+                  <strong id="bi-donut-total">0</strong>
+                  <span>ativos</span>
+                </div>
               </div>
+              <ul class="legend" id="bi-legend"></ul>
             </div>
-            <ul class="legend" id="bi-legend"></ul>
           </article>
           <article class="panel">
             <h2>Região</h2>
@@ -350,6 +360,10 @@
           </article>
         </section>
       </div>
+      <footer class="brand-foot">
+        <span>Digital Solvers by LLYC</span>
+        <span>LLORENTE Y CUENCA · llyc.global</span>
+      </footer>
     </main>
   </div>
   <p class="toast" id="toast" hidden></p>
@@ -362,8 +376,8 @@
     });
   </script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="assets/app.js?v=47"></script>
-  <script src="assets/bi.js?v=47"></script>
-  <script src="assets/cnes-tab.js?v=47"></script>
+  <script src="assets/app.js?v=49"></script>
+  <script src="assets/bi.js?v=49"></script>
+  <script src="assets/cnes-tab.js?v=49"></script>
 </body>
 </html>

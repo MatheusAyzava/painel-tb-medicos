@@ -71,9 +71,13 @@ function biFmt(n) {
 
 function heatColor(t) {
   const x = Math.max(0, Math.min(1, t));
-  if (x < 0.33) return `rgb(29, ${Math.round(78 + x * 300)}, 216)`;
-  if (x < 0.66) return `rgb(${Math.round(29 + (x - 0.33) * 600)}, 224, ${Math.round(108 - (x - 0.33) * 180)})`;
-  return `rgb(239, ${Math.round(196 - (x - 0.66) * 280)}, 68)`;
+  const mix = (a, b, u) => Math.round(a + (b - a) * u);
+  if (x < 0.5) {
+    const u = x / 0.5;
+    return `rgb(${mix(29, 81, u)}, ${mix(51, 224, u)}, ${mix(58, 46, u)})`;
+  }
+  const u = (x - 0.5) / 0.5;
+  return `rgb(${mix(81, 245, u)}, ${mix(224, 73, u)}, ${mix(46, 99, u)})`;
 }
 
 function fillBars(id, rows, labelKey = "label") {
@@ -93,7 +97,7 @@ function drawBiPie(slices, total) {
   const svg = document.getElementById("bi-donut");
   if (!svg) return;
   while (svg.firstChild) svg.removeChild(svg.firstChild);
-  const cx = 60, cy = 60, r0 = 28, r1 = 52;
+  const cx = 60, cy = 60, r0 = 34, r1 = 54;
   let angle = -Math.PI / 2;
   slices.forEach((s) => {
     const sweep = (s.value / total) * 2 * Math.PI;
@@ -130,18 +134,18 @@ function renderBi(data) {
     ? `Atualizado em: ${upd.toLocaleString("pt-BR")}`
     : `Atualizado em: ${data.atualizado_em || "—"}`;
 
-  const genderColors = { feminino: "#ff5b7a", masculino: "#22e06c" };
+  const genderColors = { feminino: "#f54963", masculino: "#51e02e", "não informado": "#f4f7fb", "nao informado": "#f4f7fb" };
   const slices = (data.genero || []).map((g) => ({
     key: g.label,
-    color: genderColors[String(g.label).toLowerCase()] || "#f0c14a",
+    color: genderColors[String(g.label).toLowerCase()] || "#f4f7fb",
     value: g.value,
   }));
   const total = slices.reduce((s, g) => s + g.value, 0) || 1;
   document.getElementById("bi-donut-total").textContent = biFmt(total);
   drawBiPie(slices, total);
   document.getElementById("bi-legend").innerHTML = slices.map((g) => {
-    const pct = ((g.value / total) * 100).toFixed(1).replace(".", ",");
-    return `<li><i style="background:${g.color}"></i>${g.key} · ${biFmt(g.value)} (${pct}%)</li>`;
+    const pct = ((g.value / total) * 100).toFixed(2).replace(".", ",");
+    return `<li><i style="background:${g.color}"></i><span>${g.key} · ${biFmt(g.value)} (${pct}%)</span></li>`;
   }).join("");
 
   const mensalOk = (data.mensal || []).filter((m) => mesValido(m.mes));

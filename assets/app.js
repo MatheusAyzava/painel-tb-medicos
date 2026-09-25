@@ -123,19 +123,19 @@ function kpiRow(fonte, prefix) {
 function render() {
   const { fontes, ufs, genero, tipoInscricao } = state;
   const labels = {
-    dadosfera: "CRMs únicos ativos · GOLD.TB_MEDICOS",
-    databricks: "CRMs únicos ativos · gold.tb_medicos",
-    manual: "TXT Manual · Bronze",
+    dadosfera: "CRMs únicos ativos",
+    databricks: "CRMs únicos ativos",
+    manual: "TXT Manual",
   };
 
   $("source-cards").innerHTML = [
-    ["dadosfera", "Dadosfera", fontes.dadosfera.gold || fontes.dadosfera.bronze],
+    ["dadosfera", "Dadosfera · CFM", fontes.dadosfera.gold || fontes.dadosfera.bronze],
     ["databricks", "Databricks", fontes.databricks.gold || fontes.databricks.bronze],
     ["manual", "TXT Manual", fontes.manual.bronze || fontes.manual.gold],
   ].map(([key, name, value]) => `
     <article class="card ${key}">
       <p class="label">${name}</p>
-      <p class="value ${key === "databricks" ? "gold" : ""}">${formatMi(value)}</p>
+      <p class="value">${formatMi(value)}</p>
       <p class="sub">${labels[key]} · ${formatDate(fontes[key].atualizado_em)}</p>
     </article>
   `).join("");
@@ -150,30 +150,30 @@ function render() {
   `).join("");
 
   const rows = [
-    { label: "Databricks · Gold", value: fontes.databricks.gold },
-    { label: "Databricks · Silver", value: fontes.databricks.silver },
-    { label: "Databricks · Bronze", value: fontes.databricks.bronze },
-    { label: "Dadosfera · Gold", value: fontes.dadosfera.gold },
-    { label: "TXT Manual · Bronze", value: fontes.manual.bronze || fontes.manual.gold },
+    { label: "Databricks · Gold", value: fontes.databricks.gold, tone: "green" },
+    { label: "Databricks · Silver", value: fontes.databricks.silver, tone: "teal" },
+    { label: "Databricks · Bronze", value: fontes.databricks.bronze, tone: "teal" },
+    { label: "Dadosfera · Gold", value: fontes.dadosfera.gold, tone: "coral" },
+    { label: "TXT Manual · Bronze", value: fontes.manual.bronze || fontes.manual.gold, tone: "white" },
   ];
   const max = Math.max(...rows.map((r) => r.value), 1);
   $("bars").innerHTML = rows.map((r) => `
     <div class="bar-row">
       <span>${r.label}</span>
-      <i><b style="width:${(r.value / max) * 100}%"></b></i>
+      <i><b class="${r.tone}" style="width:${(r.value / max) * 100}%"></b></i>
       <em>${formatMi(r.value)}</em>
     </div>
   `).join("");
 
   const genderColors = {
-    feminino: "#ff5b7a",
-    masculino: "#22e06c",
-    "nao informado": "#1b3d32",
-    "não informado": "#1b3d32",
+    feminino: "#f54963",
+    masculino: "#51e02e",
+    "nao informado": "#f4f7fb",
+    "não informado": "#f4f7fb",
   };
   const genderSlices = (genero || []).map((g) => ({
     key: g.label,
-    color: genderColors[norm(g.label)] || "#f0c14a",
+    color: genderColors[norm(g.label)] || "#f4f7fb",
     value: g.value,
   }));
   const genderTotal = genderSlices.reduce((s, g) => s + g.value, 0) || 1;
@@ -182,8 +182,13 @@ function render() {
   drawPie(genderSlices, genderTotal);
   $("legend").innerHTML = genderSlices.map((g) => {
     const pct = genderTotal ? ((g.value / genderTotal) * 100).toFixed(2).replace(".", ",") : "0";
-    return `<li><i style="background:${g.color}"></i>${g.key} · ${formatMi(g.value)} (${pct}%)</li>`;
+    return `<li><i style="background:${g.color}"></i><span>${g.key} · ${formatMi(g.value)} (${pct}%)</span></li>`;
   }).join("");
+  const source = $("donut-source");
+  if (source) {
+    const day = formatDate(fontes.dadosfera.atualizado_cfm || fontes.dadosfera.atualizado_em).split(" ")[0];
+    source.textContent = `Fonte: Dadosfera · CFM · ${day}.`;
+  }
 
   $("kpis").innerHTML = [
     ...kpiRow(fontes.dadosfera, "Dadosfera"),
@@ -280,8 +285,8 @@ function drawPie(slices, total) {
   while (svg.firstChild) svg.removeChild(svg.firstChild);
   const cx = 60;
   const cy = 60;
-  const r0 = 28;
-  const r1 = 52;
+  const r0 = 34;
+  const r1 = 54;
   let angle = -Math.PI / 2;
   if (!slices.length || !total) {
     const empty = document.createElementNS("http://www.w3.org/2000/svg", "circle");
@@ -298,8 +303,6 @@ function drawPie(slices, total) {
     const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
     path.setAttribute("d", donutSlicePath(cx, cy, r0, r1, angle, next));
     path.setAttribute("fill", s.color);
-    path.setAttribute("stroke", "#101820");
-    path.setAttribute("stroke-width", "0.8");
     path.style.cursor = "pointer";
     path.addEventListener("mousemove", (event) => showGenderTip(event, s, total));
     path.addEventListener("mouseenter", (event) => {
@@ -311,22 +314,6 @@ function drawPie(slices, total) {
       hideGenderTip();
     });
     svg.appendChild(path);
-
-    if (sweep > 0.18) {
-      const mid = angle + sweep / 2;
-      const lr = (r0 + r1) / 2;
-      const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-      text.setAttribute("x", String(cx + lr * Math.cos(mid)));
-      text.setAttribute("y", String(cy + lr * Math.sin(mid)));
-      text.setAttribute("text-anchor", "middle");
-      text.setAttribute("dominant-baseline", "middle");
-      text.setAttribute("fill", /fem/i.test(s.key) ? "#fff7f9" : "#07110c");
-      text.setAttribute("font-size", "7");
-      text.setAttribute("font-weight", "700");
-      text.setAttribute("pointer-events", "none");
-      text.textContent = `${((s.value / total) * 100).toFixed(1).replace(".", ",")}%`;
-      svg.appendChild(text);
-    }
     angle = next;
   });
 }
@@ -470,7 +457,8 @@ async function uploadCnesZip(file) {
   if (!res.ok) throw new Error(data.error || `Falha ${res.status}`);
   applyFonte("manual", data, "bronze");
   setStatus("manual", true);
-  $("file-name").textContent = data.arquivo || file.name;
+  const fileName = $("file-name");
+  if (fileName) fileName.textContent = data.arquivo || file.name;
   render();
   toast(`TXT TOTAL registrado: ${formatMi(data.valor)} CRMs ativos.`);
 }
@@ -486,7 +474,8 @@ async function readFile(file) {
   }
   const text = await file.text();
   parseManual(text);
-  $("file-name").textContent = file.name;
+  const fileName = $("file-name");
+  if (fileName) fileName.textContent = file.name;
   setStatus("manual", true);
   render();
   toast(`Arquivo ${file.name} aplicado no painel.`);
@@ -567,7 +556,8 @@ async function pullCnes() {
     const data = await postJson("/api/cnes", {});
     applyFonte("manual", data, "bronze");
     setStatus("manual", true);
-    $("file-name").textContent = data.arquivo || "pasta CNES";
+    const fileName = $("file-name");
+    if (fileName) fileName.textContent = data.arquivo || "pasta CNES";
     render();
     toast(`TXT TOTAL registrado: ${formatMi(data.valor)} CRMs ativos.`);
   } catch (err) {
@@ -598,16 +588,10 @@ async function loadStatus() {
     const res = await fetch("/api/status", { signal: AbortSignal.timeout(12000) });
     if (!res.ok) return false;
     const data = await res.json();
-    if (data.snowflake) $("sf-ready").textContent = `${data.snowflake.warehouse} · ${data.snowflake.account}`;
-    if (data.databricks) $("dbx-ready").textContent = data.databricks.tabela || data.databricks.host;
-    if (data.cnes) {
-      $("cnes-ready").textContent = data.cnes.pasta || (data.cnes.last?.arquivo ? `Último TXT: ${data.cnes.last.arquivo}` : "TXT");
-      if (data.cnes.last && data.cnes.last.valor) {
-        applyFonte("manual", data.cnes.last, "bronze");
-        setStatus("manual", true);
-        $("file-name").textContent = data.cnes.last.arquivo || "TXT registrado";
-        render();
-      }
+    if (data.cnes && data.cnes.last && data.cnes.last.valor) {
+      applyFonte("manual", data.cnes.last, "bronze");
+      setStatus("manual", true);
+      render();
     }
     setStatus("dadosfera", Boolean(data.snowflake?.ok));
     setStatus("databricks", Boolean(data.databricks?.ok));
@@ -658,29 +642,6 @@ function bindUi() {
   $("btn-snowflake").addEventListener("click", pullSnowflake);
   $("btn-databricks").addEventListener("click", pullDatabricks);
   $("btn-cnes").addEventListener("click", pullCnes);
-  const zone = $("dropzone");
-  const input = $("file-input");
-  if (!zone || !input) return;
-  ["dragenter", "dragover"].forEach((evt) => {
-    zone.addEventListener(evt, (e) => {
-      e.preventDefault();
-      zone.classList.add("drag");
-    });
-  });
-  ["dragleave", "drop"].forEach((evt) => {
-    zone.addEventListener(evt, (e) => {
-      e.preventDefault();
-      zone.classList.remove("drag");
-    });
-  });
-  zone.addEventListener("drop", (e) => {
-    const file = e.dataTransfer.files[0];
-    if (file) readFile(file).catch((err) => toast(err.message));
-  });
-  input.addEventListener("change", () => {
-    const file = input.files[0];
-    if (file) readFile(file).catch((err) => toast(err.message));
-  });
 }
 
 async function bind() {
