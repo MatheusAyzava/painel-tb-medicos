@@ -216,8 +216,8 @@ function atualizarHint() {
   const cidades = biState.cidadesNovos[mesValue()] || [];
   const medicos = cidades.reduce((s, c) => s + (Number(c.value) || 0), 0);
   hint.textContent = medicos
-    ? `${biFmt(medicos)} médicos novos de ${mes} em ${biFmt(cidades.length)} localidades. Clique na bolinha para ver a lista.`
-    : `Escolha o mês em Médicos novos e clique na cidade para ver a lista de ${mes}.`;
+    ? `${biFmt(medicos)} médicos novos de ${mes} em ${biFmt(cidades.length)} localidades.`
+    : `Escolha o mês em Médicos novos para ver as cidades.`;
 }
 
 async function atualizarMapa() {
