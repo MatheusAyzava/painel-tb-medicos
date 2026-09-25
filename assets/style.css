@@ -1325,7 +1325,8 @@ body.screen-visao .pbi-kpis {
   flex: 1;
   min-height: 0;
   display: grid;
-  grid-template-rows: minmax(210px, 0.86fr) minmax(0, 1.14fr);
+  grid-template-rows: 258px auto;
+  align-content: start;
   gap: 8px;
   overflow: hidden;
 }
@@ -1333,7 +1334,10 @@ body.screen-visao .pbi-kpis {
 
 .pbi-row { display: grid; gap: 8px; min-height: 0; }
 .pbi-row-1 { grid-template-columns: 272px minmax(0, 1.55fr) 236px; }
-.pbi-row-2 { grid-template-columns: 1fr 1fr 1fr 0.78fr minmax(250px, 1.15fr); }
+.pbi-row-2 {
+  grid-template-columns: 1fr 1fr 1fr 0.82fr minmax(250px, 1.1fr);
+  align-items: start;
+}
 .pbi-card {
   min-height: 0 !important;
   padding: 10px 12px 8px;
@@ -1347,9 +1351,9 @@ body.screen-visao .pbi-kpis {
   flex: 0 0 auto;
 }
 .pbi-card .bars {
-  flex: 1;
+  flex: 0 1 auto;
   min-height: 0;
-  gap: 7px;
+  gap: 6px;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -1389,10 +1393,10 @@ body.screen-visao .pbi-kpis {
 .pbi-month .month-col em { font-size: 9px; }
 .pbi-month .month-name { font-size: 10px; }
 .pbi-month .month-year strong { font-size: 11px; margin-top: 2px; }
-.pbi-map-card { padding: 0; position: relative; }
+.pbi-map-card { padding: 0; position: relative; min-height: 300px; height: 300px; }
 #map-pbi {
   height: 100%;
-  min-height: 0;
+  min-height: 300px;
   border: 0;
   border-radius: 12px;
   background: #0a1210;
@@ -1410,7 +1414,7 @@ body.screen-visao .pbi-kpis {
 @media (max-width: 1180px) {
   body.screen-visao { overflow: auto; }
   body.screen-visao .viz { height: auto; max-height: none; }
-  #view-visao { overflow: visible; grid-template-rows: auto auto; }
+  #view-visao { overflow: visible; grid-template-rows: auto; }
   .pbi-row-1 { grid-template-columns: 1fr 1fr; }
   .pbi-row-2 { grid-template-columns: 1fr 1fr; }
   #map-pbi { min-height: 280px; }
