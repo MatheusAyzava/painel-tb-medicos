@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Open+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/style.css?v=55" />
+  <link rel="stylesheet" href="assets/style.css?v=56" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 </head>
 <body>
@@ -226,7 +226,7 @@
         <header class="bi-head">
           <div>
             <p class="eyebrow">Digital Solvers · Dadosfera</p>
-            <h1>CFM · painel analítico</h1>
+            <h1>Médicos novos</h1>
           </div>
           <div class="bi-kpis">
             <div><b id="bi-crm">0</b><span>CRM</span></div>
@@ -236,58 +236,14 @@
           <p class="bi-updated" id="bi-updated">Atualizado em: —</p>
         </header>
 
-        <section class="bi-grid bi-top">
-          <article class="panel donut-panel">
-            <p class="panel-kicker">Distribuição</p>
-            <h2>Gênero</h2>
-            <div class="donut-body">
-              <div class="donut-wrap">
-                <svg id="bi-donut" viewBox="0 0 120 120" aria-hidden="true"></svg>
-                <div class="donut-center">
-                  <strong id="bi-donut-total">0</strong>
-                  <span>ativos</span>
-                </div>
-              </div>
-              <ul class="legend" id="bi-legend"></ul>
-            </div>
-          </article>
-          <article class="panel">
-            <h2>Região</h2>
-            <div class="bars" id="bi-regiao"></div>
-          </article>
-        </section>
-
-        <section class="bi-grid bi-month-row">
-          <article class="panel">
-            <h2>Evolução mensal</h2>
-            <p class="map-hint">Clique no mês para filtrar a lista. Vale para todos os médicos e para médicos novos.</p>
-            <div class="month-chart" id="bi-mensal"></div>
-          </article>
-        </section>
-
-        <section class="bi-grid bi-mid">
-          <article class="panel">
-            <h2>Faixa etária</h2>
-            <div class="bars" id="bi-faixa"></div>
-          </article>
-          <article class="panel">
-            <h2>Especialidade DS</h2>
-            <div class="bars" id="bi-esp-ds"></div>
-          </article>
-          <article class="panel">
-            <h2>Especialidade CFM</h2>
-            <div class="bars" id="bi-esp-cfm"></div>
-          </article>
-          <article class="panel">
-            <h2>UF</h2>
-            <div class="bars uf" id="bi-ufs"></div>
-          </article>
-        </section>
-
         <section class="bi-grid bi-map-row">
           <article class="panel map-panel">
             <div class="map-toolbar">
-              <h2>Concentração de médicos</h2>
+              <h2>Mapa de médicos novos</h2>
+              <label>
+                Médicos novos
+                <select id="map-mes"></select>
+              </label>
               <label>
                 Estado
                 <select id="map-uf">
@@ -296,7 +252,7 @@
               </label>
               <button type="button" class="btn ghost" id="map-reset">Ver Brasil</button>
             </div>
-            <p class="map-hint" id="map-hint">Clique no mês na evolução mensal e depois na cidade para ver os médicos novos dali.</p>
+            <p class="map-hint" id="map-hint">Escolha o mês e clique na cidade para ver os médicos novos dali.</p>
             <div id="map-br"></div>
             <div class="heat-legend">
               <span>menor</span>
@@ -304,53 +260,6 @@
               <span>maior concentração</span>
             </div>
           </article>
-        </section>
-
-        <section class="panel novos-monitor">
-          <div class="novos-toolbar">
-            <h2>Monitoramento de médicos novos</h2>
-            <strong id="monitor-mes">mês</strong>
-            <span id="monitor-total">Selecione o mês na evolução mensal.</span>
-            <button type="button" class="btn" id="btn-csv-mes">Baixar relatório do mês</button>
-          </div>
-          <p class="map-hint">Baixa a lista completa do mês (ex.: os 2.343 de agosto), com horas CNES, estabelecimento em que mais atende, setor público/privado, município e UF. O arquivo não corta em 8.000 linhas.</p>
-        </section>
-
-        <section class="panel novos-panel">
-          <div class="novos-toolbar">
-            <h2 id="lista-titulo">Médicos · janeiro</h2>
-            <div class="modo-toggle" role="group" aria-label="Tipo de lista">
-              <button type="button" class="tab" data-modo="todos" id="modo-todos">Todos os médicos</button>
-              <button type="button" class="tab on" data-modo="novos" id="modo-novos">Médicos novos</button>
-            </div>
-            <strong id="mes-escolhido">janeiro</strong>
-            <input type="search" id="lista-busca" placeholder="Buscar nome, CRM, especialidade, hospital ou e-mail" autocomplete="off" />
-            <button type="button" class="btn" id="btn-novos">Buscar</button>
-            <button type="button" class="btn ghost" id="btn-csv">Baixar CSV da lista</button>
-            <span id="novos-count">0 registros</span>
-          </div>
-          <p class="map-hint" id="lista-local">Clique num mês na evolução mensal e depois numa cidade.</p>
-          <div class="table-wrap">
-            <table class="novos-table">
-              <thead>
-                <tr>
-                  <th>UF+CRM</th>
-                  <th>Nome</th>
-                  <th>Especialidade</th>
-                  <th>Cidade</th>
-                  <th>UF</th>
-                  <th>Horas CNES</th>
-                  <th>Estabelecimento</th>
-                  <th>Setor</th>
-                  <th>Telefone</th>
-                  <th>E-mail</th>
-                </tr>
-              </thead>
-              <tbody id="novos-body">
-                <tr><td colspan="10">Clique num mês na evolução mensal e depois em Buscar ou numa cidade.</td></tr>
-              </tbody>
-            </table>
-          </div>
         </section>
       </div>
 
@@ -374,9 +283,11 @@
                 <option>RO</option><option>RR</option><option>RS</option><option>SC</option><option>SE</option>
                 <option>SP</option><option>TO</option>
               </select>
-              <label class="cnes-check">
-                <input type="checkbox" id="cnes-novos" />
-                Só médicos novos
+              <label class="cnes-field">
+                <span>Médicos novos</span>
+                <select id="cnes-mes">
+                  <option value="">Todos os médicos</option>
+                </select>
               </label>
               <div class="cnes-search-actions">
                 <button type="button" class="btn" id="cnes-btn">Buscar no CNES</button>
@@ -437,8 +348,8 @@
     });
   </script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="assets/app.js?v=55"></script>
-  <script src="assets/bi.js?v=55"></script>
-  <script src="assets/cnes-tab.js?v=55"></script>
+  <script src="assets/app.js?v=56"></script>
+  <script src="assets/bi.js?v=56"></script>
+  <script src="assets/cnes-tab.js?v=56"></script>
 </body>
 </html>

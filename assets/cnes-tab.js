@@ -151,14 +151,16 @@ function renderCnesDetalhe(pessoaId) {
 async function buscarCnes() {
   const q = document.getElementById("cnes-q").value.trim();
   const uf = document.getElementById("cnes-uf").value;
-  const novos = document.getElementById("cnes-novos").checked;
+  const mesEl = document.getElementById("cnes-mes");
+  const mes = mesEl ? mesEl.value : "";
+  const novos = Boolean(mes);
   const count = document.getElementById("cnes-count");
   count.textContent = "Consultando CNES no Snowflake…";
   try {
     const res = await fetch("/api/cnes-busca", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ q, uf, novos, mes: cnesMesAtual() }),
+      body: JSON.stringify({ q, uf, novos, mes: mes || cnesMesAtual() }),
     });
     const text = await res.text();
     let data = {};
@@ -167,7 +169,12 @@ async function buscarCnes() {
     } catch (err) {
       throw new Error("A consulta passou do tempo no servidor. Tente de novo em alguns segundos.");
     }
-    if (!res.ok) throw new Error(data.error || "Falha na busca CNES");
+    if (!res.ok) {
+      const raw = String(data.error || "");
+      throw new Error(/timeout|timed out|cancelled|canceled|408|504|warehouse timeout|statement timeout|passou do tempo/i.test(raw)
+        ? "A busca passou do tempo. Use nome e sobrenome, CRM completo ou filtre um estado."
+        : (raw || "Falha na busca CNES"));
+    }
     cnesState.data = data;
     cnesState.selecionado = null;
     renderCnesDocs();

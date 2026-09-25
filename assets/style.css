@@ -955,10 +955,17 @@ input, textarea {
 }
 
 #map-br {
-  height: 460px;
+  height: min(68vh, 640px);
   border-radius: 10px;
   border: 1px solid var(--line);
   background: #0a1210;
+}
+.map-toolbar label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: var(--muted);
+  font-size: 11px;
 }
 
 .modo-toggle { display: flex; gap: 6px; flex-wrap: wrap; }
@@ -1039,6 +1046,14 @@ input, textarea {
   white-space: nowrap;
 }
 .cnes-check input { width: auto; margin: 0; }
+.cnes-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: var(--muted);
+  font-size: 11px;
+}
+.cnes-field select { min-width: 220px; }
 .cnes-layout {
   display: grid;
   grid-template-columns: 260px minmax(0, 1fr);

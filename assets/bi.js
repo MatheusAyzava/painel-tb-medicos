@@ -152,51 +152,12 @@ function renderBi(data) {
     ? `Atualizado em: ${upd.toLocaleString("pt-BR")}`
     : `Atualizado em: ${data.atualizado_em || "—"}`;
 
-  const genderColors = { feminino: "#f54963", masculino: "#51e02e", "não informado": "#f4f7fb", "nao informado": "#f4f7fb" };
-  const slices = (data.genero || []).map((g) => ({
-    key: g.label,
-    color: genderColors[String(g.label).toLowerCase()] || "#f4f7fb",
-    value: g.value,
-  }));
-  const total = slices.reduce((s, g) => s + g.value, 0) || 1;
-  document.getElementById("bi-donut-total").textContent = biFmt(total);
-  drawBiPie(slices, total);
-  document.getElementById("bi-legend").innerHTML = slices.map((g) => {
-    const pct = ((g.value / total) * 100).toFixed(2).replace(".", ",");
-    return `<li><i style="background:${g.color}"></i><span>${g.key} · ${biFmt(g.value)} (${pct}%)</span></li>`;
-  }).join("");
-
   const mensalOk = (data.mensal || []).filter((m) => mesValido(m.mes));
   if (!biState.mes || !mesValido(biState.mes)) biState.mes = mensalOk.length ? mensalOk[mensalOk.length - 1].mes : null;
-  const escolhido = mesValue();
-  const rows = [...mensalOk].sort((a, b) => String(b.mes).localeCompare(String(a.mes)));
-  const maxM = Math.max(...rows.map((m) => m.value), 1);
-  const grupos = [];
-  rows.forEach((m) => {
-    const year = mesAno(m.mes);
-    if (!grupos.length || grupos[grupos.length - 1].year !== year) grupos.push({ year, items: [] });
-    grupos[grupos.length - 1].items.push(m);
-  });
-  document.getElementById("bi-mensal").innerHTML = grupos.map((grupo) => `
-    <div class="month-year">
-      <div class="month-year-bars">
-        ${grupo.items.map((m) => `
-          <div class="month-col${m.mes === escolhido ? " on" : ""}" data-mes="${m.mes}" title="${mesLabel(m.mes)} ${grupo.year} · ${biFmt(m.value)}">
-            <span class="month-track"><i style="height:${Math.max(4, (m.value / maxM) * 100)}%"><em>${biFmt(m.value)}</em></i></span>
-            <span class="month-name">${mesEixo(m.mes)}</span>
-          </div>
-        `).join("")}
-      </div>
-      <strong>${grupo.year}</strong>
-    </div>
-  `).join("");
+  fillMesSelect("map-mes", mensalOk, mesValue());
+  const cnesMes = document.getElementById("cnes-mes");
+  fillMesSelect("cnes-mes", mensalOk, cnesMes ? cnesMes.value : "", true);
   atualizarTitulo();
-
-  fillBars("bi-regiao", data.regioes || []);
-  fillBars("bi-faixa", data.faixa || []);
-  fillBars("bi-esp-ds", data.especialidade_ds || []);
-  fillBars("bi-esp-cfm", data.especialidade_cfm || []);
-  fillBars("bi-ufs", (data.ufs || []).slice(0, 16), "uf");
   renderVisao(data);
 
   const sel = document.getElementById("map-uf");
@@ -256,7 +217,7 @@ function atualizarHint() {
   const medicos = cidades.reduce((s, c) => s + (Number(c.value) || 0), 0);
   hint.textContent = medicos
     ? `${biFmt(medicos)} médicos novos de ${mes} em ${biFmt(cidades.length)} localidades. Clique na bolinha para ver a lista.`
-    : `Clique no mês na evolução mensal e depois na cidade para ver os médicos novos de ${mes}.`;
+    : `Escolha o mês em Médicos novos e clique na cidade para ver a lista de ${mes}.`;
 }
 
 async function atualizarMapa() {
@@ -369,13 +330,29 @@ function csvEscape(value) {
   return text;
 }
 
+function fillMesSelect(id, rows, selected, includeAll) {
+  const sel = document.getElementById(id);
+  if (!sel) return;
+  const lista = [...(rows || [])].sort((a, b) => String(b.mes).localeCompare(String(a.mes)));
+  const opts = includeAll ? '<option value="">Todos os médicos</option>' : "";
+  sel.innerHTML = opts + lista.map((m) => {
+    const label = `${mesLabel(m.mes)} ${mesAno(m.mes)} · ${biFmt(m.value)}`;
+    return `<option value="${m.mes}">${label}</option>`;
+  }).join("");
+  const value = selected || sel.value;
+  sel.value = lista.some((m) => m.mes === value) ? value : (includeAll ? "" : (lista[0] && lista[0].mes) || "");
+}
+
 function atualizarTitulo() {
   const mes = mesLabel(mesValue()) || "mês";
   const elMes = document.getElementById("mes-escolhido");
   if (elMes) elMes.textContent = mes;
-  document.getElementById("lista-titulo").textContent = biState.modo === "novos"
-    ? `Médicos novos · ${mes}`
-    : "Todos os médicos";
+  const titulo = document.getElementById("lista-titulo");
+  if (titulo) {
+    titulo.textContent = biState.modo === "novos"
+      ? `Médicos novos · ${mes}`
+      : "Todos os médicos";
+  }
   const cidade = biState.cidade
     ? `${biState.cidade.municipio} · ${biState.cidade.uf}`
     : "Brasil";
@@ -392,36 +369,30 @@ function atualizarTitulo() {
   } else if (biState.cidade) {
     local = `${cidade} · ${mes}`;
   }
-  document.getElementById("lista-local").textContent = local;
-  document.querySelectorAll(".month-col").forEach((col) => {
-    col.classList.toggle("on", col.dataset.mes === mesValue());
-  });
-  const elMonMes = document.getElementById("monitor-mes");
-  const elMonTot = document.getElementById("monitor-total");
-  if (elMonMes) elMonMes.textContent = mes;
-  if (elMonTot) {
-    const item = ((biState.data && biState.data.mensal) || []).find((m) => m.mes === mesValue());
-    elMonTot.textContent = item ? `${biFmt(item.value)} médicos novos em ${mes}` : `Relatório completo de ${mes}`;
-  }
+  const localEl = document.getElementById("lista-local");
+  if (localEl) localEl.textContent = local;
+  const mapMes = document.getElementById("map-mes");
+  if (mapMes && mesValue()) mapMes.value = mesValue();
 }
 
 function setModo(modo) {
   biState.modo = modo === "todos" ? "todos" : "novos";
-  document.getElementById("modo-todos").classList.toggle("on", biState.modo === "todos");
-  document.getElementById("modo-novos").classList.toggle("on", biState.modo === "novos");
+  const todos = document.getElementById("modo-todos");
+  const novos = document.getElementById("modo-novos");
+  if (todos) todos.classList.toggle("on", biState.modo === "todos");
+  if (novos) novos.classList.toggle("on", biState.modo === "novos");
   atualizarTitulo();
   atualizarMapa();
-  buscarLista();
 }
 
 function abrirCidade(cidade) {
   biState.cidade = cidade;
   biState.busca = "";
-  const buscaEl = document.getElementById("lista-busca");
-  if (buscaEl) buscaEl.value = "";
+  const hint = document.getElementById("map-hint");
+  if (hint && cidade) {
+    hint.textContent = `${cidade.municipio}${cidade.uf ? " · " + cidade.uf : ""}: ${biFmt(cidade.value)} médicos novos em ${mesLabel(mesValue()) || "mês"}.`;
+  }
   atualizarTitulo();
-  document.getElementById("novos-body").scrollIntoView({ behavior: "smooth", block: "start" });
-  buscarLista();
 }
 
 function escolherMes(mes) {
@@ -429,8 +400,6 @@ function escolherMes(mes) {
   biState.mes = mes;
   atualizarTitulo();
   atualizarMapa();
-  document.getElementById("novos-body").scrollIntoView({ behavior: "smooth", block: "start" });
-  buscarLista();
 }
 
 function textoLinha(r) {
@@ -599,6 +568,7 @@ async function downloadMesCsv() {
 
 async function buscarLista() {
   const bodyEl = document.getElementById("novos-body");
+  if (!bodyEl) return;
   const buscaEl = document.getElementById("lista-busca");
   if (buscaEl) biState.busca = buscaEl.value || "";
   atualizarTitulo();
@@ -951,8 +921,16 @@ async function initBi() {
     document.getElementById("map-uf").value = "BR";
     atualizarMapa();
   });
-  document.getElementById("btn-novos").addEventListener("click", buscarLista);
-  document.getElementById("btn-csv").addEventListener("click", downloadNovosCsv);
+  const mapMes = document.getElementById("map-mes");
+  if (mapMes) {
+    mapMes.addEventListener("change", () => {
+      if (mapMes.value) escolherMes(mapMes.value);
+    });
+  }
+  const btnNovos = document.getElementById("btn-novos");
+  if (btnNovos) btnNovos.addEventListener("click", buscarLista);
+  const btnCsv = document.getElementById("btn-csv");
+  if (btnCsv) btnCsv.addEventListener("click", downloadNovosCsv);
   const btnMes = document.getElementById("btn-csv-mes");
   if (btnMes) btnMes.addEventListener("click", downloadMesCsv);
   const buscaEl = document.getElementById("lista-busca");
@@ -968,12 +946,17 @@ async function initBi() {
       }
     });
   }
-  document.getElementById("modo-todos").addEventListener("click", () => setModo("todos"));
-  document.getElementById("modo-novos").addEventListener("click", () => setModo("novos"));
-  document.getElementById("bi-mensal").addEventListener("click", (event) => {
-    const col = event.target.closest(".month-col");
-    if (col && col.dataset.mes) escolherMes(col.dataset.mes);
-  });
+  const modoTodos = document.getElementById("modo-todos");
+  const modoNovos = document.getElementById("modo-novos");
+  if (modoTodos) modoTodos.addEventListener("click", () => setModo("todos"));
+  if (modoNovos) modoNovos.addEventListener("click", () => setModo("novos"));
+  const mensalEl = document.getElementById("bi-mensal");
+  if (mensalEl) {
+    mensalEl.addEventListener("click", (event) => {
+      const col = event.target.closest(".month-col");
+      if (col && col.dataset.mes) escolherMes(col.dataset.mes);
+    });
+  }
   const visaoEl = document.getElementById("view-visao");
   if (visaoEl) {
     visaoEl.addEventListener("click", (event) => {

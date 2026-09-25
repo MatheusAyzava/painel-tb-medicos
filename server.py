@@ -1040,16 +1040,29 @@ def _cnes_medicos_sql(parsed: dict, uf: str, novos: bool, ano: int, mo: int) -> 
         parts.append(f"({_cnes_name_sql('m', tokens, 'NOME')})")
     where = " OR ".join(parts) if parts else "1=0"
     uf_sql = f"AND m.UF_CRM ILIKE '{uf}%'" if uf else ""
-    novos_sql = _cnes_novos_sql("m", ano, mo) if novos else ""
+    novos_join = ""
+    if novos:
+        novos_join = f"""
+        JOIN (
+          SELECT DISTINCT UF_CRM
+          FROM GOLD.TB_ESPECIALIDADE_X_FONTES
+          WHERE COALESCE(TRY_TO_DATE(DT_INSCRICAO, 'DD/MM/YYYY'), TRY_TO_DATE(DT_INSCRICAO))
+                  >= DATE_FROM_PARTS({ano}, {mo}, 1)
+            AND COALESCE(TRY_TO_DATE(DT_INSCRICAO, 'DD/MM/YYYY'), TRY_TO_DATE(DT_INSCRICAO))
+                  < DATEADD(MONTH, 1, DATE_FROM_PARTS({ano}, {mo}, 1))
+        ) nv ON nv.UF_CRM = m.UF_CRM
+        """
     return f"""
         SELECT m.UF_CRM, m.NOME,
           IFF(LENGTH(REGEXP_REPLACE(TO_VARCHAR(m.CPF), '[^0-9]', '')) >= 11,
               LOWER(SHA2(REGEXP_REPLACE(TO_VARCHAR(m.CPF), '[^0-9]', ''), 256)), NULL)
         FROM GOLD.TB_MEDICOS m
+        {novos_join}
         WHERE ({where})
+          AND UPPER(m.SITUACAO) = 'ATIVO'
           {uf_sql}
-          {novos_sql}
-        QUALIFY DENSE_RANK() OVER (ORDER BY m.NOME, m.UF_CRM) <= 40
+        ORDER BY m.NOME, m.UF_CRM
+        LIMIT 40
     """
 
 
@@ -1065,23 +1078,25 @@ def _cnes_busca_sql(parsed: dict, uf: str, novos: bool, ano: int, mo: int, allow
     digits = re.sub(r"\D", "", parsed["digits"] or compact)[:20]
     tokens = parsed["tokens"]
     parts = []
+    safe_crms = [re.sub(r"[^A-Za-z0-9]", "", str(v)) for v in (uf_crms or []) if re.sub(r"[^A-Za-z0-9]", "", str(v))][:40]
+    crm_nums = sorted({re.sub(r"\D", "", v) for v in safe_crms if re.sub(r"\D", "", v)})
+    crm_vars = list(dict.fromkeys(safe_crms + [f"AM{n}" for n in crm_nums] + [f"SP{n}" for n in crm_nums]))[:80]
     if parsed["is_crm"]:
         if re.match(r"^[A-Z]{2}", compact):
             parts.append(f"c.UF_CRM = '{compact}'")
         else:
             parts.append(f"(c.UF_CRM ILIKE '%{digits}' OR TO_VARCHAR(c.CRM) = '{digits}')")
-    elif tokens:
-        parts.append(f"({_cnes_name_sql('c', tokens, 'NOME')})")
-    if len(parsed["digits"]) >= 8 and len(parsed["digits"]) != 11:
-        parts.append(f"TO_VARCHAR(c.CNS) LIKE '%{parsed['digits']}%'")
-    safe_crms = [re.sub(r"[^A-Za-z0-9]", "", str(v)) for v in (uf_crms or []) if re.sub(r"[^A-Za-z0-9]", "", str(v))][:40]
-    crm_nums = sorted({re.sub(r"\D", "", v) for v in safe_crms if re.sub(r"\D", "", v)})
-    crm_vars = list(dict.fromkeys(safe_crms + [f"AM{n}" for n in crm_nums] + [f"SP{n}" for n in crm_nums]))[:80]
-    if crm_vars:
+    elif crm_vars:
         parts.append("c.UF_CRM IN (" + ",".join(f"'{v}'" for v in crm_vars) + ")")
+        if allow_blank and tokens:
+            parts.append(f"(NULLIF(c.UF_CRM, '') IS NULL AND ({_cnes_name_sql('c', tokens, 'NOME')}))")
+    elif allow_blank and tokens:
+        parts.append(f"({_cnes_name_sql('c', tokens, 'NOME')})")
+    if len(parsed["digits"]) >= 8 and len(parsed["digits"]) != 11 and not crm_vars:
+        parts.append(f"TO_VARCHAR(c.CNS) LIKE '%{parsed['digits']}%'")
     where = " OR ".join(parts) if parts else "1=0"
     blank_sql = " OR 1=1" if allow_blank else ""
-    novos_sql = _cnes_novos_sql("c", ano, mo) if novos else ""
+    novos_sql = _cnes_novos_sql("c", ano, mo) if novos and not crm_vars else ""
     uf_sql = f"AND (c.UF = '{uf}' OR c.UF_CRM ILIKE '{uf}%')" if uf else ""
     anomes = "('20' || REGEXP_SUBSTR(c.FILE_PATH, 'PF[A-Z]{2}([0-9]{4})', 1, 1, 'e', 1))"
     ftp_mes = re.sub(r"\D", "", str(ftp_mes or ""))[:4]
@@ -1327,6 +1342,23 @@ def query_cnes_busca(override: dict | None = None) -> dict:
                 "nome": str(r[1] or ""),
                 "cpf_hash": str(r[2] or "").lower(),
             })
+        precisa_ftp = parsed["is_crm"] or medicos or allow_blank or (
+            len(parsed["digits"]) >= 8 and len(parsed["digits"]) != 11
+        )
+        if not precisa_ftp:
+            return {
+                "q": q,
+                "mes": mes,
+                "novos": novos,
+                "total": 0,
+                "aviso": (
+                    "Nenhum médico novo deste mês corresponde à busca. Escolha outro mês ou deixe Médicos novos em Todos os médicos."
+                    if novos else
+                    "Nenhum profissional encontrado. Tente nome e sobrenome, CRM ou um estado."
+                ),
+                "profissionais": [],
+                "vinculos": [],
+            }
         rows = snowflake_fetch(ctx, _cnes_busca_sql(
             parsed, uf, novos, ano, mo, allow_blank,
             [m["uf_crm"] for m in medicos],

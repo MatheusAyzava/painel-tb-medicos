@@ -155,7 +155,7 @@ async function snowflakeSql(sql, opts = {}) {
     throw new Error("A consulta passou do tempo no Snowflake. Tente de novo em alguns segundos.");
   }
   if (!Array.isArray(data.data)) {
-    throw new Error(data.message || data.error || `Snowflake HTTP ${res.status}`);
+    throw new Error(friendlyCnesError(data.message || data.error || `Snowflake HTTP ${res.status}`));
   }
   let rows = data.data;
   const partitions = (data.resultSetMetaData && data.resultSetMetaData.partitionInfo) || [];
@@ -936,15 +936,26 @@ function cnesMedicosSql(parsed, { uf, novos, ano, mo }) {
     parts.push(`(${cnesNameSql("m", tokens, "NOME")})`);
   }
   const where = parts.length ? parts.join(" OR ") : "1=0";
+  const novosJoin = novos ? `
+    JOIN (
+      SELECT DISTINCT UF_CRM
+      FROM GOLD.TB_ESPECIALIDADE_X_FONTES
+      WHERE COALESCE(TRY_TO_DATE(DT_INSCRICAO, 'DD/MM/YYYY'), TRY_TO_DATE(DT_INSCRICAO))
+              >= DATE_FROM_PARTS(${ano}, ${mo}, 1)
+        AND COALESCE(TRY_TO_DATE(DT_INSCRICAO, 'DD/MM/YYYY'), TRY_TO_DATE(DT_INSCRICAO))
+              < DATEADD(MONTH, 1, DATE_FROM_PARTS(${ano}, ${mo}, 1))
+    ) nv ON nv.UF_CRM = m.UF_CRM` : "";
   return `
     SELECT m.UF_CRM, m.NOME,
       IFF(LENGTH(REGEXP_REPLACE(TO_VARCHAR(m.CPF), '[^0-9]', '')) >= 11,
           LOWER(SHA2(REGEXP_REPLACE(TO_VARCHAR(m.CPF), '[^0-9]', ''), 256)), NULL)
     FROM GOLD.TB_MEDICOS m
+    ${novosJoin}
     WHERE (${where})
+      AND UPPER(m.SITUACAO) = 'ATIVO'
       ${uf ? `AND m.UF_CRM ILIKE '${uf}%'` : ""}
-      ${novos ? cnesNovosSql("m", ano, mo) : ""}
-    QUALIFY DENSE_RANK() OVER (ORDER BY m.NOME, m.UF_CRM) <= 40
+    ORDER BY m.NOME, m.UF_CRM
+    LIMIT 40
   `;
 }
 
@@ -955,25 +966,37 @@ function cnesFtpMesSql() {
   `;
 }
 
+function friendlyCnesError(err) {
+  const msg = String(err && err.message ? err.message : err || "");
+  if (/timeout|timed out|cancelled|canceled|408|504|333334|warehouse timeout|statement timeout|passou do tempo/i.test(msg)) {
+    return "A busca passou do tempo. Use nome e sobrenome, CRM completo ou filtre um estado.";
+  }
+  return msg || "Falha na busca CNES";
+}
+
 function cnesBuscaSql(parsed, { uf, novos, ano, mo, allowBlankCrm, ufCrms = [], hashes = [], ftpMes = "" }) {
   const { compact, digits, tokens, isCrm } = parsed;
   const parts = [];
+  const safeCrms = (ufCrms || []).map((v) => String(v).replace(/[^A-Za-z0-9]/g, "")).filter(Boolean).slice(0, 40);
+  const crmNums = [...new Set(safeCrms.map((v) => v.replace(/\D/g, "")).filter(Boolean))];
+  const crmVars = [...new Set(safeCrms.concat(crmNums.flatMap((num) => [`AM${num}`, `SP${num}`])))].slice(0, 80);
   if (isCrm) {
     const key = compact.slice(0, 20);
     const num = (digits || compact).replace(/\D/g, "").slice(0, 20);
     parts.push(/^[A-Z]{2}/.test(key)
       ? `c.UF_CRM = '${key}'`
       : `(c.UF_CRM ILIKE '%${num}' OR TO_VARCHAR(c.CRM) = '${num}')`);
-  } else if (tokens.length) {
+  } else if (crmVars.length) {
+    parts.push(`c.UF_CRM IN (${crmVars.map((v) => `'${v}'`).join(",")})`);
+    if (allowBlankCrm && tokens.length) {
+      parts.push(`(NULLIF(c.UF_CRM, '') IS NULL AND (${cnesNameSql("c", tokens, "NOME")}))`);
+    }
+  } else if (allowBlankCrm && tokens.length) {
     parts.push(`(${cnesNameSql("c", tokens, "NOME")})`);
   }
-  if (digits.length >= 8 && digits.length !== 11) {
+  if (digits.length >= 8 && digits.length !== 11 && !crmVars.length) {
     parts.push(`TO_VARCHAR(c.CNS) LIKE '%${digits}%'`);
   }
-  const safeCrms = (ufCrms || []).map((v) => String(v).replace(/[^A-Za-z0-9]/g, "")).filter(Boolean).slice(0, 40);
-  const crmNums = [...new Set(safeCrms.map((v) => v.replace(/\D/g, "")).filter(Boolean))];
-  const crmVars = [...new Set(safeCrms.concat(crmNums.flatMap((num) => [`AM${num}`, `SP${num}`])))].slice(0, 80);
-  if (crmVars.length) parts.push(`c.UF_CRM IN (${crmVars.map((v) => `'${v}'`).join(",")})`);
   const where = parts.length ? parts.join(" OR ") : "1=0";
   const anomes = "('20' || REGEXP_SUBSTR(c.FILE_PATH, 'PF[A-Z]{2}([0-9]{4})', 1, 1, 'e', 1))";
   return `
@@ -997,7 +1020,7 @@ function cnesBuscaSql(parsed, { uf, novos, ano, mo, allowBlankCrm, ufCrms = [], 
       AND (NULLIF(c.UF_CRM, '') IS NOT NULL${allowBlankCrm ? " OR 1=1" : ""})
       ${/^\d{4}$/.test(String(ftpMes || "")) ? `AND c.FILE_PATH ILIKE '%${ftpMes}.csv'` : ""}
       ${uf ? `AND (c.UF = '${uf}' OR c.UF_CRM ILIKE '${uf}%')` : ""}
-      ${novos ? cnesNovosSql("c", ano, mo) : ""}
+      ${novos && !crmVars.length ? cnesNovosSql("c", ano, mo) : ""}
     QUALIFY ROW_NUMBER() OVER (
       PARTITION BY COALESCE(NULLIF(c.UF_CRM, ''), TO_VARCHAR(c.CNS), c.NOME),
         COALESCE(TO_VARCHAR(c.CNES), c.ESTABELECIMENTO), COALESCE(c.CBO, ''),
@@ -1259,22 +1282,46 @@ async function queryCnesBusca(opts = {}) {
   const stamp = ok ? String(opts.mes) : new Date().toISOString().slice(0, 7);
   const [ano, mo] = stamp.split("-").map(Number);
   const allowBlankCrm = cnesAllowBlankCrm(parsed.tokens);
-  const [medRows, mesRows] = await Promise.all([
-    snowflakeSql(cnesMedicosSql(parsed, { uf, novos, ano, mo }), { timeout: 12, maxWait: 12000, poll: 400 }),
-    snowflakeSql(cnesFtpMesSql(), { timeout: 12, maxWait: 12000, poll: 400 }),
-  ]);
+  let medRows = [];
+  let mesRows = [];
+  try {
+    [medRows, mesRows] = await Promise.all([
+      snowflakeSql(cnesMedicosSql(parsed, { uf, novos, ano, mo }), { timeout: 12, maxWait: 12000, poll: 400 }),
+      snowflakeSql(cnesFtpMesSql(), { timeout: 12, maxWait: 12000, poll: 400 }),
+    ]);
+  } catch (err) {
+    throw new Error(friendlyCnesError(err));
+  }
   const ftpMes = String((mesRows && mesRows[0] && mesRows[0][0]) || "").replace(/\D/g, "").slice(0, 4);
   const medicos = (medRows || []).map((r) => ({
     uf_crm: String(r[0] || ""),
     nome: String(r[1] || ""),
     cpf_hash: String(r[2] || "").toLowerCase(),
   })).filter((m) => m.uf_crm || m.nome);
-  const rows = await snowflakeSql(cnesBuscaSql(parsed, {
-    uf, novos, ano, mo, allowBlankCrm,
-    ufCrms: medicos.map((m) => m.uf_crm),
-    hashes: medicos.map((m) => m.cpf_hash),
-    ftpMes,
-  }), { timeout: 24, maxWait: 24000, poll: 400 });
+  const precisaFtp = parsed.isCrm
+    || medicos.length
+    || allowBlankCrm
+    || (parsed.digits.length >= 8 && parsed.digits.length !== 11);
+  if (!precisaFtp) {
+    return {
+      q, mes: stamp, novos, total: 0, aviso: novos
+        ? "Nenhum médico novo deste mês corresponde à busca. Escolha outro mês ou deixe Médicos novos em Todos os médicos."
+        : "Nenhum profissional encontrado. Tente nome e sobrenome, CRM ou um estado.",
+      profissionais: [],
+      vinculos: [],
+    };
+  }
+  let rows = [];
+  try {
+    rows = await snowflakeSql(cnesBuscaSql(parsed, {
+      uf, novos, ano, mo, allowBlankCrm,
+      ufCrms: medicos.map((m) => m.uf_crm),
+      hashes: medicos.map((m) => m.cpf_hash),
+      ftpMes,
+    }), { timeout: 20, maxWait: 20000, poll: 400 });
+  } catch (err) {
+    throw new Error(friendlyCnesError(err));
+  }
   const grouped = mergeMedicosSemCnes(agruparCnes(mapCnesVinculos(rows), medicos), medicos);
   const aviso = grouped.profissionais.length
     ? ""
