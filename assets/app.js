@@ -511,13 +511,14 @@ async function postJson(url, body) {
 
 function applyFonte(name, data, layer) {
   const campo = layer || (name === "manual" ? "bronze" : "gold");
-  state.fontes[name][campo] = Number(data.valor) || 0;
-  if (data.silver != null) state.fontes[name].silver = Number(data.silver) || 0;
-  if (data.bronze != null) state.fontes[name].bronze = Number(data.bronze) || 0;
+  const valor = Number(data.valor);
+  if (Number.isFinite(valor) && valor > 0) state.fontes[name][campo] = valor;
+  if (data.silver != null && Number(data.silver) > 0) state.fontes[name].silver = Number(data.silver);
+  if (data.bronze != null && Number(data.bronze) > 0) state.fontes[name].bronze = Number(data.bronze);
   if (data.atualizado_em) state.fontes[name].atualizado_em = data.atualizado_em;
   if (data.atualizado_cnes) state.fontes[name].atualizado_cnes = data.atualizado_cnes;
   if (data.atualizado_cfm) state.fontes[name].atualizado_cfm = data.atualizado_cfm;
-  if (Array.isArray(data.extras) && data.extras.length) {
+  if (Array.isArray(data.extras) && data.extras.some((item) => Number(item && item.value) > 0)) {
     state.fontes[name].extras = data.extras;
   }
   if (Array.isArray(data.ufs) && data.ufs.length && (name === "dadosfera" || !state.ufs.length)) {
@@ -529,38 +530,47 @@ function applyFonte(name, data, layer) {
   if (Array.isArray(data.tipo_inscricao) && data.tipo_inscricao.length && (name === "dadosfera" || !state.tipoInscricao.length)) {
     state.tipoInscricao = data.tipo_inscricao;
   }
-  if (data.lacunas && name === "dadosfera") state.lacunas = { ...state.lacunas, ...data.lacunas };
+  if (data.lacunas && name === "dadosfera") {
+    const next = { ...state.lacunas };
+    Object.entries(data.lacunas).forEach(([key, value]) => {
+      const n = Number(value);
+      if (Number.isFinite(n) && n > 0) next[key] = n;
+    });
+    state.lacunas = next;
+  }
 }
 
-async function pullSnowflake() {
+async function pullSnowflake(opts = {}) {
+  const silent = Boolean(opts.silent);
   const btn = $("btn-snowflake");
   btn.disabled = true;
-  toast("Consultando Snowflake…");
+  if (!silent) toast("Consultando Snowflake…");
   try {
     const data = await postJson("/api/snowflake", {});
     applyFonte("dadosfera", data, "gold");
     setStatus("dadosfera", true);
     render();
-    toast(data.tabela ? `Dadosfera: ${data.tabela}` : "Dadosfera atualizada via Snowflake.");
+    if (!silent) toast(data.tabela ? `Dadosfera: ${data.tabela}` : "Dadosfera atualizada via Snowflake.");
   } catch (err) {
-    toast(err.message || "Não consegui falar com o Snowflake.");
+    if (!silent) toast(err.message || "Não consegui falar com o Snowflake.");
   } finally {
     btn.disabled = false;
   }
 }
 
-async function pullDatabricks() {
+async function pullDatabricks(opts = {}) {
+  const silent = Boolean(opts.silent);
   const btn = $("btn-databricks");
   btn.disabled = true;
-  toast("Consultando Databricks…");
+  if (!silent) toast("Consultando Databricks…");
   try {
     const data = await postJson("/api/databricks", {});
     applyFonte("databricks", data, "gold");
     setStatus("databricks", true);
     render();
-    toast("Databricks atualizado via API.");
+    if (!silent) toast("Databricks atualizado via API.");
   } catch (err) {
-    toast(err.message || "Não consegui falar com o Databricks.");
+    if (!silent) toast(err.message || "Não consegui falar com o Databricks.");
   } finally {
     btn.disabled = false;
   }
@@ -674,8 +684,8 @@ async function bind() {
     bindUi();
     const live = await loadStatus();
     if (live) {
-      pullDatabricks();
-      pullSnowflake();
+      pullDatabricks({ silent: true });
+      pullSnowflake({ silent: true });
     }
   } catch (err) {
     toast(err.message || String(err));

@@ -4,9 +4,9 @@
       "gold": 773790,
       "silver": 0,
       "bronze": 0,
-      "atualizado_em": "2026-09-15 11:02:32",
-      "atualizado_cnes": "2026-09-15 11:02:32",
-      "atualizado_cfm": "2026-09-15 07:13:04",
+      "atualizado_em": "2026-09-25 10:57:56",
+      "atualizado_cnes": "2026-09-25 10:57:56",
+      "atualizado_cfm": "2026-09-25 07:02:53",
       "extras": [
         {
           "label": "CRMs únicos ativos",
@@ -35,9 +35,9 @@
       "gold": 793646,
       "silver": 519364,
       "bronze": 488718,
-      "atualizado_em": "2026-08-20T00:47:03.000Z",
+      "atualizado_em": "2026-09-20T00:33:57.000Z",
       "atualizado_cnes": "2025-05-13T15:53:04.000Z",
-      "atualizado_cfm": "2026-08-20T00:44:05.000Z",
+      "atualizado_cfm": "2026-09-20T00:28:47.000Z",
       "extras": [
         {
           "label": "Databricks · CRMs únicos ativos",
@@ -173,5 +173,12 @@
       "uf": "ES",
       "value": 16986
     }
-  ]
+  ],
+  "lacunas": {
+    "sem_cpf": 20458,
+    "sem_telefone": 60991,
+    "sem_email": 56568,
+    "sem_genero": 18457,
+    "sem_nasc": 78108
+  }
 }

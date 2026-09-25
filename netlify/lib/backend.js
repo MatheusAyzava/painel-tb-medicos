@@ -263,13 +263,23 @@ async function querySnowflake() {
   } catch {
     gapRow = [];
   }
-  const lacunas = {
+  const liveGaps = {
     sem_cpf: toNumber(gapRow[0]),
     sem_telefone: toNumber(gapRow[1]),
     sem_email: toNumber(gapRow[2]),
     sem_genero: toNumber(gapRow[3]),
     sem_nasc: toNumber(gapRow[4]),
   };
+  const hasGaps = Object.values(liveGaps).some((n) => n > 0);
+  let lacunas = liveGaps;
+  if (!hasGaps) {
+    try {
+      const snapGaps = (loadSnapshot().lacunas) || {};
+      if (Object.values(snapGaps).some((n) => Number(n) > 0)) lacunas = snapGaps;
+    } catch {
+      lacunas = liveGaps;
+    }
+  }
 
   return {
     valor: crm,
@@ -324,65 +334,98 @@ async function databricksSql(sql) {
   return ((data.result || {}).data_array) || [];
 }
 
+function snapshotDatabricks() {
+  try {
+    const db = (loadSnapshot().fontes || {}).databricks || {};
+    const valor = Number(db.gold || db.bronze || 0);
+    if (!valor) return null;
+    return {
+      valor,
+      crm_unicos: valor,
+      silver: Number(db.silver) || 0,
+      bronze: Number(db.bronze) || 0,
+      extras: db.extras || [],
+      atualizado_em: db.atualizado_em,
+      atualizado_cfm: db.atualizado_cfm || db.atualizado_em,
+      atualizado_cnes: db.atualizado_cnes || db.atualizado_em,
+      fonte: "databricks",
+      snapshot: true,
+    };
+  } catch {
+    return null;
+  }
+}
+
 async function queryDatabricks() {
-  const catalog = process.env.DATABRICKS_CATALOG || "dev";
-  const table = `${catalog}.gold.${process.env.DATABRICKS_TABLE || "tb_medicos"}`;
-  const kpis = (await databricksSql(`
-    SELECT
-      COUNT(DISTINCT CASE WHEN UPPER(situacao) = 'ATIVO' THEN uf_crm END),
-      COUNT(DISTINCT CASE WHEN UPPER(situacao) = 'ATIVO' THEN cpf END),
-      COUNT(CASE WHEN UPPER(situacao) = 'ATIVO' THEN 1 END),
-      COUNT(DISTINCT uf_crm),
-      MAX(update_date)
-    FROM ${table}
-  `))[0] || [];
-
-  const crm = toNumber(kpis[0]);
-  let bronze = 0;
-  let silver = 0;
+  const fallback = snapshotDatabricks();
   try {
-    bronze = toNumber(((await databricksSql(`
-      SELECT COUNT(DISTINCT regexp_replace(cpf, '[^0-9]', ''))
-      FROM ${catalog}.bronze.db_d2p_43_cnes_profissionais
-      WHERE cbo LIKE '225%'
-    `))[0] || [])[0]);
-  } catch {
-    bronze = 0;
-  }
-  try {
-    silver = toNumber(((await databricksSql(`
-      SELECT COUNT(DISTINCT regexp_replace(cpf, '[^0-9]', ''))
-      FROM ${catalog}.silver.tb_cnes_profissionais
-      WHERE cbo LIKE '225%'
-    `))[0] || [])[0]);
-  } catch {
-    silver = 0;
-  }
+    const catalog = process.env.DATABRICKS_CATALOG || "dev";
+    const table = `${catalog}.gold.${process.env.DATABRICKS_TABLE || "tb_medicos"}`;
+    const kpis = (await databricksSql(`
+      SELECT
+        COUNT(DISTINCT CASE WHEN UPPER(situacao) = 'ATIVO' THEN uf_crm END),
+        COUNT(DISTINCT CASE WHEN UPPER(situacao) = 'ATIVO' THEN cpf END),
+        COUNT(CASE WHEN UPPER(situacao) = 'ATIVO' THEN 1 END),
+        COUNT(DISTINCT uf_crm),
+        MAX(update_date)
+      FROM ${table}
+    `))[0] || [];
 
-  const extras = [
-    { label: "Databricks · CRMs únicos ativos", value: crm, accent: true },
-    { label: "Databricks · CPFs únicos ativos", value: toNumber(kpis[1]) },
-    { label: "Databricks · Total médicos ativos", value: toNumber(kpis[2]) },
-    { label: "Databricks · Total registros", value: toNumber(kpis[3]) },
-  ];
-  if (bronze) extras.push({ label: "Databricks · Bronze CNES", value: bronze });
-  if (silver) extras.push({ label: "Databricks · Silver CNES", value: silver });
+    const crm = toNumber(kpis[0]);
+    let bronze = 0;
+    let silver = 0;
+    try {
+      bronze = toNumber(((await databricksSql(`
+        SELECT COUNT(DISTINCT regexp_replace(cpf, '[^0-9]', ''))
+        FROM ${catalog}.bronze.db_d2p_43_cnes_profissionais
+        WHERE cbo LIKE '225%'
+      `))[0] || [])[0]);
+    } catch {
+      bronze = 0;
+    }
+    try {
+      silver = toNumber(((await databricksSql(`
+        SELECT COUNT(DISTINCT regexp_replace(cpf, '[^0-9]', ''))
+        FROM ${catalog}.silver.tb_cnes_profissionais
+        WHERE cbo LIKE '225%'
+      `))[0] || [])[0]);
+    } catch {
+      silver = 0;
+    }
 
-  return {
-    valor: crm,
-    crm_unicos: crm,
-    cpf_unicos: toNumber(kpis[1]),
-    total_medicos: toNumber(kpis[2]),
-    total_registros: toNumber(kpis[3]),
-    bronze,
-    silver,
-    fonte: "databricks",
-    tabela: table,
-    extras,
-    atualizado_em: kpis[4],
-    atualizado_cfm: kpis[4],
-    atualizado_cnes: kpis[4],
-  };
+    if (!crm) {
+      if (fallback) return fallback;
+      throw new Error("Databricks não retornou CRMs ativos.");
+    }
+
+    const extras = [
+      { label: "Databricks · CRMs únicos ativos", value: crm, accent: true },
+      { label: "Databricks · CPFs únicos ativos", value: toNumber(kpis[1]) },
+      { label: "Databricks · Total médicos ativos", value: toNumber(kpis[2]) },
+      { label: "Databricks · Total registros", value: toNumber(kpis[3]) },
+    ];
+    if (bronze) extras.push({ label: "Databricks · Bronze CNES", value: bronze });
+    if (silver) extras.push({ label: "Databricks · Silver CNES", value: silver });
+
+    return {
+      valor: crm,
+      crm_unicos: crm,
+      cpf_unicos: toNumber(kpis[1]),
+      total_medicos: toNumber(kpis[2]),
+      total_registros: toNumber(kpis[3]),
+      bronze,
+      silver,
+      fonte: "databricks",
+      tabela: table,
+      extras,
+      atualizado_em: kpis[4],
+      atualizado_cfm: kpis[4],
+      atualizado_cnes: kpis[4],
+    };
+  } catch (err) {
+    if (fallback) return fallback;
+    throw err;
+  }
 }
 
 function loadSnapshot() {
