@@ -711,10 +711,10 @@ function visaoFiltrada(data) {
       especialidades: data.especialidades,
       genero: data.genero || [],
       faixa: data.faixa || [],
-      especialidade_ds: (data.especialidade_ds || []).slice(0, 10),
-      especialidade_cfm: (data.especialidade_cfm || []).slice(0, 10),
+      especialidade_ds: (data.especialidade_ds || []).slice(0, 16),
+      especialidade_cfm: (data.especialidade_cfm || []).slice(0, 16),
       regioes: data.regioes || [],
-      ufs: (data.ufs || []).slice(0, 12),
+      ufs: data.ufs || [],
       mensal: data.mensal || [],
       cidades: data.cidades || [],
     };
@@ -741,8 +741,8 @@ function visaoFiltrada(data) {
     especialidades,
     genero: has("uf_genero") ? somarPorChave(data.uf_genero, ufs, "label") : data.genero || [],
     faixa: has("uf_faixa") ? somarPorChave(data.uf_faixa, ufs, "label") : data.faixa || [],
-    especialidade_ds: (has("uf_esp_ds") ? somarPorChave(data.uf_esp_ds, ufs, "label") : data.especialidade_ds || []).slice(0, 10),
-    especialidade_cfm: (has("uf_esp_cfm") ? somarPorChave(data.uf_esp_cfm, ufs, "label") : data.especialidade_cfm || []).slice(0, 10),
+    especialidade_ds: (has("uf_esp_ds") ? somarPorChave(data.uf_esp_ds, ufs, "label") : data.especialidade_ds || []).slice(0, 16),
+    especialidade_cfm: (has("uf_esp_cfm") ? somarPorChave(data.uf_esp_cfm, ufs, "label") : data.especialidade_cfm || []).slice(0, 16),
     regioes: data.regioes || [],
     ufs: ufsRows,
     mensal: has("uf_mensal")
@@ -883,7 +883,7 @@ function renderVisao(data) {
   }
 
   const mensalOk = (view.mensal || []).filter((m) => mesValido(m.mes));
-  const rows = [...mensalOk].sort((a, b) => String(a.mes).localeCompare(String(b.mes)));
+  const rows = [...mensalOk].sort((a, b) => String(b.mes).localeCompare(String(a.mes)));
   const maxM = Math.max(...rows.map((m) => m.value), 1);
   const grupos = [];
   rows.forEach((m) => {

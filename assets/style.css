@@ -1325,8 +1325,7 @@ body.screen-visao .pbi-kpis {
   flex: 1;
   min-height: 0;
   display: grid;
-  grid-template-rows: 258px auto;
-  align-content: start;
+  grid-template-rows: 258px minmax(0, 1fr);
   gap: 8px;
   overflow: hidden;
 }
@@ -1336,7 +1335,7 @@ body.screen-visao .pbi-kpis {
 .pbi-row-1 { grid-template-columns: 272px minmax(0, 1.55fr) 236px; }
 .pbi-row-2 {
   grid-template-columns: 1fr 1fr 1fr 0.82fr minmax(250px, 1.1fr);
-  align-items: start;
+  align-items: stretch;
 }
 .pbi-card {
   min-height: 0 !important;
@@ -1351,15 +1350,19 @@ body.screen-visao .pbi-kpis {
   flex: 0 0 auto;
 }
 .pbi-card .bars {
-  flex: 0 1 auto;
+  flex: 1;
   min-height: 0;
   gap: 6px;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  overflow: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #3a5158 transparent;
 }
 .pbi-card .bar-row {
+  flex: 0 0 auto;
   font-size: 11px;
   grid-template-columns: minmax(86px, 0.95fr) minmax(40px, 1fr) 62px;
   gap: 8px;
@@ -1393,10 +1396,10 @@ body.screen-visao .pbi-kpis {
 .pbi-month .month-col em { font-size: 9px; }
 .pbi-month .month-name { font-size: 10px; }
 .pbi-month .month-year strong { font-size: 11px; margin-top: 2px; }
-.pbi-map-card { padding: 0; position: relative; min-height: 300px; height: 300px; }
+.pbi-map-card { padding: 0; position: relative; min-height: 0; height: auto; }
 #map-pbi {
   height: 100%;
-  min-height: 300px;
+  min-height: 0;
   border: 0;
   border-radius: 12px;
   background: #0a1210;

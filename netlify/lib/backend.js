@@ -241,7 +241,9 @@ async function querySnowflake() {
       )
       SELECT
         COUNT(DISTINCT CASE
-          WHEN CPF_DIG IS NULL OR LENGTH(CPF_DIG) < 11 OR REGEXP_LIKE(CPF_DIG, '^(.)\\1{10}$')
+          WHEN CPF_DIG IS NULL
+            OR LENGTH(CPF_DIG) < 11
+            OR CPF_DIG = REPEAT(LEFT(CPF_DIG, 1), 11)
           THEN UF_CRM END),
         COUNT(DISTINCT CASE WHEN t.CPF IS NULL THEN a.UF_CRM END),
         COUNT(DISTINCT CASE WHEN e.CPF IS NULL THEN a.UF_CRM END),

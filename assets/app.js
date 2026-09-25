@@ -194,11 +194,11 @@ function render() {
   const gaps = state.lacunas || {};
   if ($("gap-cards")) {
     $("gap-cards").innerHTML = [
-      ["sem_cpf", "UF+CRM sem CPF"],
-      ["sem_telefone", "UF+CRM sem telefone"],
-      ["sem_email", "UF+CRM sem e-mail"],
-      ["sem_genero", "UF+CRM sem gênero"],
-      ["sem_nasc", "UF+CRM sem data nasc."],
+      ["sem_cpf", "UFCRM sem CPF"],
+      ["sem_telefone", "UFCRM sem telefone"],
+      ["sem_email", "UFCRM sem e-mail"],
+      ["sem_genero", "UFCRM sem gênero"],
+      ["sem_nasc", "UFCRM sem data nasc."],
     ].map(([key, label]) => `
       <article class="gap">
         <strong>${formatMi(gaps[key])}</strong>
