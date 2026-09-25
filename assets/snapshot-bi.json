@@ -100,6 +100,202 @@
     {
       "label": "PSIQUIATRA",
       "value": 16274
+    },
+    {
+      "label": "DERMATOLOGISTA",
+      "value": 13906
+    },
+    {
+      "label": "NEUROLOGISTA",
+      "value": 8833
+    },
+    {
+      "label": "OTORRINOLARINGOLOGISTA",
+      "value": 8751
+    },
+    {
+      "label": "ENDOCRINOLOGISTA",
+      "value": 7402
+    },
+    {
+      "label": "MÉDICO DO TRABALHO",
+      "value": 6484
+    },
+    {
+      "label": "UROLOGISTA",
+      "value": 6275
+    },
+    {
+      "label": "GASTROENTEROLOGISTA",
+      "value": 5701
+    },
+    {
+      "label": "CIRURGIÃO PLÁSTICO",
+      "value": 4971
+    },
+    {
+      "label": "ONCOLOGISTA",
+      "value": 4824
+    },
+    {
+      "label": "MÉDICO DE FAMÍLIA E COMUNIDADE",
+      "value": 4455
+    },
+    {
+      "label": "INTENSIVISTA",
+      "value": 4247
+    },
+    {
+      "label": "NEFROLOGISTA",
+      "value": 3996
+    },
+    {
+      "label": "CIRURGIÃO VASCULAR",
+      "value": 3612
+    },
+    {
+      "label": "INFECTOLOGISTA",
+      "value": 3504
+    },
+    {
+      "label": "ANGIOLOGISTA",
+      "value": 2973
+    },
+    {
+      "label": "PATOLOGISTA",
+      "value": 2884
+    },
+    {
+      "label": "CIRURGIÃO NEUROLÓGICO",
+      "value": 2653
+    },
+    {
+      "label": "OUTROS",
+      "value": 2651
+    },
+    {
+      "label": "REUMATOLOGISTA",
+      "value": 2573
+    },
+    {
+      "label": "HEMATOLOGISTA",
+      "value": 2397
+    },
+    {
+      "label": "ENDOSCOPISTA",
+      "value": 2275
+    },
+    {
+      "label": "GERIATRA",
+      "value": 2232
+    },
+    {
+      "label": "ACUPUNTURISTA",
+      "value": 1947
+    },
+    {
+      "label": "ALERGISTA E IMUNOLOGISTA",
+      "value": 1797
+    },
+    {
+      "label": "CIRURGIÃO DO APARELHO DIGESTIVO",
+      "value": 1599
+    },
+    {
+      "label": "COLOPROCTOLOGISTA",
+      "value": 1566
+    },
+    {
+      "label": "PNEUMOLOGISTA",
+      "value": 1238
+    },
+    {
+      "label": "CIRURGIÃO CARDIOLOGISTA",
+      "value": 1065
+    },
+    {
+      "label": "CIRURGIÃO DE CABEÇA E PESCOÇO",
+      "value": 937
+    },
+    {
+      "label": "MASTOLOGISTA",
+      "value": 934
+    },
+    {
+      "label": "HOMEOPATA",
+      "value": 805
+    },
+    {
+      "label": "NUTRÓLOGO",
+      "value": 584
+    },
+    {
+      "label": "FISIATRA",
+      "value": 434
+    },
+    {
+      "label": "GENETICISTA",
+      "value": 320
+    },
+    {
+      "label": "CIRURGIÃO PEDIÁTRICO",
+      "value": 306
+    },
+    {
+      "label": "NEUROFISIOLOGISTA",
+      "value": 302
+    },
+    {
+      "label": "SANITARISTA",
+      "value": 182
+    },
+    {
+      "label": "MEDICINA DO ESPORTE",
+      "value": 175
+    },
+    {
+      "label": "ADMINISTRAÇÃO EM SAÚDE",
+      "value": 167
+    },
+    {
+      "label": "CIRURGIÃO DE MÃO",
+      "value": 158
+    },
+    {
+      "label": "MEDICINA PREVENTIVA E SOCIAL",
+      "value": 151
+    },
+    {
+      "label": "CIRURGIÃO TORÁCICO",
+      "value": 132
+    },
+    {
+      "label": "MEDICINA NUCLEAR",
+      "value": 100
+    },
+    {
+      "label": "MEDICINA DE EMERGÊNCIA",
+      "value": 97
+    },
+    {
+      "label": "HEMOTERAPEUTA",
+      "value": 95
+    },
+    {
+      "label": "PROCTOLOGISTA",
+      "value": 54
+    },
+    {
+      "label": "PERÍCIA MÉDICA",
+      "value": 47
+    },
+    {
+      "label": "LEGISTA",
+      "value": 40
+    },
+    {
+      "label": "HEPATOLOGISTA",
+      "value": 17
     }
   ],
   "especialidade_cfm": [
@@ -150,6 +346,226 @@
     {
       "label": "OFTALMOLOGISTA",
       "value": 19965
+    },
+    {
+      "label": "PSIQUIATRA",
+      "value": 15909
+    },
+    {
+      "label": "DERMATOLOGISTA",
+      "value": 13083
+    },
+    {
+      "label": "INTENSIVISTA",
+      "value": 12132
+    },
+    {
+      "label": "NEUROLOGISTA",
+      "value": 8975
+    },
+    {
+      "label": "OTORRINOLARINGOLOGISTA",
+      "value": 8911
+    },
+    {
+      "label": "ENDOCRINOLOGISTA",
+      "value": 8374
+    },
+    {
+      "label": "CIRURGIÃO PLÁSTICO",
+      "value": 8308
+    },
+    {
+      "label": "ONCOLOGISTA",
+      "value": 7177
+    },
+    {
+      "label": "UROLOGISTA",
+      "value": 7155
+    },
+    {
+      "label": "CIRURGIÃO VASCULAR",
+      "value": 7032
+    },
+    {
+      "label": "NEFROLOGISTA",
+      "value": 6492
+    },
+    {
+      "label": "ENDOSCOPISTA",
+      "value": 6228
+    },
+    {
+      "label": "OUTROS",
+      "value": 5950
+    },
+    {
+      "label": "ECOCARDIOLOGISTA",
+      "value": 5536
+    },
+    {
+      "label": "ULTRASSONOGRAFISTA",
+      "value": 5236
+    },
+    {
+      "label": "GASTROENTEROLOGISTA",
+      "value": 5143
+    },
+    {
+      "label": "INFECTOLOGISTA",
+      "value": 4918
+    },
+    {
+      "label": "PNEUMOLOGISTA",
+      "value": 4868
+    },
+    {
+      "label": "CIRURGIÃO NEUROLÓGICO",
+      "value": 4382
+    },
+    {
+      "label": "CIRURGIÃO DO APARELHO DIGESTIVO",
+      "value": 4222
+    },
+    {
+      "label": "PATOLOGISTA",
+      "value": 4183
+    },
+    {
+      "label": "ACUPUNTURISTA",
+      "value": 3988
+    },
+    {
+      "label": "REUMATOLOGISTA",
+      "value": 3941
+    },
+    {
+      "label": "HEMATOLOGISTA",
+      "value": 3844
+    },
+    {
+      "label": "GERIATRA",
+      "value": 3658
+    },
+    {
+      "label": "CIRURGIÃO CARDIOLOGISTA",
+      "value": 3176
+    },
+    {
+      "label": "MASTOLOGISTA",
+      "value": 3130
+    },
+    {
+      "label": "HOMEOPATA",
+      "value": 2764
+    },
+    {
+      "label": "COLOPROCTOLOGISTA",
+      "value": 2537
+    },
+    {
+      "label": "ANGIOLOGISTA",
+      "value": 2482
+    },
+    {
+      "label": "ALERGISTA E IMUNOLOGISTA",
+      "value": 2356
+    },
+    {
+      "label": "NUTRÓLOGO",
+      "value": 2257
+    },
+    {
+      "label": "MEDICINA DO ESPORTE",
+      "value": 2134
+    },
+    {
+      "label": "PERÍCIA MÉDICA",
+      "value": 2081
+    },
+    {
+      "label": "CIRURGIÃO PEDIÁTRICO",
+      "value": 1859
+    },
+    {
+      "label": "MEDICINA DE EMERGÊNCIA",
+      "value": 1749
+    },
+    {
+      "label": "NEUROFISIOLOGISTA",
+      "value": 1747
+    },
+    {
+      "label": "CIRURGIÃO DE CABEÇA E PESCOÇO",
+      "value": 1560
+    },
+    {
+      "label": "CIRURGIÃO TORÁCICO",
+      "value": 1299
+    },
+    {
+      "label": "CIRURGIÃO DE MÃO",
+      "value": 1294
+    },
+    {
+      "label": "MEDICINA PREVENTIVA E SOCIAL",
+      "value": 975
+    },
+    {
+      "label": "CIRURGIÃO BARIÁTRICO",
+      "value": 918
+    },
+    {
+      "label": "MEDICINA NUCLEAR",
+      "value": 855
+    },
+    {
+      "label": "REPRODUÇÃO HUMANA",
+      "value": 773
+    },
+    {
+      "label": "MEDICINA DO SONO",
+      "value": 551
+    },
+    {
+      "label": "HEPATOLOGISTA",
+      "value": 533
+    },
+    {
+      "label": "ADMINISTRAÇÃO EM SAÚDE",
+      "value": 518
+    },
+    {
+      "label": "GENETICISTA",
+      "value": 459
+    },
+    {
+      "label": "HANSENOLOGISTA",
+      "value": 295
+    },
+    {
+      "label": "FISIATRA",
+      "value": 244
+    },
+    {
+      "label": "PROCTOLOGISTA",
+      "value": 171
+    },
+    {
+      "label": "SANITARISTA",
+      "value": 160
+    },
+    {
+      "label": "LEGISTA",
+      "value": 138
+    },
+    {
+      "label": "HEMOTERAPEUTA",
+      "value": 100
+    },
+    {
+      "label": "ONCOGENÉTICA",
+      "value": 9
     }
   ],
   "ufs": [

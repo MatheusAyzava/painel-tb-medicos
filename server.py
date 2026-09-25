@@ -642,7 +642,6 @@ def query_dadosfera_bi(override: dict | None = None) -> dict:
             WHERE UPPER(SITUACAO) = 'ATIVO'
             GROUP BY 1
             ORDER BY 2 DESC
-            LIMIT 12
             """
         ))
         especialidade_cfm = label_rows(q(
@@ -652,7 +651,6 @@ def query_dadosfera_bi(override: dict | None = None) -> dict:
             WHERE UPPER(SITUACAO) = 'ATIVO'
             GROUP BY 1
             ORDER BY 2 DESC
-            LIMIT 12
             """
         ))
         ufs = [{"uf": str(r[0]), "value": as_int([r[1]])} for r in q(

@@ -708,17 +708,32 @@ function somarPorChave(rows, ufs, key) {
   return [...map.entries()].map(([label, value]) => ({ label, value })).sort((a, b) => b.value - a.value);
 }
 
+function listaEspecialidade(data, ufKey, natKey, ufs) {
+  const hasUf = Array.isArray(data[ufKey]) && data[ufKey].length;
+  if (hasUf) {
+    const rows = somarPorChave(data[ufKey], ufs, "label").filter((r) => r.value > 0);
+    if (rows.length) return rows;
+  }
+  return data[natKey] || [];
+}
+
 function visaoFiltrada(data) {
   const ufs = ufsDoFiltro();
+  const especialidade_ds = listaEspecialidade(data, "uf_esp_ds", "especialidade_ds", ufs);
+  const especialidade_cfm = listaEspecialidade(data, "uf_esp_cfm", "especialidade_cfm", ufs);
+  const especialidades = especialidade_ds.filter((r) => {
+    const label = foldText(r.label);
+    return r.value > 0 && label && label !== "sem especialidade" && label !== "nao identificado";
+  }).length || data.especialidades;
   if (!ufs) {
     return {
       crm: data.crm,
       medicos: data.medicos,
-      especialidades: data.especialidades,
+      especialidades: data.especialidades || especialidades,
       genero: data.genero || [],
       faixa: data.faixa || [],
-      especialidade_ds: (data.especialidade_ds || []).slice(0, 10),
-      especialidade_cfm: (data.especialidade_cfm || []).slice(0, 10),
+      especialidade_ds,
+      especialidade_cfm,
       regioes: data.regioes || [],
       ufs: (data.ufs || []).slice(0, 12),
       mensal: data.mensal || [],
@@ -735,20 +750,14 @@ function visaoFiltrada(data) {
     ? kpis.reduce((s, k) => s + (Number(k.medicos) || 0), 0)
     : crm;
   const has = (key) => Array.isArray(data[key]) && data[key].length;
-  const especialidades = has("uf_esp_ds")
-    ? new Set((data.uf_esp_ds || [])
-      .filter((r) => set.has(String(r.uf || "").toUpperCase()) && r.value > 0)
-      .map((r) => String(r.label || "").trim())
-      .filter((label) => label && label !== "SEM ESPECIALIDADE")).size
-    : data.especialidades;
   return {
     crm,
     medicos,
     especialidades,
     genero: has("uf_genero") ? somarPorChave(data.uf_genero, ufs, "label") : data.genero || [],
     faixa: has("uf_faixa") ? somarPorChave(data.uf_faixa, ufs, "label") : data.faixa || [],
-    especialidade_ds: (has("uf_esp_ds") ? somarPorChave(data.uf_esp_ds, ufs, "label") : data.especialidade_ds || []).slice(0, 10),
-    especialidade_cfm: (has("uf_esp_cfm") ? somarPorChave(data.uf_esp_cfm, ufs, "label") : data.especialidade_cfm || []).slice(0, 10),
+    especialidade_ds,
+    especialidade_cfm,
     regioes: data.regioes || [],
     ufs: ufsRows,
     mensal: has("uf_mensal")

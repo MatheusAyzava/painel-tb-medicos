@@ -1367,8 +1367,15 @@ body.screen-visao .pbi-kpis {
   display: grid;
   gap: 8px;
   min-height: 0;
-  align-content: space-between;
-  overflow: visible;
+  align-content: start;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #3a5158 transparent;
+}
+.pbi-card .bars#pbi-esp-ds,
+.pbi-card .bars#pbi-esp-cfm {
+  max-height: 280px;
 }
 .pbi-card .bar-row {
   grid-template-columns: minmax(0, 1.3fr) minmax(48px, 1fr) auto;
